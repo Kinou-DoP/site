@@ -1,0 +1,2 @@
+# site
+Site statique Kinou
