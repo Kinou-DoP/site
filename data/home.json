@@ -2,6 +2,14 @@
   "duration": 7000,
   "slides": [
     {
+      "dp": "Chris Alessi",
+      "slug": "chris-alessi",
+      "film": "Titre du film",
+      "legend": "Long métrage · 2026",
+      "video": "",
+      "h": 340
+    },
+    {
       "dp": "Lara Perrotte Boucard",
       "slug": "lara-perrotte-boucard-cinematographer",
       "film": "Mylène Farmer",
@@ -9,14 +17,6 @@
       "legend": "Thierry & Didier Poiraud\nEmpreinte Digitale",
       "video": "https://d1ko11x0ybxl0h.cloudfront.net/kinou/production/clips/11314/68237a51-b694-11f1-a349-0215583debcb.mp4",
       "h": 210
-    },
-    {
-      "dp": "Chris Alessi",
-      "slug": "chris-alessi",
-      "film": "Titre du film",
-      "legend": "Long métrage · 2026",
-      "video": "",
-      "h": 340
     },
     {
       "dp": "Vadim Alsayed",
