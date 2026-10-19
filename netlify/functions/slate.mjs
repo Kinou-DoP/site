@@ -51,9 +51,9 @@ function showreel(html) {
   return media.map(function (m, k) { return { m: m, img: imgs[k] }; });
 }
 
-// bundle : "https://kinou.slateapp.com/bundles/<uuid>" -> { categories, clips }
+// bundle : "https://kinou.slateapp.com/bundles/<uuid>" ou "<uuid>" -> { name, categories, clips }
 export async function readBundle(bundle) {
-  var id = (bundle.match(/\/bundles\/([0-9a-f-]{36})/) || [])[1];
+  var id = (String(bundle).match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/) || [])[1];
   if (!id) throw new Error("lien de bundle invalide");
   var root = await page(ORIGIN + "/bundles/" + id);
   var reels = [], re = new RegExp('href="/bundles/' + id + '/(\\d+)"[\\s\\S]*?<h2>([\\s\\S]*?)</h2>', "g"), m;
@@ -78,5 +78,9 @@ export async function readBundle(bundle) {
     if (!c) clips.push(c = byId[x.m.id] = clip(x.m, x.img, ""));
     c.featured = true; c.featuredOrder = k + 1;
   });
-  return { categories: categories, clips: clips };
+  // Nom du chef op : le « Cinematographer » le plus fréquent des clips du bundle.
+  var count = {};
+  pages.forEach(function (p) { p.forEach(function (x) { (x.m.artists_names || []).forEach(function (n) { count[n] = (count[n] || 0) + 1; }); }); });
+  var name = Object.keys(count).sort(function (a, b) { return count[b] - count[a]; })[0] || "";
+  return { name: name, categories: categories, clips: clips };
 }

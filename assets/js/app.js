@@ -267,7 +267,8 @@
       });
       if (d.categories) CATS_BY[d.slug] = d.categories;
       var a = d.about || {};
-      if (a.img && !/^(https?:|data:|\/)/.test(a.img)) a.img = DATA_BASE + "dps/" + a.img;
+      // Portrait et CV (PDF) : chemins relatifs au dossier des fiches.
+      ["img", "cv"].forEach(function (k) { if (a[k] && !/^(https?:|data:|\/)/.test(a[k])) a[k] = DATA_BASE + "dps/" + a[k]; });
       ABOUT[d.slug] = a;
       TEMPLATE[d.slug] = d.template || "default";
       return d;
