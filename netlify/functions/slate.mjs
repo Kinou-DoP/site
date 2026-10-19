@@ -94,7 +94,7 @@ export async function readBundle(bundle) {
   // Les autres chefs op crédités sur un film sont ajoutés en dernière ligne des crédits.
   clips.forEach(function (c) {
     var others = (artists[c.slate] || []).filter(function (n) { return n !== name; });
-    if (others.length) c.sub = (c.sub ? c.sub + "\n" : "") + "with " + others.join(", ");
+    if (others.length) c.sub = (c.sub ? c.sub + "\n" : "") + "co-DoP " + others.join(", ");
   });
   return { name: name, categories: categories, clips: clips };
 }

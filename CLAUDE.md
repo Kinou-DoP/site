@@ -79,7 +79,7 @@ Convention des bundles : un showreel `#featured` (ordre du FEATURED) et un showr
 (`#automotive`, `#commercial`, `#music video`…). L'ordre des showreels dans le bundle = ordre des onglets.
 Le nom de l'onglet est le texte après `#`, en majuscules (`#clips` → CLIPS).
 Plusieurs chefs op crédités sur un film : la page est celle du chef op crédité sur le plus de films du bundle
-(chaque film compté une fois) ; les autres sont ajoutés en dernière ligne des crédits (« with Nom »).
+(chaque film compté une fois) ; les autres sont ajoutés en dernière ligne des crédits (« co-DoP Nom »).
 
 ## Règles visuelles — à respecter absolument
 
