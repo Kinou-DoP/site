@@ -84,6 +84,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 
 - Toujours lire les fichiers existants avant de modifier
 - Ne jamais inventer d'URLs CloudFront ou Slate — elles viennent des bundles Slate réels
+- Les URLs d'images Slate (`images.slatecdn.net/<signature>/<options>/<source>`) sont signées :
+  les copier telles quelles depuis le bundle, sans changer taille, options ni source (sinon erreur 403)
 - Les slugs sont immutables — ne pas les renommer
 - Commit atomique par DP ajouté ou fonctionnalité implémentée
 - Message de commit en français : "Ajout [Prénom Nom]" ou "Fix [description]"
