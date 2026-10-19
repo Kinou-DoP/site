@@ -82,9 +82,19 @@ export async function readBundle(bundle) {
     if (!c) clips.push(c = byId[x.m.id] = clip(x.m, x.img, ""));
     c.featured = true; c.featuredOrder = k + 1;
   });
-  // Nom du chef op : le « Cinematographer » le plus fréquent des clips du bundle.
-  var count = {};
-  pages.forEach(function (p) { p.forEach(function (x) { (x.m.artists_names || []).forEach(function (n) { count[n] = (count[n] || 0) + 1; }); }); });
+  // Nom du chef op : celui qui est crédité (« Cinematographer ») sur le plus de films du bundle,
+  // chaque film n'étant compté qu'une fois même s'il figure dans plusieurs showreels.
+  var count = {}, artists = {};
+  pages.forEach(function (p) { p.forEach(function (x) {
+    if (artists[x.m.id]) return;
+    artists[x.m.id] = (x.m.artists_names || []).map(function (n) { return String(n).trim(); }).filter(Boolean);
+    artists[x.m.id].forEach(function (n) { count[n] = (count[n] || 0) + 1; });
+  }); });
   var name = Object.keys(count).sort(function (a, b) { return count[b] - count[a]; })[0] || "";
+  // Les autres chefs op crédités sur un film sont ajoutés en dernière ligne des crédits.
+  clips.forEach(function (c) {
+    var others = (artists[c.slate] || []).filter(function (n) { return n !== name; });
+    if (others.length) c.sub = (c.sub ? c.sub + "\n" : "") + "with " + others.join(", ");
+  });
   return { name: name, categories: categories, clips: clips };
 }
