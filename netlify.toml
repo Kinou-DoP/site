@@ -1,0 +1,3 @@
+# Site statique : pas d'étape de build, on publie la racine du repo.
+[build]
+  publish = "."
