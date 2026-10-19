@@ -153,3 +153,9 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 #player .pcap p { margin: 0; white-space: pre-line; font-size: 11px; line-height: 1.7; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.55); }
 #player .pclose { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 20px); right: 28px; width: 40px; height: 40px; padding: 0; border: 0; background: none; color: var(--kinou-fg); cursor: pointer; opacity: .7; transition: opacity .2s; }
 #player .pclose:hover { opacity: 1; }
+#player.has-stills .pstage, #player.has-stills .pcap { width: min(100%, 1400px, calc((100vh - 270px) * 16 / 9)); }
+#player .pstills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+#player .pstills button { width: 96px; aspect-ratio: 16 / 9; padding: 0; border: 0; background-color: var(--kinou-bg); background-size: cover; background-position: center; opacity: .4; cursor: pointer; transition: opacity .2s; }
+#player .pstills button:hover { opacity: .8; }
+#player .pstills button.on { opacity: 1; }
+@media (max-width: 560px) { #player .pstills { gap: 4px; } #player .pstills button { width: 64px; } }

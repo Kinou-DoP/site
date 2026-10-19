@@ -290,8 +290,41 @@
       }
       var h = document.createElement("h3"); h.textContent = p.title; pcap.appendChild(h);
       var s = document.createElement("p"); s.textContent = p.sub || p.cat; pcap.appendChild(s);
+      buildStills(p);
       player.classList.add("on");
     }
+    // Lightbox des stills (p.stills) : vignettes sous la legende ; la premiere ramene au clip.
+    var stillsP = null, stillsIdx = 0;
+    function buildStills(p) {
+      stillsP = null;
+      player.classList.toggle("has-stills", !!(p.stills && p.stills.length));
+      if (!p.stills || !p.stills.length) return;
+      var strip = document.createElement("div"); strip.className = "pstills";
+      [p.img].concat(p.stills).forEach(function (u, i) {
+        var b = document.createElement("button");
+        b.style.backgroundImage = u ? 'url("' + u + '")' : bgFor(p);
+        b.setAttribute("aria-label", i ? "Still " + i : p.title);
+        if (!i) b.className = "on";
+        b.addEventListener("click", function () { showStill(p, i); });
+        strip.appendChild(b);
+      });
+      pcap.appendChild(strip);
+      stillsP = p; stillsIdx = 0;
+    }
+    function showStill(p, i) {
+      var n = p.stills.length + 1; i = (i + n) % n;
+      if (i === 0) { openPlayer(p); return; }
+      var v = pstage.querySelector("video"); if (v) v.pause();
+      pstage.textContent = "";
+      var im = document.createElement("img"); im.src = p.stills[i - 1]; im.alt = p.title; pstage.appendChild(im);
+      stillsIdx = i;
+      pcap.querySelectorAll(".pstills button").forEach(function (b, k) { b.classList.toggle("on", k === i); });
+    }
+    document.addEventListener("keydown", function (e) {
+      if (!stillsP || !player.classList.contains("on")) return;
+      if (e.key === "ArrowRight") showStill(stillsP, stillsIdx + 1);
+      if (e.key === "ArrowLeft") showStill(stillsP, stillsIdx - 1);
+    });
     function closePlayer() {
       if (!player.classList.contains("on")) return;
       player.classList.remove("on");
