@@ -29,5 +29,13 @@ Site statique Kinou
   s'il reste, c'est lié au plan gratuit (plan payant ou autre hébergeur).
 - **Nom de domaine** : brancher kinou.fr sur `main` quand la beta est validée.
 
+### GitHub
+- **Passer `kinou-agency` en organisation** (aujourd'hui compte personnel) pour que chacun ait son compte
+  et son token. Avant : créer les comptes perso (Gus, beau-frère), ajouter une connexion email/mot de passe
+  sur Netlify et refaire la connexion GitHub de claude.ai. Puis Settings → Account → Turn into an organization.
+  Après : réautoriser GitHub dans Netlify (`kinou-test`, `kinou-admin`) et réinstaller l'application Claude.
+- **Mini-applis des collègues** : pas de compte GitHub pour eux ; la clé GitHub reste côté serveur (Netlify),
+  accès par mot de passe ou code personnel.
+
 ### Admin
 Première version en ligne (https://kinou-admin.netlify.app) ; sa liste « à faire » est dans le README du repo `admin`.
