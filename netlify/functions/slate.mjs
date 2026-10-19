@@ -60,11 +60,12 @@ export async function readBundle(bundle) {
   while ((m = re.exec(root))) reels.push({ n: m[1], title: decode(m[2].trim()) });
   if (!reels.length) throw new Error("aucun showreel dans le bundle");
   var pages = await Promise.all(reels.map(function (r) { return page(ORIGIN + "/bundles/" + id + "/" + r.n).then(showreel); }));
-  var categories = ["FEATURED"], clips = [], byId = {}, featured = [];
+  // L'ordre des onglets suit l'ordre des showreels dans le bundle (FEATURED compris).
+  var categories = [], clips = [], byId = {}, featured = [];
   reels.forEach(function (r, k) {
     var cat = catName(r.title);
+    if (categories.indexOf(cat) < 0) categories.push(cat);
     if (cat === "FEATURED") { featured = pages[k]; return; }
-    categories.push(cat);
     pages[k].forEach(function (x) {
       if (byId[x.m.id]) return;
       clips.push(byId[x.m.id] = clip(x.m, x.img, cat));

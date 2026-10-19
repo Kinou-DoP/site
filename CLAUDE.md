@@ -74,8 +74,9 @@ via la fonction Netlify `/api/dp/<slug>` (`netlify/functions/dp.mjs` + `slate.mj
 - `open` : id Slate du clip présélectionné depuis l'accueil.
 - `overrides` : corrections par id Slate, appliquées par-dessus Slate, ex. `{"10903": {"title": "…"}, "534": {"hidden": true}}`.
 
-Convention des bundles : un showreel `#featured` (ordre du FEATURED), puis un showreel par catégorie
-(`#automotive`, `#commercial`, `#music video`…) dans l'ordre d'affichage voulu.
+Convention des bundles : un showreel `#featured` (ordre du FEATURED) et un showreel par catégorie
+(`#automotive`, `#commercial`, `#music video`…). L'ordre des showreels dans le bundle = ordre des onglets.
+Le nom de l'onglet est le texte après `#`, en majuscules (`#clips` → CLIPS).
 
 ## Règles visuelles — à respecter absolument
 
