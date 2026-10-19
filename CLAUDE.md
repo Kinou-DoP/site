@@ -73,6 +73,13 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 6. **Animations** : celles du prototype, ni plus ni moins (révélation circulaire 1,15s, morphing du nom 1000ms, etc.). Ne pas en ajouter.
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
+## Branches et mise en ligne
+
+- `main` = site officiel (kinou.fr). Netlify publie `main` en production.
+- `beta` = version de test (branch deploy Netlify : `beta--<site>.netlify.app`).
+- On travaille et on pousse sur `beta` (ou une branche de travail fusionnée dans `beta`).
+- On ne fusionne `beta` dans `main` qu'après validation explicite de Gus.
+
 ## Règles de code
 
 - Toujours lire les fichiers existants avant de modifier
