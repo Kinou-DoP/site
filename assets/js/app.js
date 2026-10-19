@@ -138,7 +138,7 @@
     function src(a) {
       return a.dataset.img || BASE + a.getAttribute("href").replace(/\/+$/, "").split("/").pop() + EXT;
     }
-    function show(a) {
+    function showBg(a) { // (nommee "show" dans le prototype : ecrasee par show(t) plus bas)
       var u = src(a);
       var im = cache[u];
       if (!im) { im = cache[u] = new Image(); im.src = u; }
@@ -172,8 +172,8 @@
     function hide() { bg.style.opacity = 0; }
 
     document.querySelectorAll("li a").forEach(function (a) {
-      a.addEventListener("mouseenter", function () { show(a); });
-      a.addEventListener("focus", function () { show(a); });
+      a.addEventListener("mouseenter", function () { showBg(a); });
+      a.addEventListener("focus", function () { showBg(a); });
       a.addEventListener("mouseleave", hide);
       a.addEventListener("blur", hide);
     });
