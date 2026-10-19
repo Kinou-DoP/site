@@ -63,7 +63,9 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 
 ## Règles visuelles — à respecter absolument
 
-1. **Pas de framework CSS** — tout en CSS vanilla ; les tokens de design globaux sont des variables `--kinou-*`.
+1. **Pas de framework CSS** — tout en CSS vanilla ; les tokens de design globaux sont des variables `--kinou-*`
+   (`--kinou-bg`, `--kinou-fg`, `--kinou-body`, `--kinou-sans`, `--kinou-hero-top`, `--kinou-hero-h`, `--kinou-tabs-top`, `--kinou-zm`).
+   Les variables posées par app.js sur les éléments (`--h`, `--img`, `--i`, `--d`, `--near`) gardent leur nom court.
 2. **Palette** : fond noir pur (#000), texte blanc pur (#fff), textes secondaires en blanc transparent ; teinte HSL par clip pour les fonds de remplacement.
 3. **Typographie** : Helvetica Neue 300 pour la liste des DPs ; titres en `--kinou-sans` (SF Pro Display / Inter) 600, interlettrage serré ; étiquettes 11–13px, 600, `letter-spacing: .14em`, majuscules.
 4. **Grille clips** : galerie 3 colonnes 16:9 à toutes les tailles (gap 6px, 4px mobile) ; mode feed en 1 colonne.
