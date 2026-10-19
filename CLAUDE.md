@@ -43,17 +43,22 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
       "title": "Titre du projet",
       "sub": "Réalisateur\nProduction",
       "video": "https://d1ko11x0ybxl0h.cloudfront.net/kinou/production/clips/{id}/{uuid}.mp4",
+      "full": "https://d1ko11x0ybxl0h.cloudfront.net/kinou/production/clips/{uuid}-0x1080.5000.mp4",
       "img": "https://images.slatecdn.net/{path}",
       "cat": "MUSIC VIDEO",
       "featured": true,
       "featuredOrder": 1,
       "open": true,
-      "stills": ["url1", "url2"]
+      "stills": ["url1", "url2"],
+      "slate": 10716
     }
   ],
   "about": { "bio": ["…"], "bioEn": ["…"], "cv": "", "instagram": "", "website": "", "img": "img/<slug>.webp", "pos": "center 30%", "shade": "…" }
 }
 ```
+- `video` : extrait d'aperçu Slate (10 s, sans son) — slideshow et survol des vignettes.
+- `full` : film complet Slate (1080p, avec son) — joué dans le lecteur. Sans `full`, le lecteur joue `video`.
+- `slate` : identifiant du clip dans Slate (traçabilité).
 - `hue` : teinte de base (0–360) des fonds de remplacement ; la teinte de chaque clip vaut `(index * 47 + hue) % 360` (ou `h` si fourni sur le clip).
 - `featured` / `featuredOrder` : clip du showreel FEATURED et son rang.
 - `open` : clip présélectionné quand on arrive sur la page depuis l'accueil.
@@ -102,7 +107,9 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 Pour ajouter un DP, aller chercher son bundle Slate :
 1. URL du bundle : trouvée via shots.re/{code} ou directement sur kinou.slateapp.com
 2. Fetcher les sous-pages /0, /1, /2… pour avoir tous les clips
-3. Extraire : title, sub, video (CloudFront), img (Slatecdn)
+3. Extraire depuis la playlist du lecteur (attribut `data-media` de chaque page) : title, director/production (→ sub),
+   snippets.small (→ video), le stream 1080 (→ full), id (→ slate) ; et l'image signée de la grille (→ img).
+   Télécharger les pages avec `curl --compressed` (sinon la page est tronquée).
 4. Identifier les clips "featured" avec le client ou son beau-frère
 5. Créer `data/dps/<slug>.json` et ajouter le DP dans `data/dps/index.json`
 

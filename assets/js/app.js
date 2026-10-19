@@ -279,11 +279,12 @@
       projvid.pause(); pauseSnips();
       pstage.textContent = ""; pcap.textContent = "";
       pstage.style.backgroundImage = bgFor(p);
-      if (p.video) {
+      var src = p.full || p.video; // film complet (avec son) si disponible, sinon l'extrait
+      if (src) {
         var v = document.createElement("video");
         v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = "auto";
         if (p.img) v.poster = p.img;
-        v.src = p.video; pstage.appendChild(v);
+        v.src = src; pstage.appendChild(v);
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
       } else if (p.img) {
         var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
@@ -349,13 +350,14 @@
     function snip(st, p, on) {
       var v = st.querySelector("video.snip");
       if (!on) { if (v) { v.pause(); v.classList.remove("on"); } return; }
-      if (!p.video || reduceMotion || (navigator.connection && navigator.connection.saveData)) return;
+      var vsrc = p.video || p.full; // extrait d'apercu, sinon le film complet
+      if (!vsrc || reduceMotion || (navigator.connection && navigator.connection.saveData)) return;
       if (!v) {
         v = document.createElement("video"); v.className = "snip"; v.muted = true; v.playsInline = true; v.preload = "auto";
         v.addEventListener("loadedmetadata", function () { var d = v.duration || 0; v._a = d > 12 ? d * 0.3 : 0; v._b = v._a + 4; try { v.currentTime = v._a; } catch (e) {} });
         v.addEventListener("timeupdate", function () { if (v._b && v.currentTime >= v._b) v.currentTime = v._a; });
         v.addEventListener("playing", function () { v.classList.add("on"); });
-        v.src = p.video; st.appendChild(v);
+        v.src = vsrc; st.appendChild(v);
       }
       var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
     }
