@@ -70,7 +70,7 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 Une fiche peut contenir `"bundle": "https://kinou.slateapp.com/bundles/<uuid>"`. Le site lit alors ses clips
 via la fonction Netlify `/api/dp/<slug>` (`netlify/functions/dp.mjs` + `slate.mjs`), qui lit le bundle Slate
 (cache CDN 10 min). `categories` et `clips` de la fiche ne servent plus que de copie de secours
-(API en erreur ou > 2,5 s). Champs propres à ces fiches :
+(API en erreur ou > 2,5 s). Un même film peut figurer dans plusieurs catégories (une entrée par catégorie). Champs propres à ces fiches :
 - `open` : id Slate du clip présélectionné depuis l'accueil.
 - `overrides` : corrections par id Slate, appliquées par-dessus Slate, ex. `{"10903": {"title": "…"}, "534": {"hidden": true}}`.
 
@@ -157,8 +157,6 @@ Pour tester en local, servir le dossier (fetch ne marche pas en `file://`) :
 - Dans `main.css`, la règle `#home {` n'est pas refermée tout de suite : les règles
   suivantes (`.slide`, `.info`, `.name`…) y sont imbriquées (CSS nesting natif) jusqu'à
   une `}` isolée. Ne pas « corriger » : cela changerait la spécificité.
-- L'ordre FEATURED de Neel Potgieter cite « Derichebourg », absent de ses clips (7 featured).
-- La slide d'accueil de Neel n'a pas de clip `open`.
 
 ---
 

@@ -66,9 +66,11 @@ export async function readBundle(bundle) {
     var cat = catName(r.title);
     if (categories.indexOf(cat) < 0) categories.push(cat);
     if (cat === "FEATURED") { featured = pages[k]; return; }
+    // Un film peut figurer dans plusieurs catégories : une entrée par catégorie.
     pages[k].forEach(function (x) {
-      if (byId[x.m.id]) return;
-      clips.push(byId[x.m.id] = clip(x.m, x.img, cat));
+      if (clips.some(function (c) { return c.slate === x.m.id && c.cat === cat; })) return;
+      var c = clip(x.m, x.img, cat);
+      clips.push(c); if (!byId[x.m.id]) byId[x.m.id] = c;
     });
   });
   featured.forEach(function (x, k) {
