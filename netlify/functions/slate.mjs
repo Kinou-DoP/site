@@ -43,12 +43,16 @@ function showreel(html) {
   if (i < 0) throw new Error("playlist Slate introuvable");
   i += 12;
   var media = JSON.parse(decode(html.slice(i, html.indexOf('"', i))));
-  var imgs = html.split('<div class="grid-item fadein').slice(1).map(function (it) {
-    var m = it.match(/<img loading="lazy" src="([^"]+)"/);
-    return m ? decode(m[1]) : null;
+  // Vignette signée de chaque film : première image qui suit son repère data-playlist-item
+  // (grille, ou grand visuel unique quand le showreel ne contient qu'un film).
+  var imgs = {};
+  html.split('data-playlist-item="').slice(1).forEach(function (chunk) {
+    var n = parseInt(chunk, 10), m = chunk.match(/<img[^>]*?\ssrc="([^"]+)"/);
+    if (!isNaN(n) && !imgs[n] && m) imgs[n] = decode(m[1]);
   });
-  if (imgs.length !== media.length) throw new Error("grille et playlist Slate ne correspondent pas");
-  return media.map(function (m, k) { return { m: m, img: imgs[k] }; });
+  return media.map(function (m, k) {
+    return { m: m, img: imgs[k] || (m.thumbnail && m.thumbnail.image_player_url) || null };
+  });
 }
 
 // bundle : "https://kinou.slateapp.com/bundles/<uuid>" ou "<uuid>" -> { name, categories, clips }
