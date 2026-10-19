@@ -241,14 +241,26 @@
     var CATS = ["FEATURED", "BEAUTY", "TEXTURES", "FOOD", "COMEDY", "LIFESTYLE", "AUTOMOTIVE"];
     var WORK = {}, CATS_BY = {}, TEMPLATE = {}, loading = {};
     function loadDP(slug) {
-      if (!loading[slug]) loading[slug] = getJSON("dps/" + slug + ".json").then(register, function () { return null; });
+      if (!loading[slug]) loading[slug] = getJSON("dps/" + slug + ".json").then(live).then(register, function () { return null; });
       return loading[slug];
+    }
+    // Fiche avec bundle Slate : clips a jour via /api/dp/<slug> (lu sur Slate, cache 10 min).
+    // Si l'API ne repond pas (ou trop lentement), on garde la copie enregistree dans la fiche.
+    function live(d) {
+      if (!d.bundle) return d;
+      var api = fetch("/api/dp/" + d.slug).then(function (r) { if (!r.ok) throw r; return r.json(); })
+        .then(function (s) { d.categories = s.categories; d.clips = s.clips; return d; });
+      var copy = new Promise(function (ok) { setTimeout(function () { ok(d); }, 2500); });
+      return Promise.race([api, copy]).catch(function () { return d; });
     }
     // Fiche JSON -> format interne du prototype (WORK, CATS_BY, ABOUT).
     function register(d) {
       var hue = d.hue || 0;
-      WORK[d.slug] = (d.clips || []).map(function (c, i) {
+      var ov = d.overrides || {}; // corrections par clip (cle = id Slate) : title, sub, hidden…
+      WORK[d.slug] = (d.clips || []).filter(function (c) { return !(ov[c.slate] && ov[c.slate].hidden); }).map(function (c, i) {
         var p = {}; for (var k in c) p[k] = c[k];
+        if (ov[c.slate]) for (k in ov[c.slate]) p[k] = ov[c.slate][k];
+        if (d.open !== undefined && c.slate === d.open) p.open = true;
         p.f = !!c.featured; if (c.featuredOrder) p.fo = c.featuredOrder;
         if (p.h === undefined) p.h = (i * 47 + hue) % 360;
         return p;

@@ -2,6 +2,10 @@
   "slug": "neel-potgieter-cinematographer",
   "name": "Neel Potgieter, SASC",
   "hue": 180,
+  "bundle": "https://kinou.slateapp.com/bundles/35a5cf0e-c71e-11f1-a349-0215583debcb",
+  "open": 10716,
+  "overrides": {},
+  "about": {},
   "categories": [
     "FEATURED",
     "AUTOMOTIVE",
@@ -27,8 +31,7 @@
       "cat": "AUTOMOTIVE",
       "slate": 10716,
       "featured": true,
-      "featuredOrder": 1,
-      "open": true
+      "featuredOrder": 1
     },
     {
       "title": "QUARKUS - Manifesto",
@@ -491,6 +494,5 @@
       "cat": "MUSIC VIDEO",
       "slate": 264
     }
-  ],
-  "about": {}
+  ]
 }

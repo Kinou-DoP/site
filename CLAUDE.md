@@ -66,6 +66,17 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 - `about.img` : chemin relatif au dossier `data/dps/`.
 - Exception de mise en page = ajouter `"template": "special"` dans le JSON.
 
+### Synchronisation Slate en temps réel
+Une fiche peut contenir `"bundle": "https://kinou.slateapp.com/bundles/<uuid>"`. Le site lit alors ses clips
+via la fonction Netlify `/api/dp/<slug>` (`netlify/functions/dp.mjs` + `slate.mjs`), qui lit le bundle Slate
+(cache CDN 10 min). `categories` et `clips` de la fiche ne servent plus que de copie de secours
+(API en erreur ou > 2,5 s). Champs propres à ces fiches :
+- `open` : id Slate du clip présélectionné depuis l'accueil.
+- `overrides` : corrections par id Slate, appliquées par-dessus Slate, ex. `{"10903": {"title": "…"}, "534": {"hidden": true}}`.
+
+Convention des bundles : un showreel `#featured` (ordre du FEATURED), puis un showreel par catégorie
+(`#automotive`, `#commercial`, `#music video`…) dans l'ordre d'affichage voulu.
+
 ## Règles visuelles — à respecter absolument
 
 1. **Pas de framework CSS** — tout en CSS vanilla ; les tokens de design globaux sont des variables `--kinou-*`
