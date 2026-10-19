@@ -2,7 +2,7 @@
 Site statique Kinou
 
 - `index.html` : structure ; `assets/css/main.css` : styles ; `assets/js/app.js` : logique.
-- Données : `data/` (JSON, voir CLAUDE.md). Clips synchronisés depuis Slate par `netlify/functions/`.
+- Données : publiées par l'admin (repo `kinou-agency/admin`, https://kinou-admin.netlify.app). Clips synchronisés depuis Slate par `netlify/functions/`.
 - Test en local : `python3 -m http.server` puis http://localhost:8000 (fetch ne marche pas en `file://` ;
   la fonction Slate n'existe pas en local, le site utilise alors la copie enregistrée dans la fiche).
 - Référence visuelle : `reference/prototype.html`.
@@ -29,15 +29,5 @@ Site statique Kinou
   s'il reste, c'est lié au plan gratuit (plan payant ou autre hébergeur).
 - **Nom de domaine** : brancher kinou.fr sur `main` quand la beta est validée.
 
-### Admin (repo `admin`)
-- **« + » → coller le lien du bundle → Importer** : aperçu du nom (repris de Slate), des catégories,
-  des films (titre, réalisateur, production, vignette).
-- **Adresse de la page créée automatiquement** à l'import, modifiable : « Mélodie Preel » → `melodie-preel`
-  (minuscules, accents retirés, espaces → tirets). Définitive une fois publiée.
-- **Corrections par film** (titre, crédits, masquer) enregistrées par identifiant Slate : elles suivent
-  le film quand l'ordre change sur Slate. Signaler les corrections orphelines (film supprimé puis
-  remis sur Slate = nouvel identifiant).
-- **Ce qui n'est pas sur Slate** : bio FR/EN, portrait, liens CV/Instagram/site, photo de survol,
-  choix de la slide d'accueil.
-- **Connexion** : seul Gus peut publier (ex. connexion GitHub).
-- **Migration des données** vers le repo admin (constante `DATA_BASE` de `app.js`).
+### Admin
+Première version en ligne (https://kinou-admin.netlify.app) ; sa liste « à faire » est dans le README du repo `admin`.

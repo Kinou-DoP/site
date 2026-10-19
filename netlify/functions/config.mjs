@@ -1,6 +1,6 @@
 // Réglages partagés des fonctions.
 // Dossier des données (fiches des DPs) : relatif au site, ou adresse complète de l'admin.
-export const DATA_BASE = "/data/";
+export const DATA_BASE = "https://kinou-admin.netlify.app/data/";
 // Repo dont les membres peuvent forcer une mise à jour (token GitHub avec droit d'écriture).
 export const ADMIN_REPO = "kinou-agency/admin";
 export const CORS = {

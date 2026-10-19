@@ -1,7 +1,7 @@
 // kinou — logique du site. Les donnees viennent des fichiers JSON de DATA_BASE.
 (function () {
-  // Dossier des donnees JSON. Seule ligne a changer quand les donnees migreront vers le repo admin.
-  var DATA_BASE = "data/";
+  // Donnees JSON : publiees par l'admin (repo kinou-agency/admin), lues ici par le site officiel et la beta.
+  var DATA_BASE = "https://kinou-admin.netlify.app/data/";
   function getJSON(path) {
     return fetch(DATA_BASE + path).then(function (r) {
       if (!r.ok) throw new Error(r.status + " " + DATA_BASE + path);

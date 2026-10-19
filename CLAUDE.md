@@ -13,9 +13,10 @@ refactorisé doit rester visuellement identique à ce fichier.
 
 ## Architecture des données
 
-Les données vivent dans des fichiers JSON chargés via `fetch()`.
-Pour l'instant ils sont dans ce repo (`data/`) ; ils migreront plus tard vers
-le repo `admin` (même format, seule la constante `DATA_BASE` de `app.js` changera).
+Les données vivent dans le repo `kinou-agency/admin` (dossier `data/`), publiées sur
+https://kinou-admin.netlify.app/data/ et chargées via `fetch()` par le site officiel **et** la beta
+(constante `DATA_BASE` de `assets/js/app.js` et de `netlify/functions/config.mjs`).
+On les modifie avec l'interface d'admin (https://kinou-admin.netlify.app), pas dans ce repo.
 
 ```
 data/
@@ -133,7 +134,7 @@ site/
 ├── assets/
 │   ├── css/main.css    # tout le CSS
 │   └── js/app.js       # chargement JSON + logique + template unique des pages DP
-├── data/               # JSON (transitoire, migrera vers le repo admin)
+├── netlify/functions/  # API : /api/dp (clips Slate), /api/bundle (import admin), /api/refresh
 ├── reference/
 │   └── prototype.html  # prototype d'origine, référence visuelle
 ├── CLAUDE.md
