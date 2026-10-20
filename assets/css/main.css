@@ -17,13 +17,13 @@ a { text-shadow: 0 0 18px rgba(0,0,0,.6); }
 html { scrollbar-gutter: stable; }
 .hero { position: fixed; z-index: 3; top: calc(env(safe-area-inset-top, 0px) + 84px); right: 32px; margin: 0; white-space: nowrap; transform-origin: top left; font-family: var(--kinou-sans); font-weight: 600; font-size: clamp(30px, 5vw, 84px); letter-spacing: -0.04em; line-height: 1; color: var(--kinou-fg); opacity: 0; pointer-events: none; will-change: transform; }
 /* Tokens de design globaux (--kinou-*). Les variables --h, --img, --i, --d, --near sont posées par app.js. */
-:root { --kinou-bg: #000; --kinou-fg: #fff; --kinou-body: "Helvetica Neue", Helvetica, Arial, sans-serif; --kinou-sans: -apple-system, "SF Pro Display", "Inter", "Helvetica Neue", Arial, sans-serif; --kinou-hero-top: calc(env(safe-area-inset-top, 0px) + 84px); --kinou-hero-h: clamp(30px, 5vw, 84px); --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 36px); --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 40px); }
+:root { --kinou-bg: #000; --kinou-fg: #FFFCEB; --kinou-body: "Satoshi", "Helvetica Neue", Helvetica, Arial, sans-serif; --kinou-sans: "Satoshi", -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; --kinou-hero-top: calc(env(safe-area-inset-top, 0px) + 84px); --kinou-hero-h: clamp(30px, 5vw, 84px); --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 36px); --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 40px); }
 .cats { position: fixed; z-index: 2; top: calc(var(--kinou-zm) + 62px); left: 32px; display: flex; flex-direction: column; gap: 10px; opacity: 0; pointer-events: none; transition: opacity .3s; }
 .cats button { flex: 0 0 auto; padding: 0; border: 0; background: none; color: var(--kinou-fg); font-family: var(--kinou-sans); font-weight: 600; font-size: 13px; letter-spacing: .14em; text-align: left; opacity: .4; cursor: pointer; transition: opacity .2s; }
 .cats button:hover { opacity: .8; }
 .cats button.on { opacity: 1; }
 .cats .sep { margin-top: 18px; }
-.about { display: none; padding-top: 46px; max-width: 560px; font-family: var(--kinou-sans); font-weight: 400; font-size: 18px; line-height: 1.55; color: rgba(255,255,255,.85); animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
+.about { display: none; padding-top: 46px; max-width: 560px; font-family: var(--kinou-sans); font-weight: 400; font-size: 18px; line-height: 1.55; color: rgba(255,252,235,.85); animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
 .about p { margin: 0 0 1em; }
 .still video.snip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s ease; pointer-events: none; }
 .still video.snip.on { opacity: 1; }
@@ -34,7 +34,7 @@ html { scrollbar-gutter: stable; }
 #projbg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center; background-repeat: no-repeat; opacity: 0; transition: opacity .45s ease; pointer-events: none; }
 body.viewing.proj-on #projbg { opacity: 1; }
 .card { cursor: pointer; }
-.card.sel .still { box-shadow: inset 0 0 0 2px rgba(255,255,255,.9); }
+.card.sel .still { box-shadow: inset 0 0 0 2px rgba(255,252,235,.9); }
 #aboutbg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center 30%; background-repeat: no-repeat; opacity: 0; transition: opacity .7s ease; pointer-events: none; }
 body.viewing.about-on #aboutbg { opacity: 1; }
 .about .links { display: flex; flex-wrap: wrap; gap: 6px 28px; margin-top: 34px; }
@@ -54,7 +54,7 @@ body.viewing.has-work .work, body.viewing.has-work .cats { opacity: 1; pointer-e
 .still { aspect-ratio: 16 / 9; background: var(--img, none), radial-gradient(circle at 30% 35%, hsl(var(--h), 70%, 38%), transparent 55%), radial-gradient(circle at 75% 70%, hsl(calc(var(--h) + 50), 65%, 30%), transparent 50%), linear-gradient(135deg, hsl(var(--h), 45%, 14%), #050505); background-size: cover; background-position: center; filter: brightness(.85); transition: filter .35s ease; }
 .card:hover .still { filter: brightness(1.1); }
 .card h3 { margin: 12px 0 3px; font-family: var(--kinou-sans); font-weight: 600; font-size: 16px; letter-spacing: -0.01em; line-height: 1.2; }
-.card p { margin: 0; white-space: pre-line; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .14em; color: rgba(255,255,255,.5); }
+.card p { margin: 0; white-space: pre-line; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .14em; color: rgba(255,252,235,.5); }
 .feed.gallery { grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: none; }
 .feed.gallery .card { position: relative; overflow: hidden; aspect-ratio: 16 / 9; }
 .feed.gallery .still { position: absolute; inset: 0; aspect-ratio: auto; filter: none; transition: transform .6s ease; }
@@ -116,14 +116,14 @@ body.closing li a { transition: opacity .3s .7s; }
 .show { opacity: 1; transform: none; }
 .caption h2 { margin: 0 0 6px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
 .caption h2.big { font-size: 34px; letter-spacing: -0.03em; margin-bottom: 4px; }
-.song { margin: 0 0 12px; font-size: 17px; font-weight: 400; line-height: 1.3; color: rgba(255,255,255,.85); }
+.song { margin: 0 0 12px; font-size: 17px; font-weight: 400; line-height: 1.3; color: rgba(255,252,235,.85); }
 .song:empty { display: none; }
-.caption p { margin: 0; white-space: pre-line; font-size: 11px; line-height: 1.7; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.5); }
-.caption p::first-line { font-size: 15px; font-weight: 400; letter-spacing: 0; text-transform: none; color: rgba(255,255,255,.85); }
+.caption p { margin: 0; white-space: pre-line; font-size: 11px; line-height: 1.7; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.5); }
+.caption p::first-line { font-size: 15px; font-weight: 400; letter-spacing: 0; text-transform: none; color: rgba(255,252,235,.85); }
 
 .bars { position: fixed; z-index: 5; left: 32px; right: 32px; bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); display: flex; gap: 6px; }
 .bars button { flex: 1; height: 22px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
-.bars button::after { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: rgba(255,255,255,.25); transition: background .3s; }
+.bars button::after { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: rgba(255,252,235,.25); transition: background .3s; }
 .bars button.on::after { background: var(--kinou-fg); }
 
 @media (max-width: 700px) {
@@ -150,7 +150,7 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 #player .pstage video, #player .pstage img { display: block; width: 100%; height: 100%; object-fit: contain; background: transparent; }
 #player .pcap { width: min(100%, 1400px, calc((100vh - 190px) * 16 / 9)); margin-top: 18px; font-family: var(--kinou-sans); }
 #player .pcap h3 { margin: 0 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
-#player .pcap p { margin: 0; white-space: pre-line; font-size: 11px; line-height: 1.7; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+#player .pcap p { margin: 0; white-space: pre-line; font-size: 11px; line-height: 1.7; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.55); }
 #player .pclose { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 20px); right: 28px; width: 40px; height: 40px; padding: 0; border: 0; background: none; color: var(--kinou-fg); cursor: pointer; opacity: .7; transition: opacity .2s; }
 #player .pclose:hover { opacity: 1; }
 #player.has-stills .pstage, #player.has-stills .pcap { width: min(100%, 1400px, calc((100vh - 270px) * 16 / 9)); }
@@ -159,3 +159,35 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 #player .pstills button:hover { opacity: .8; }
 #player .pstills button.on { opacity: 1; }
 @media (max-width: 560px) { #player .pstills { gap: 4px; } #player .pstills button { width: 64px; } }
+
+/* ---------- Ajustements visuels (oct. 2026) ---------- */
+/* En-tête : logo au centre ; à gauche Instagram + liens à venir ; à droite « cinematographers » (inchangé). */
+.logo { left: 50%; transform: translateX(-50%); }
+.lnav { position: fixed; z-index: 2; mix-blend-mode: difference; top: calc(env(safe-area-inset-top, 0px) + 36px); left: 32px; display: flex; align-items: center; gap: 22px; }
+.lnav a { padding: 0; font-family: var(--kinou-sans); font-weight: 600; font-size: 14px; letter-spacing: -0.01em; line-height: 1; text-shadow: none; transition: opacity .2s; }
+.lnav a:hover { opacity: .6; }
+.lnav .ig { display: block; height: 16px; margin-top: -1px; }
+.lnav .ig svg { display: block; }
+@media (max-width: 700px) { .lnav .soon { display: none; } }
+@media (max-width: 560px) { .lnav { left: 24px; top: calc(env(safe-area-inset-top, 0px) + 35px); } }
+
+/* Liste : extrait vidéo du premier film FEATURED du chef op en fond, au survol. */
+#bgvid { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.6); opacity: 0; transition: opacity .45s ease; pointer-events: none; }
+#bgvid.on { opacity: 1; }
+body.is-home #bgvid { display: none; }
+body.viewing #bgvid { opacity: 0 !important; }
+
+/* Page d'un chef op : fond (projet survolé) très flouté et assombri ; grille posée sur un fond sombre. */
+#projbg, #projvid { transform: scale(1.15); }
+#projbg { filter: blur(40px) brightness(.5); }
+#projvid { filter: blur(40px) brightness(.4); }
+.feed.gallery { background: rgba(0,0,0,.92); box-shadow: 0 0 0 6px rgba(0,0,0,.92), 0 0 140px 70px rgba(0,0,0,.6); }
+
+/* Survol d'un film : léger voile lumineux (monte à 20 % en 0,25 s, redescend en 1 s). */
+.still { position: relative; }
+.still::after { content: ""; position: absolute; inset: 0; background: var(--kinou-fg); opacity: 0; transition: opacity 1s ease-out; pointer-events: none; }
+.card:hover .still::after { opacity: .2; transition: opacity .25s ease-out; }
+
+/* Sous le nom du chef op : coupe nette au lieu du dégradé, et barre de défilement masquée. */
+.work { -webkit-mask-image: linear-gradient(to bottom, transparent var(--kinou-zm), #000 var(--kinou-zm)); mask-image: linear-gradient(to bottom, transparent var(--kinou-zm), #000 var(--kinou-zm)); scrollbar-width: none; }
+.work::-webkit-scrollbar { display: none; }

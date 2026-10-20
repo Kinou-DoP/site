@@ -169,11 +169,25 @@
       s += '</g></svg>';
       return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
     }
-    function hide() { bg.style.opacity = 0; }
+    // Fond video : extrait (snippet Slate) du premier film FEATURED du chef op, s'il a une fiche.
+    var bgvid = document.getElementById("bgvid");
+    function showBgVideo(a) {
+      var slug = a.dataset.view;
+      loadDP(slug).then(function (d) {
+        if (!d || !(a.matches(":hover") || a === document.activeElement)) return;
+        var f = (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0];
+        if (!f) return;
+        if (bgvid.dataset.src !== f.video) { bgvid.src = f.video; bgvid.dataset.src = f.video; }
+        try { bgvid.currentTime = 0; } catch (e) {}
+        bgvid.onplaying = function () { if (a.matches(":hover") || a === document.activeElement) bgvid.classList.add("on"); };
+        var pr = bgvid.play(); if (pr && pr.catch) pr.catch(function () {});
+      });
+    }
+    function hide() { bg.style.opacity = 0; bgvid.classList.remove("on"); bgvid.onplaying = null; bgvid.pause(); }
 
     document.querySelectorAll("li a").forEach(function (a) {
-      a.addEventListener("mouseenter", function () { showBg(a); });
-      a.addEventListener("focus", function () { showBg(a); });
+      a.addEventListener("mouseenter", function () { showBg(a); showBgVideo(a); });
+      a.addEventListener("focus", function () { showBg(a); showBgVideo(a); });
       a.addEventListener("mouseleave", hide);
       a.addEventListener("blur", hide);
     });
@@ -266,7 +280,7 @@
     // l'URL Slate signee est transmise telle quelle).
     var IMG_CDN = /(^|\.)netlify\.app$|(^|\.)kinou\.fr$/.test(location.hostname);
     function thumb(u, w) {
-      return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=75" : u;
+      return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=75&fm=webp" : u;
     }
     // Fiche JSON -> format interne du prototype (WORK, CATS_BY, ABOUT).
     function register(d) {
@@ -524,6 +538,8 @@
       if (t === "home") HomeAPI.resume(); else { HomeAPI.pause(); window.scrollTo(0, 0); }
     }
     document.getElementById("name").addEventListener("mouseenter", function () { loadDP(this.getAttribute("href").slice(1)); }); // precharge la fiche
+    // Liens de l'en-tete pas encore actifs (spotlight, fiction).
+    document.querySelectorAll("[data-soon]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); }); });
     window.Site = { fromHome: function (p) { openView({ text: p.dp, slug: p.slug, from: "home", rect: homeNameRect(), film: p }); } };
     document.querySelector(".logo").addEventListener("click", function (e) { e.preventDefault(); closeView(true); show("home"); });
     document.querySelector(".nav-btn").addEventListener("click", function (e) {
