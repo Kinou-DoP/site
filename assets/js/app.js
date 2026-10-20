@@ -317,16 +317,20 @@
       if (!IMG_CDN || warmed[slug]) return;
       warmed[slug] = true;
       loadDP(slug).then(function (d) {
-        if (d) (WORK[slug] || []).forEach(function (p) { if (p.f && p.img) new Image().src = thumb(p.img, 600); });
+        if (d) (WORK[slug] || []).forEach(function (p) { if (p.f && p.img) new Image().src = thumb(p.img, GW); });
       });
     }
     function warmAll(slug) {
       if (!IMG_CDN) return;
       var seen = {};
-      (WORK[slug] || []).forEach(function (p) { if (p.img && !seen[p.img]) { seen[p.img] = true; new Image().src = thumb(p.img, 600); } });
+      (WORK[slug] || []).forEach(function (p) { if (p.img && !seen[p.img]) { seen[p.img] = true; new Image().src = thumb(p.img, GW); } });
     }
+    // Largeur des vignettes selon l'ecran : nettes sur un ecran haute densite (Retina), legeres sinon.
+    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var GW = Math.min(1200, Math.max(600, Math.ceil(window.innerWidth / 3 * DPR / 200) * 200)); // galerie (3 colonnes)
+    var FW = Math.min(1800, Math.max(1000, Math.ceil(Math.min(window.innerWidth, 1400) * DPR / 200) * 200)); // feed (1 colonne)
     function thumb(u, w) {
-      return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=70&fm=webp" : u;
+      return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=80&fm=webp" : u;
     }
     // Fiche JSON -> format interne du prototype (WORK, CATS_BY, ABOUT).
     function register(d) {
@@ -355,7 +359,7 @@
     // Fond plein ecran du projet survole (ou selectionne par clic / tap). p.img = visuel du projet.
     var projbg = document.getElementById("projbg"), projvid = document.getElementById("projvid"), selCard = null;
     function bgFor(p, w) {
-      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, w || 600) + '")';
+      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, w || GW) + '")';
       return "none"; // pas de fond colore provisoire
     }
     // Ignore les cartes masquees sous l'en-tete (zone du titre) quand on a defile.
@@ -445,7 +449,7 @@
         return;
       }
       if (v && v._free) { clearTimeout(v._free); v._free = null; }
-      var vsrc = p.video || p.full; // extrait d'apercu, sinon le film complet
+      var vsrc = p.video; // extrait d'apercu seulement (le film complet, trop lourd, est reserve au lecteur)
       if (!vsrc || reduceMotion || (navigator.connection && navigator.connection.saveData)) return;
       if (!v) {
         v = document.createElement("video"); v.className = "snip"; v.muted = true; v.playsInline = true; v.preload = "auto";
@@ -467,7 +471,7 @@
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
         if (p.img) {
-          var url = thumb(p.img, mode === "gallery" ? 600 : 1200), im = new Image();
+          var url = thumb(p.img, mode === "gallery" ? GW : FW), im = new Image();
           im.onload = im.onerror = (function (st, url) { return function () { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st, url);
           im.src = url;
         }

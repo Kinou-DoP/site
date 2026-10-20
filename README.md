@@ -35,8 +35,9 @@ Site statique Kinou
 - **Nom de domaine** : brancher kinou.fr sur `main` quand la beta est validée.
 
 ### Admin (à faire après le 18 novembre, pour ne pas consommer de crédits avant)
-- Le préchauffage des vignettes de l'admin demande encore la taille 800 px (`w=800&q=75`) ; le site utilise
-  maintenant 600 px (`w=600&q=70`). Aligner `warmThumbs` dans `admin/assets/js/admin.js`.
+- Le préchauffage des vignettes de l'admin demande la taille 800 px (`w=800&q=75`) ; le site choisit maintenant la
+  taille selon l'écran (`w=600` à `1200`, multiples de 200, `q=80`). Aligner `warmThumbs` dans `admin/assets/js/admin.js`
+  (préchauffer les tailles courantes : 600 et 1000).
 
 ### GitHub
 - **Passer `kinou-agency` en organisation** (aujourd'hui compte personnel) pour que chacun ait son compte

@@ -186,9 +186,8 @@ body.viewing #bgvid { opacity: 0 !important; }
    vers l'extérieur. Ombre portée calculée sur la forme des vignettes : elle ne déborde pas sur les voisines. */
 .feed .shade { display: none; }
 .feed.gallery { position: relative; isolation: isolate; }
-.feed.gallery .shade { position: absolute; inset: 0; z-index: -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: none; will-change: transform;
-  filter: drop-shadow(0 0 3px rgba(0,0,0,.95)) drop-shadow(0 0 3px rgba(0,0,0,.95)) drop-shadow(0 0 30px rgba(0,0,0,.55)); }
-.feed.gallery .shade i { aspect-ratio: 16 / 9; background: #000; }
+.feed.gallery .shade { position: absolute; inset: 0; z-index: -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: none; }
+.feed.gallery .shade i { aspect-ratio: 16 / 9; background: #000; box-shadow: 0 0 0 3px rgba(0,0,0,.95), 0 0 40px 12px rgba(0,0,0,.55); }
 @media (max-width: 560px) { .feed.gallery .shade { gap: 4px; } }
 .feed:not(.gallery) .still { box-shadow: 0 0 0 3px rgba(0,0,0,.9), 0 0 36px 14px rgba(0,0,0,.55); }
 
