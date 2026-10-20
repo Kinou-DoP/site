@@ -182,7 +182,9 @@ body.viewing #bgvid { opacity: 0 !important; }
 #projbg, #projvid { transform: scale(1.15); }
 #projbg { filter: blur(40px) brightness(.65); }
 #projvid { filter: blur(40px) brightness(.55); }
-.feed.gallery { background: rgba(0,0,0,.92); box-shadow: 0 0 0 6px rgba(0,0,0,.92); }
+/* Fond noir derrière chaque film (pas toute la grille : rien derrière une case vide), qui s'estompe
+   vers l'extérieur. Ombre portée calculée sur la forme des vignettes : elle ne déborde pas sur les voisines. */
+.feed { filter: drop-shadow(0 0 3px rgba(0,0,0,.95)) drop-shadow(0 0 3px rgba(0,0,0,.95)) drop-shadow(0 0 30px rgba(0,0,0,.55)); }
 
 /* Survol d'un film : léger voile lumineux, une seule fois (15 % en 0,25 s, retour à 0 en 1 s). */
 .still { position: relative; }
@@ -201,7 +203,12 @@ html::-webkit-scrollbar { display: none; }
 
 /* Accueil : la barre du projet en cours s'allonge, un peu plus claire, et un trait montre l'avancement. */
 #home .bars button { transition: flex .6s cubic-bezier(.2, .7, .2, 1); }
-#home .bars button.on { flex: 4; }
+#home .bars button.on { flex: 2.5; }
 #home .bars button.on::after { background: rgba(255,252,235,.4); }
 #home .bars button::before { content: ""; position: absolute; z-index: 1; left: 0; right: 0; top: 10px; height: 2px; background: var(--kinou-fg); transform: scaleX(0); transform-origin: left; }
 #home .bars button.on::before { transform: scaleX(var(--p, 0)); }
+
+/* Vignettes : pas de fond coloré provisoire ; l'image arrive en fondu avec un léger mouvement vers le haut. */
+.still { background: var(--img, none) center / cover no-repeat, #070707; opacity: 0; }
+.still.ready { animation: still-in .9s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes still-in { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }

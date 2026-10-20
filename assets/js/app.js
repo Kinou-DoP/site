@@ -105,20 +105,21 @@
       if (e.key === "ArrowRight") go(cur + 1);
       if (e.key === "ArrowLeft") go(cur - 1);
     });
-    // Molette / trackpad : un geste = un projet. Apres un changement, on attend la fin du geste
-    // (inertie du trackpad) et la fin de la transition avant d'accepter le suivant.
-    var wheelSum = 0, wheelLast = 0, wheelUntil = 0;
+    // Molette / trackpad : un geste = un projet. L'inertie du trackpad (valeurs qui decroissent)
+    // est ignoree ; un nouveau geste est reconnu a une pause ou a une reprise d'elan (valeur qui remonte).
+    var wheelSum = 0, wheelLast = 0, wheelAbs = 0, wheelUntil = 0;
     window.addEventListener("wheel", function (e) {
       if (!active) return;
-      var now = Date.now(), quiet = now - wheelLast > 180;
-      wheelLast = now;
+      var d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      var now = Date.now(), quiet = now - wheelLast > 160, rising = Math.abs(d) > wheelAbs * 1.5 + 4;
+      wheelLast = now; wheelAbs = Math.abs(d);
       if (wheelUntil) {
-        if (now < wheelUntil || !quiet) return; // transition en cours, ou geste (inertie) pas encore fini
-        wheelUntil = 0;
+        if (now < wheelUntil || !(quiet || rising)) return; // transition en cours, ou fin d'inertie du meme geste
+        wheelUntil = 0; wheelSum = 0;
       }
       if (quiet) wheelSum = 0;
-      wheelSum += Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (Math.abs(wheelSum) > 40) { go(cur + (wheelSum > 0 ? 1 : -1)); wheelSum = 0; wheelUntil = now + 1200; }
+      wheelSum += d;
+      if (Math.abs(wheelSum) > 40) { go(cur + (wheelSum > 0 ? 1 : -1)); wheelSum = 0; wheelUntil = now + 450; }
     }, { passive: true });
     var x0 = null;
     document.addEventListener("touchstart", function (e) { if (!active) return; x0 = e.touches[0].clientX; }, { passive: true });
@@ -318,6 +319,11 @@
         if (d) (WORK[slug] || []).forEach(function (p) { if (p.f && p.img) new Image().src = thumb(p.img, 800); });
       });
     }
+    function warmAll(slug) {
+      if (!IMG_CDN) return;
+      var seen = {};
+      (WORK[slug] || []).forEach(function (p) { if (p.img && !seen[p.img]) { seen[p.img] = true; new Image().src = thumb(p.img, 800); } });
+    }
     function thumb(u, w) {
       return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=75&fm=webp" : u;
     }
@@ -348,9 +354,8 @@
     // Fond plein ecran du projet survole (ou selectionne par clic / tap). p.img = visuel du projet.
     var projbg = document.getElementById("projbg"), projvid = document.getElementById("projvid"), selCard = null;
     function bgFor(p) {
-      var h = p.h, g = 'radial-gradient(circle at 30% 35%, hsl(' + h + ',70%,38%), transparent 55%), radial-gradient(circle at 75% 70%, hsl(' + (h + 50) + ',65%,30%), transparent 50%), linear-gradient(135deg, hsl(' + h + ',45%,14%), #050505)';
-      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, 800) + '"), ' + g; // meme fichier que la vignette (deja en cache)
-      return 'linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)), ' + g;
+      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, 800) + '")'; // meme fichier que la vignette (deja en cache)
+      return "none"; // pas de fond colore provisoire
     }
     // Ignore les cartes masquees sous l'en-tete (zone du titre) quand on a defile.
     function inZone(e) { return e.clientY >= parseFloat(getComputedStyle(work).paddingTop) - 6; }
@@ -452,7 +457,11 @@
       WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; }).forEach(function (p, i) {
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
-        if (p.img) st.style.setProperty("--img", 'url("' + thumb(p.img, mode === "gallery" ? 800 : 1600) + '")');
+        if (p.img) {
+          var url = thumb(p.img, mode === "gallery" ? 800 : 1600), im = new Image();
+          im.onload = im.onerror = (function (st, url) { return function () { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st, url);
+          im.src = url;
+        }
         var meta = document.createElement("div"); meta.className = "meta";
         var h = document.createElement("h3"); h.textContent = p.title;
         var s = document.createElement("p"); s.textContent = p.sub || p.cat;
@@ -548,6 +557,7 @@
         return;
       }
       document.body.classList.add("has-work");
+      setTimeout(function () { warmAll(slug); }, 1200); // apres FEATURED : les autres categories
       work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = "gallery"; buildTabs(slug); render(slug, "FEATURED", 700);
       if (film) {
         var cards = feed.querySelectorAll(".card");
