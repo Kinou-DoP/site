@@ -22,6 +22,7 @@
       var s = document.createElement("div");
       s.className = "slide";
       s.style.setProperty("--h", p.h);
+      if (p.zoom > 1) s.style.setProperty("--z", p.zoom); // recadrage réglé dans l'admin (enlève les bandes noires)
       var inner = document.createElement("div"); inner.className = "in"; s.appendChild(inner);
       if (p.video) {
         var v = document.createElement("video");
@@ -156,7 +157,7 @@
       resume: function () { if (active) return; active = true; var v = slides[cur].querySelector("video"); if (v && v.src) { var pr = v.play(); if (pr && pr.catch) pr.catch(later); v.onended = next; } else later(); },
       videoEl: function () { return slides[cur].querySelector("video"); }
     };
-    go(0);
+    go(Math.floor(Math.random() * PROJECTS.length)); // on arrive sur un film au hasard, puis l'ordre de la bande
   }
 
   // ---------- Liste des DPs + page DP (template unique) ----------
@@ -202,6 +203,7 @@
         var f = d && (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0];
         if (!f) { showBg(a); return; } // pas de fiche ou pas d'extrait : image s'il y en a une
         if (bgvid.dataset.src !== f.video) { bgvid.src = f.video; bgvid.dataset.src = f.video; }
+        bgvid.style.setProperty("--z", f.zoom > 1 ? f.zoom : 1);
         try { bgvid.currentTime = 0; } catch (e) {}
         bgvid.onplaying = function () { if (a.matches(":hover") || a === document.activeElement) bgvid.classList.add("on"); };
         var pr = bgvid.play(); if (pr && pr.catch) pr.catch(function () {});
@@ -479,6 +481,7 @@
       WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; }).forEach(function (p, i) {
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
+        if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); st.classList.add("zoomed"); } // recadrage (admin)
         if (p.img) {
           var url = thumb(p.img, mode === "gallery" ? GW : FW), im = new Image();
           im.onload = im.onerror = (function (st, url) { return function () { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st, url);
@@ -692,6 +695,5 @@
     var slides = r[0].slides.map(function (p) { if (!p.dps) p.dps = [{ name: p.dp, slug: p.slug }]; return p; });
     initHome(slides, r[0].duration);
     initSite(r[1].dps);
-    if (slides[0].dps[0].slug) Site.prefetch(slides[0].dps[0].slug);
   }).catch(function (e) { console.error("kinou : chargement des donnees impossible", e); });
 })();
