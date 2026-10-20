@@ -120,6 +120,8 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 - `beta` = version de test (branch deploy Netlify : `beta--<site>.netlify.app`).
 - On travaille et on pousse sur `beta` (ou une branche de travail fusionnée dans `beta`).
 - On ne fusionne `beta` dans `main` qu'après validation explicite de Gus.
+- Pour l'instant seule la beta compte : le site `main` (kinou-test.netlify.app) n'est pas suivi et peut ne plus
+  savoir lire les données publiées par l'admin (ex. nouveau format de `home.json`) ; pas de compatibilité à maintenir.
 
 ### Crédits Netlify (plan gratuit : 300 crédits / mois)
 - Chaque mise en ligne d'un site **de production** coûte environ 15 crédits : chaque push sur `main` du site,
