@@ -119,7 +119,7 @@
       }
       if (quiet) wheelSum = 0;
       wheelSum += d;
-      if (Math.abs(wheelSum) > 40) { go(cur + (wheelSum > 0 ? 1 : -1)); wheelSum = 0; wheelUntil = now + 450; }
+      if (Math.abs(wheelSum) > 40) { go(cur + (wheelSum > 0 ? 1 : -1)); wheelSum = 0; wheelUntil = now + 300; }
     }, { passive: true });
     var x0 = null;
     document.addEventListener("touchstart", function (e) { if (!active) return; x0 = e.touches[0].clientX; }, { passive: true });
