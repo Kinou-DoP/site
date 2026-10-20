@@ -23,7 +23,8 @@ On les modifie avec l'interface d'admin (https://kinou-admin.netlify.app), pas d
 
 ```
 data/
-├── home.json              # slideshow de l'accueil (PROJECTS) + durée
+├── home.json              # slideshow de l'accueil (PROJECTS) + durée ; importé d'une bande Slate dans l'admin
+├── site.json              # réglages (logo image : { logo: "brand/logo.png", logoHeight: 36 })
 └── dps/
     ├── index.json         # liste ordonnée des DPs : [{ slug, name, img? }]
     ├── <slug>.json        # une fiche par DP (clips + about)
@@ -82,6 +83,11 @@ via la fonction Netlify `/api/dp/<slug>` (`netlify/functions/dp.mjs` + `slate.mj
   `data-media` → `images[].image_player_url`, URLs signées copiées telles quelles) et les enregistre dans
   `overrides[<id>].stills` (+ `stillsLink`). Recoller le lien pour reprendre les changements faits sur Slate.
 
+Accueil (`home.json`) : `{ duration, reel, overrides, slides: [{ slate, film, song, legend, video, img, dps: [{ name, slug }] }] }`.
+L'admin importe les 10 premiers films d'une bande Slate (`/api/reel?link=…`, `readReel` de `slate.mjs`) ; les chefs op crédités
+sont reliés à leur page par leur nom (liste des DPs) ; `overrides` (par id Slate) garde les textes corrigés au rafraîchissement.
+Ancien format accepté : `{ dp, slug }` par slide.
+
 Convention des bundles : un showreel `#featured` (ordre du FEATURED) et un showreel par catégorie
 (`#automotive`, `#commercial`, `#music video`…). L'ordre des showreels dans le bundle = ordre des onglets.
 Le nom de l'onglet est le texte après `#`, en majuscules (`#clips` → CLIPS).
@@ -101,6 +107,9 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    lumineux au survol d'un film (blanc 20 % en 0,25 s, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » et « fiction » (à venir,
    masqués sous 700px) ; à droite « cinematographers ».
+10. **Catégorie du film** : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
+   toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.
+11. **Accueil** : un lien par chef op crédité (« Nom & Nom ») ; pas de fond coloré de remplacement (noir).
 9. **Fonds** : liste → nom survolé en blanc et en gras (500), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
    film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé).
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
@@ -157,7 +166,7 @@ site/
 ├── assets/
 │   ├── css/main.css    # tout le CSS
 │   └── js/app.js       # chargement JSON + logique + template unique des pages DP
-├── netlify/functions/  # API : /api/data (données), /api/dp (clips Slate), /api/bundle + /api/stills (import admin), /api/refresh
+├── netlify/functions/  # API : /api/data (données), /api/dp (clips Slate), /api/bundle + /api/stills + /api/reel (import admin), /api/refresh
 ├── reference/
 │   └── prototype.html  # prototype d'origine, référence visuelle
 ├── CLAUDE.md

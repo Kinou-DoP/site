@@ -120,3 +120,31 @@ export async function readStills(link) {
   if (!stills.length) throw new Error("aucune image sur cette page Slate");
   return { link: url, title: String(media.title || "").trim(), stills: stills };
 }
+
+// Bande de l'accueil : n'importe quelle page Slate avec une playlist (showreel, page d'un bundle) ou un bundle
+// (on prend alors son premier showreel), ou un lien shots.re. Renvoie les `max` premiers films.
+export async function readReel(link, max) {
+  var s = String(link || "").trim(), url;
+  var c = s.match(/^(?:https?:\/\/)?shots\.re\/([A-Za-z0-9]{3,20})\/?$/);
+  if (c) url = (await fetch("https://shots.re/" + c[1])).url;
+  else url = s;
+  var u = url.match(/^https:\/\/kinou\.slateapp\.com(\/[\w\/-]+)\/?(?:[?#].*)?$/);
+  if (!u) throw new Error("lien invalide : attendu un lien kinou.slateapp.com ou shots.re");
+  url = ORIGIN + u[1];
+  var html = await page(url);
+  if (html.indexOf('data-media="') < 0) {
+    var b = html.match(/href="(\/bundles\/[0-9a-f-]{36}\/\d+)"/);
+    if (!b) throw new Error("aucun film sur cette page Slate");
+    html = await page(ORIGIN + b[1]);
+  }
+  var films = showreel(html).slice(0, max || 10).map(function (x) {
+    var c = clip(x.m, x.img, ""), t = c.title, k = t.search(/\s[•·\-–—|]\s/);
+    return {
+      slate: c.slate, title: t,
+      film: k > -1 ? t.slice(0, k).trim() : t, song: k > -1 ? t.slice(k + 3).trim() : "",
+      legend: c.sub || "", video: c.video || "", img: c.img || "",
+      artists: (x.m.artists_names || []).map(function (n) { return String(n).trim(); }).filter(Boolean)
+    };
+  });
+  return { link: url, films: films };
+}

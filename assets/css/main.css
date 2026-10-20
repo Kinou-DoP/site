@@ -110,9 +110,12 @@ body.closing li a { transition: opacity .3s .7s; }
 .info { position: fixed; z-index: 4; left: 32px; right: 32px; bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; }
 .caption { max-width: 26vw; opacity: 0; transform: translateY(8px); transition: opacity .6s .3s, transform .6s .3s; }
 .name { margin: 0; text-align: right; font-weight: 600; font-size: clamp(30px, 5vw, 84px); letter-spacing: -0.04em; line-height: 1; white-space: nowrap; opacity: 0; transform: translateY(12px); transition: opacity .6s .3s, transform .6s .3s, color .2s; }
-.name:hover { opacity: .75 !important; }
+.name a { display: inline-block; vertical-align: top; padding: 0; font: inherit; letter-spacing: inherit; line-height: inherit; color: inherit; transition: opacity .2s; }
+.name a[href]:hover { opacity: .75; }
+.name .ns { display: inline-block; }
+.name .amp { opacity: .5; }
 .name .n { display: inline-block; }
-.name .tags { margin-top: 10px; font-size: 15px; font-weight: 600; letter-spacing: .08em; line-height: 1; opacity: .7; }
+.name .tags { display: block;  margin-top: 10px; font-size: 15px; font-weight: 600; letter-spacing: .08em; line-height: 1; opacity: .7; }
 .show { opacity: 1; transform: none; }
 .caption h2 { margin: 0 0 6px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
 .caption h2.big { font-size: 34px; letter-spacing: -0.03em; margin-bottom: 4px; }
@@ -234,3 +237,20 @@ html::-webkit-scrollbar { display: none; }
 .still { background: var(--img, none) center / cover no-repeat, #070707; }
 /* Animations d'arrivée des cartes : une fois jouées, plus rien à suivre pour le navigateur. */
 .card { animation-fill-mode: backwards; }
+
+/* Catégorie du film : en bas à droite au survol (galerie) ; sur téléphone, en haut à droite de la vignette. */
+.ccat { font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; line-height: 1; color: var(--kinou-fg); pointer-events: none; }
+.feed.gallery .meta .ccat { position: absolute; right: 16px; bottom: 14px; }
+.feed:not(.gallery) .still .ccat { position: absolute; z-index: 3; top: 12px; right: 12px; opacity: 0; transition: opacity .3s; text-shadow: 0 0 10px rgba(0,0,0,.6); }
+.feed:not(.gallery) .card:hover .still .ccat { opacity: 1; }
+/* Téléphone : toujours en feed, sans le choix d'affichage ; catégorie toujours visible. */
+@media (max-width: 700px) {
+  .modes { display: none; }
+  .feed:not(.gallery) .still .ccat { opacity: 1; }
+}
+/* Logo image (testé depuis l'admin) : même place et même effet (différence) que le logo texte. */
+.logo.img { line-height: 0; }
+.logo.img img { display: block; height: var(--logo-h, 36px); width: auto; }
+@media (max-width: 560px) { .logo.img img { height: calc(var(--logo-h, 36px) * .83); } }
+/* Accueil : la légende garde sa largeur, c'est le nom (un ou plusieurs chefs op) qui se réduit. */
+#home .caption { flex: none; }

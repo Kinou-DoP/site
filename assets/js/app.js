@@ -23,7 +23,6 @@
       s.className = "slide";
       s.style.setProperty("--h", p.h);
       var inner = document.createElement("div"); inner.className = "in"; s.appendChild(inner);
-      var fx = document.createElement("div"); fx.className = "fx"; inner.appendChild(fx);
       if (p.video) {
         var v = document.createElement("video");
         v.muted = true; v.playsInline = true; v.preload = "none"; v.dataset.src = p.video;
@@ -31,14 +30,14 @@
       }
       wrap.appendChild(s); slides.push(s);
       var b = document.createElement("button");
-      b.setAttribute("aria-label", p.dp + " — " + p.film);
+      b.setAttribute("aria-label", p.dps.map(function (d) { return d.name; }).join(" & ") + " — " + p.film);
       b.addEventListener("click", function () { go(i); });
       bars.appendChild(b); buttons.push(b);
     });
 
     // Garde le nom sur une seule ligne : reduit la taille si l'espace manque.
     function fit() {
-      var nm = name.querySelector(".n");
+      var nm = name.querySelector(".ns");
       if (!nm) return;
       name.style.fontSize = "";
       var mobile = window.innerWidth <= 700;
@@ -77,16 +76,24 @@
       cur = i; timed = false;
       buttons[i].style.setProperty("--p", 0);
       var p = PROJECTS[i];
-      if (window.Site && Site.prefetch) Site.prefetch(p.slug); // vignettes pretes si on clique sur le nom
+      if (window.Site && Site.prefetch) p.dps.forEach(function (d) { if (d.slug) Site.prefetch(d.slug); }); // vignettes pretes si on clique sur le nom
       slides[i].classList.add("on"); buttons[i].classList.add("on");
 
       cap.classList.remove("show"); name.classList.remove("show");
       setTimeout(function () {
         film.textContent = p.film; film.className = p.song ? "big" : ""; document.getElementById("song").textContent = p.song || ""; legend.textContent = p.legend;
-        var parts = p.dp.split(","), main = parts[0].trim(), tags = parts.slice(1).join(", ").trim();
-        name.textContent = ""; name.href = p.href;
-        var nm = document.createElement("span"); nm.className = "n"; nm.textContent = main; name.appendChild(nm);
-        if (tags) { var tg = document.createElement("div"); tg.className = "tags"; tg.textContent = tags; name.appendChild(tg); }
+        // Un lien par chef op (plusieurs chefs op sur un même projet : « Nom & Nom »).
+        name.textContent = "";
+        var ns = document.createElement("span"); ns.className = "ns"; name.appendChild(ns);
+        p.dps.forEach(function (d, k) {
+          if (k) { var amp = document.createElement("span"); amp.className = "amp"; amp.textContent = " & "; ns.appendChild(amp); }
+          var parts = d.name.split(","), main = parts[0].trim(), tags = parts.slice(1).join(", ").trim();
+          var a = document.createElement("a"); a.href = "#" + d.slug; a.dataset.slug = d.slug; a.dataset.name = d.name;
+          var nm = document.createElement("span"); nm.className = "n"; nm.textContent = main; a.appendChild(nm);
+          if (tags) { var tg = document.createElement("span"); tg.className = "tags"; tg.textContent = tags; a.appendChild(tg); }
+          if (!d.slug) a.removeAttribute("href");
+          ns.appendChild(a);
+        });
         fit();
         cap.classList.add("show"); name.classList.add("show");
       }, 550);
@@ -140,7 +147,10 @@
       });
       root.addEventListener("mouseleave", function () { root.style.setProperty("--near", 0); });
     }
-    name.addEventListener("click", function (e) { e.preventDefault(); if (active && window.Site) Site.fromHome(PROJECTS[cur]); });
+    name.addEventListener("click", function (e) {
+      var a = e.target.closest("a"); if (!a) return;
+      e.preventDefault(); if (active && window.Site && a.dataset.slug) Site.fromHome(PROJECTS[cur], a);
+    });
     window.HomeAPI = {
       pause: function () { active = false; clearTimeout(timer); var v = slides[cur].querySelector("video"); if (v) v.pause(); },
       resume: function () { if (active) return; active = true; var v = slides[cur].querySelector("video"); if (v && v.src) { var pr = v.play(); if (pr && pr.catch) pr.catch(later); v.onended = next; } else later(); },
@@ -180,25 +190,7 @@
         }
       }
       if (im.complete && im.naturalWidth) apply(u);
-      else if (im.complete) apply(placeholder(u));
-      else {
-        im.addEventListener("load", function () { apply(u); });
-        im.addEventListener("error", function () { apply(placeholder(u)); });
-      }
-    }
-    // Image provisoire : si la vraie image est introuvable, on genere un fond
-    // cinema (degrade + bokeh) unique pour chaque technicien.
-    function placeholder(key) {
-      var h = 2166136261;
-      for (var i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = Math.imul(h, 16777619); }
-      function rnd() { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; }
-      var hue = Math.floor(rnd() * 360), hue2 = (hue + 40 + Math.floor(rnd() * 80)) % 360;
-      var s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(' + hue + ',55%,22%)"/><stop offset="1" stop-color="hsl(' + hue2 + ',60%,8%)"/></linearGradient><filter id="b"><feGaussianBlur stdDeviation="28"/></filter></defs><rect width="1600" height="900" fill="url(#g)"/><g filter="url(#b)">';
-      for (var j = 0; j < 9; j++) {
-        s += '<circle cx="' + Math.floor(rnd() * 1600) + '" cy="' + Math.floor(rnd() * 900) + '" r="' + (40 + Math.floor(rnd() * 140)) + '" fill="hsl(' + ((hue + Math.floor(rnd() * 70)) % 360) + ',80%,' + (45 + Math.floor(rnd() * 25)) + '%)" fill-opacity="' + (0.25 + rnd() * 0.4).toFixed(2) + '"/>';
-      }
-      s += '</g></svg>';
-      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
+      else if (!im.complete) im.addEventListener("load", function () { apply(u); }); // pas d'image : pas de fond
     }
     // Fond video : extrait (snippet Slate) du premier film FEATURED du chef op, s'il a une fiche.
     var bgvid = document.getElementById("bgvid");
@@ -208,7 +200,7 @@
       loadDP(slug).then(function (d) {
         if (!(a.matches(":hover") || a === document.activeElement)) return;
         var f = d && (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0];
-        if (!f) { showBg(a); return; } // pas de fiche ou pas d'extrait : image (ou fond provisoire)
+        if (!f) { showBg(a); return; } // pas de fiche ou pas d'extrait : image s'il y en a une
         if (bgvid.dataset.src !== f.video) { bgvid.src = f.video; bgvid.dataset.src = f.video; }
         try { bgvid.currentTime = 0; } catch (e) {}
         bgvid.onplaying = function () { if (a.matches(":hover") || a === document.activeElement) bgvid.classList.add("on"); };
@@ -237,7 +229,7 @@
     function startTransform(r, f) {
       return "translate(" + (r.left - f.left) + "px," + (r.top - f.top) + "px) scale(" + (r.width / f.width) + ")";
     }
-    function homeNameRect() { return document.querySelector("#home .name .n").getBoundingClientRect(); }
+    function homeNameRect(a) { return (a ? a.querySelector(".n") : document.querySelector("#home .name .n")).getBoundingClientRect(); }
     // o = { text, slug, rect (position de depart du nom), from: "home" | "list", a (lien de la liste), film (projet de l'accueil) }
     function openView(o) {
       if (view) return;
@@ -447,6 +439,12 @@
     }
     function clearProj() { if (selCard) selCard.classList.remove("sel"); selCard = null; projvid.classList.remove("on"); projvid.pause(); document.body.classList.remove("proj-on"); }
     var mode = "gallery", curCat = "FEATURED";
+    // Sur téléphone, toujours en feed (la grille est trop petite) : pas de choix d'affichage.
+    var phone = window.matchMedia("(max-width: 700px)");
+    function defMode() { return phone.matches ? "feed" : "gallery"; }
+    phone.addEventListener && phone.addEventListener("change", function () {
+      if (view && WORK[view.o.slug] && !work.classList.contains("about-mode")) { mode = defMode(); render(view.o.slug, curCat, 0); }
+    });
     // Au survol d'un projet : la vignette joue un extrait video muet ; le fond plein ecran reste l'image fixe
     var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     function snip(st, p, on) {
@@ -490,6 +488,7 @@
         var h = document.createElement("h3"); h.textContent = p.title;
         var s = document.createElement("p"); s.textContent = p.sub || p.cat;
         meta.appendChild(h); meta.appendChild(s);
+        if (p.cat) { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
         d._p = p;
         d.addEventListener("mouseenter", function (e) { if (!inZone(e)) return; showProj(p); snip(st, p, true); });
@@ -571,7 +570,7 @@
         b.title = m === "feed" ? "Feed" : "Galerie";
         if (mode === m) b.className = "on";
         b.addEventListener("click", function () {
-          mode = m;
+          mode = phone.matches ? "feed" : m;
           try { localStorage.setItem("kinou-mode", mode); } catch (e) {}
           modes.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
           work.scrollTop = 0; render(slug, curCat, 0);
@@ -588,10 +587,11 @@
       }
       document.body.classList.add("has-work");
       setTimeout(function () { warmAll(slug); }, 1200); // apres FEATURED : les autres categories
-      work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = "gallery"; buildTabs(slug); render(slug, "FEATURED", 700);
+      work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = defMode(); buildTabs(slug); render(slug, "FEATURED", 700);
       if (film) {
         var cards = feed.querySelectorAll(".card");
-        for (var i = 0; i < cards.length; i++) if (cards[i]._p.open) {
+        var pick = film.slate && [].some.call(cards, function (c) { return c._p.slate === film.slate; });
+        for (var i = 0; i < cards.length; i++) if (pick ? cards[i]._p.slate === film.slate : cards[i]._p.open) {
           var hv = HomeAPI.videoEl();
           selCard = cards[i]; selCard.classList.add("sel"); showProj(selCard._p, hv ? hv.currentTime : 0);
           break;
@@ -616,10 +616,10 @@
       document.getElementById("home").style.display = t === "home" ? "" : "none";
       if (t === "home") HomeAPI.resume(); else { HomeAPI.pause(); window.scrollTo(0, 0); }
     }
-    document.getElementById("name").addEventListener("mouseenter", function () { loadDP(this.getAttribute("href").slice(1)); }); // precharge la fiche
+    document.getElementById("name").addEventListener("mouseover", function (e) { var a = e.target.closest("a"); if (a && a.dataset.slug) loadDP(a.dataset.slug); }); // precharge la fiche
     // Liens de l'en-tete pas encore actifs (spotlight, fiction).
     document.querySelectorAll("[data-soon]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); }); });
-    window.Site = { prefetch: warmThumbs, fromHome: function (p) { openView({ text: p.dp, slug: p.slug, from: "home", rect: homeNameRect(), film: p }); } };
+    window.Site = { prefetch: warmThumbs, fromHome: function (p, a) { openView({ text: a.dataset.name, slug: a.dataset.slug, from: "home", rect: homeNameRect(a), film: p }); } };
     document.querySelector(".logo").addEventListener("click", function (e) { e.preventDefault(); closeView(true); show("home"); });
     document.querySelector(".nav-btn").addEventListener("click", function (e) {
       e.preventDefault();
@@ -644,9 +644,23 @@
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (plight.classList.contains("on")) closeStill(); else if (player.classList.contains("on")) closePlayer(); else closeView(); } });
   }
 
+  // Réglages du site (data/site.json, onglet « contact » de l'admin) : logo image à la place du texte « kinou ».
+  getJSON("site.json").then(function (c) {
+    if (!c.logo) return;
+    var im = new Image();
+    im.onload = function () {
+      var l = document.querySelector(".logo"); l.textContent = ""; l.classList.add("img");
+      if (c.logoHeight) l.style.setProperty("--logo-h", c.logoHeight + "px");
+      im.alt = "kinou"; l.appendChild(im);
+    };
+    im.src = DATA_BASE + c.logo;
+  }).catch(function () {}); // pas de réglages : logo texte
+
   Promise.all([getJSON("home.json"), getJSON("dps/index.json")]).then(function (r) {
-    initHome(r[0].slides.map(function (p) { p.href = "#" + p.slug; return p; }), r[0].duration);
+    // Ancien format : { dp, slug } ; nouveau (admin, bande Slate) : dps: [{ name, slug }].
+    var slides = r[0].slides.map(function (p) { if (!p.dps) p.dps = [{ name: p.dp, slug: p.slug }]; return p; });
+    initHome(slides, r[0].duration);
     initSite(r[1].dps);
-    Site.prefetch(r[0].slides[0].slug);
+    if (slides[0].dps[0].slug) Site.prefetch(slides[0].dps[0].slug);
   }).catch(function (e) { console.error("kinou : chargement des donnees impossible", e); });
 })();
