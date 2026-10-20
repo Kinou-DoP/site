@@ -66,7 +66,7 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 - `hue` : teinte de base (0–360) des fonds de remplacement ; la teinte de chaque clip vaut `(index * 47 + hue) % 360` (ou `h` si fourni sur le clip).
 - `featured` / `featuredOrder` : clip du showreel FEATURED et son rang.
 - `open` : clip présélectionné quand on arrive sur la page depuis l'accueil.
-- `stills` : galerie lightbox (optionnelle), ouverte depuis le lecteur.
+- `stills` : galerie de stills (optionnelle), affichée sous le film dans le lecteur (3 colonnes, 2 sur téléphone), agrandie au clic.
 - `about.img` : chemin relatif au dossier `data/dps/`.
 - Exception de mise en page = ajouter `"template": "special"` dans le JSON.
 
@@ -77,6 +77,10 @@ via la fonction Netlify `/api/dp/<slug>` (`netlify/functions/dp.mjs` + `slate.mj
 (API en erreur ou > 2,5 s). Un même film peut figurer dans plusieurs catégories (une entrée par catégorie). Champs propres à ces fiches :
 - `open` : id Slate du clip présélectionné depuis l'accueil.
 - `overrides` : corrections par id Slate, appliquées par-dessus Slate, ex. `{"10903": {"title": "…"}, "534": {"hidden": true}}`.
+- Stills d'un film : dans l'admin, sous le film, lien d'une page Slate `https://kinou.slateapp.com/work/<adresse>` (ou shots.re).
+  L'admin lit les images via `/api/stills?link=…` (`netlify/functions/stills.mjs`, `readStills` de `slate.mjs` :
+  `data-media` → `images[].image_player_url`, URLs signées copiées telles quelles) et les enregistre dans
+  `overrides[<id>].stills` (+ `stillsLink`). Recoller le lien pour reprendre les changements faits sur Slate.
 
 Convention des bundles : un showreel `#featured` (ordre du FEATURED) et un showreel par catégorie
 (`#automotive`, `#commercial`, `#music video`…). L'ordre des showreels dans le bundle = ordre des onglets.
@@ -97,7 +101,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    lumineux au survol d'un film (blanc 20 % en 0,25 s, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » et « fiction » (à venir,
    masqués sous 700px) ; à droite « cinematographers ».
-9. **Fonds** : liste → au survol, extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
+9. **Fonds** : liste → nom survolé en blanc et en gras (500), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
    film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé).
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
@@ -153,7 +157,7 @@ site/
 ├── assets/
 │   ├── css/main.css    # tout le CSS
 │   └── js/app.js       # chargement JSON + logique + template unique des pages DP
-├── netlify/functions/  # API : /api/data (données), /api/dp (clips Slate), /api/bundle (import admin), /api/refresh
+├── netlify/functions/  # API : /api/data (données), /api/dp (clips Slate), /api/bundle + /api/stills (import admin), /api/refresh
 ├── reference/
 │   └── prototype.html  # prototype d'origine, référence visuelle
 ├── CLAUDE.md

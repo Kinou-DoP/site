@@ -98,3 +98,25 @@ export async function readBundle(bundle) {
   });
   return { name: name, categories: categories, clips: clips };
 }
+
+// Galerie de stills : page Slate « work » (https://kinou.slateapp.com/work/<adresse>) ou lien court shots.re.
+// Les images viennent de la playlist (data-media → images[].image_player_url), URLs signées copiées telles quelles.
+export async function readStills(link) {
+  var s = String(link || "").trim(), url;
+  var w = s.match(/^https?:\/\/kinou\.slateapp\.com\/work\/([a-z0-9-]+)\/?(?:[?#].*)?$/i);
+  var c = s.match(/^(?:https?:\/\/)?shots\.re\/([A-Za-z0-9]{3,20})\/?$/);
+  if (w) url = ORIGIN + "/work/" + w[1].toLowerCase();
+  else if (c) {
+    var r = await fetch("https://shots.re/" + c[1]);
+    var m = r.url.match(/^https:\/\/kinou\.slateapp\.com\/work\/([a-z0-9-]+)/i);
+    if (!m) throw new Error("ce lien shots.re ne mène pas à une page de stills Slate");
+    url = ORIGIN + "/work/" + m[1].toLowerCase();
+  } else throw new Error("lien invalide : attendu https://kinou.slateapp.com/work/…");
+  var html = await page(url), i = html.indexOf('data-media="');
+  if (i < 0) throw new Error("images introuvables sur cette page Slate");
+  i += 12;
+  var media = JSON.parse(decode(html.slice(i, html.indexOf('"', i))))[0] || {};
+  var stills = (media.images || []).map(function (im) { return im.image_player_url; }).filter(Boolean);
+  if (!stills.length) throw new Error("aucune image sur cette page Slate");
+  return { link: url, title: String(media.title || "").trim(), stills: stills };
+}
