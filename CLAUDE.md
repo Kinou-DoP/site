@@ -108,6 +108,15 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 - On travaille et on pousse sur `beta` (ou une branche de travail fusionnée dans `beta`).
 - On ne fusionne `beta` dans `main` qu'après validation explicite de Gus.
 
+### Crédits Netlify (plan gratuit : 300 crédits / mois)
+- Chaque mise en ligne d'un site **de production** coûte environ 15 crédits : chaque push sur `main` du site,
+  et chaque push sur `main` du repo `admin` qui touche autre chose que `data/`.
+- Les déploiements de la beta (branch deploys) ne coûtent rien d'après le plan gratuit (« unlimited deploy previews »).
+- Les publications de l'admin (commits dans `admin/data/`) **ne déclenchent pas de mise en ligne** (règle `ignore`
+  du `netlify.toml` de l'admin) : le site lit ces données dans GitHub via `/api/data`.
+- Donc : travailler sur `beta`, regrouper les changements avant de fusionner dans `main`, et regrouper les
+  modifications du code de l'admin en un minimum de pushs.
+
 ## Règles de code
 
 - Toujours lire les fichiers existants avant de modifier
