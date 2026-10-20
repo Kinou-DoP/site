@@ -198,13 +198,8 @@ body.viewing #bgvid { opacity: 0 !important; }
 @keyframes glow { 0% { opacity: 0; } 20% { opacity: .15; } 100% { opacity: 0; } }
 
 /* Sous le nom du chef op : barre de défilement masquée. */
-/* Sous le nom : coupe nette au-dessus de la grille seulement ; sur les côtés (hors de la grille), rien n'est
-   coupé, pour que l'ombre des vignettes continue à travers au lieu d'être tranchée. */
-:root { --work-l: 240px; --work-r: 32px; }
-.work { scrollbar-width: none; -webkit-mask-image: none; mask-image: none;
-  clip-path: polygon(0 0, var(--work-l) 0, var(--work-l) var(--kinou-zm), calc(100% - var(--work-r)) var(--kinou-zm), calc(100% - var(--work-r)) 0, 100% 0, 100% 100%, 0 100%); }
-@media (max-width: 900px) { :root { --work-l: 32px; } }
-@media (max-width: 560px) { :root { --work-l: 24px; --work-r: 24px; } }
+/* Sous le nom : coupe nette sur toute la largeur de l'écran (pas de dégradé). */
+.work { scrollbar-width: none; -webkit-mask-image: none; mask-image: none; clip-path: inset(var(--kinou-zm) 0 0 0); }
 .work::-webkit-scrollbar { display: none; }
 
 /* Pas de barre de défilement de page : sinon la largeur change entre l'accueil (sans défilement)
