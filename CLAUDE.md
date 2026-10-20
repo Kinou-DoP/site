@@ -110,7 +110,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    masqués sous 700px) ; à droite « cinematographers ».
 10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
    toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.
-11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit) ; pas de fond coloré de remplacement (noir) ;
+11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit ; plusieurs chefs op = noms plus petits) ; pas de fond coloré de remplacement (noir) ;
    on arrive sur un film au hasard parmi les 10, puis l'ordre de la bande.
 12. **Recadrage** : `zoom` (1 à 1,6, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
    agrandit au centre l'extrait pour enlever les bandes noires ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
@@ -123,7 +123,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    les onglets qui dépassent défilent lentement en boucle.
 14. **Lecteur** : flèches ‹ › tout en bas de l'écran (films de l'onglet affiché, aussi au clavier) ; images agrandies : flèches en bas, glisser,
    pavé tactile ; le bouton retour du téléphone ferme l'image puis le lecteur (`history.pushState`).
-9. **Fonds** : liste → nom survolé en blanc et en gras (500), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
+9. **Fonds** : liste → nom survolé en blanc et en gras (700), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
    film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé).
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 

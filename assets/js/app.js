@@ -84,7 +84,7 @@
       setTimeout(function () {
         film.textContent = p.film; film.className = p.song ? "big" : ""; document.getElementById("song").textContent = p.song || ""; legend.textContent = p.legend;
         // Un lien par chef op (plusieurs chefs op sur un même projet : « Nom & Nom »).
-        name.textContent = "";
+        name.textContent = ""; name.classList.toggle("multi", p.dps.length > 1);
         var ns = document.createElement("span"); ns.className = "ns"; name.appendChild(ns);
         p.dps.forEach(function (d, k) {
           if (k) { var amp = document.createElement("span"); amp.className = "amp"; amp.textContent = " & "; ns.appendChild(amp); }

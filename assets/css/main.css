@@ -7,7 +7,7 @@ ul { list-style: none; margin: 0; padding: 0; column-count: 3; column-gap: 48px;
 li { margin: 0; break-inside: avoid; }
 a { display: inline-block; padding: 6px 0; color: var(--kinou-fg); text-decoration: none; font-size: 18px; line-height: 1.3; letter-spacing: 0.01em; opacity: 1; transition: opacity .2s; }
 ul:hover a { opacity: .35; }
-ul a:hover { opacity: 1; font-weight: 500; }
+ul a:hover { opacity: 1; font-weight: 700; }
 .logo { position: fixed; z-index: 2; mix-blend-mode: difference; top: calc(env(safe-area-inset-top, 0px) + 28px); left: 32px; padding: 0; font-family: var(--kinou-sans); font-weight: 600; font-size: 30px; letter-spacing: -0.03em; line-height: 1; text-shadow: none; opacity: 1; }
 .nav-btn { position: fixed; z-index: 2; mix-blend-mode: difference; top: calc(env(safe-area-inset-top, 0px) + 36px); right: 32px; padding: 0; font-family: var(--kinou-sans); font-weight: 600; font-size: 14px; letter-spacing: -0.01em; line-height: 1; text-shadow: none; opacity: 1; transition: opacity .2s; }
 .nav-btn:hover { opacity: .6; }
@@ -324,4 +324,10 @@ body.menu-on .burger { opacity: 0; }
 @media (max-width: 560px) {
   :root { --kinou-hero-top: calc(env(safe-area-inset-top, 0px) + 68px); }
   .hero { top: var(--kinou-hero-top); }
+}
+/* Accueil (ordinateur) : nom du chef op un peu plus petit ; plusieurs chefs op : encore plus petit */
+@media (min-width: 701px) {
+  #home .name { font-size: clamp(28px, 4.2vw, 64px); }
+  #home .name.multi { font-size: clamp(22px, 3vw, 44px); }
+  #home .name.multi .tags { font-size: 12px; margin-top: 8px; }
 }
