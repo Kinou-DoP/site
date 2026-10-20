@@ -532,7 +532,11 @@
     function pickFocus() {
       focusRaf = 0;
       if (!touchOnly.matches || work.classList.contains("about-mode") || player.classList.contains("on")) return;
-      var r = work.getBoundingClientRect(), line = r.top + r.height * 0.4, best = null, bd = 1e9;
+      // Repère à 40 % de la hauteur, mais près du haut de la page il descend avec le défilement depuis le centre du
+      // 1er film : tout en haut, c'est toujours le 1er film (le plus important) qui est choisi.
+      var r = work.getBoundingClientRect(), best = null, bd = 1e9, f1 = feed.querySelector(".card .still");
+      var line = r.top + r.height * 0.4;
+      if (f1) { var b1 = f1.getBoundingClientRect(); line = Math.min(line, (b1.top + b1.bottom) / 2 + work.scrollTop); }
       feed.querySelectorAll(".card").forEach(function (c) {
         var b = c.querySelector(".still").getBoundingClientRect(), d = Math.abs((b.top + b.bottom) / 2 - line);
         if (b.bottom > r.top && d < bd) { bd = d; best = c; }
