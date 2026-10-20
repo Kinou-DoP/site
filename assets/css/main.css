@@ -162,7 +162,8 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 
 /* ---------- Ajustements visuels (oct. 2026) ---------- */
 /* En-tête : logo au centre ; à gauche Instagram + liens à venir ; à droite « cinematographers » (inchangé). */
-.logo { left: 50%; transform: translateX(-50%); }
+.logo { left: 50%; transform: translateX(-50%); font-size: 36px; top: calc(env(safe-area-inset-top, 0px) + 25px); }
+@media (max-width: 560px) { .logo { font-size: 30px; top: calc(env(safe-area-inset-top, 0px) + 26px); } }
 .lnav { position: fixed; z-index: 2; mix-blend-mode: difference; top: calc(env(safe-area-inset-top, 0px) + 36px); left: 32px; display: flex; align-items: center; gap: 22px; }
 .lnav a { padding: 0; font-family: var(--kinou-sans); font-weight: 600; font-size: 14px; letter-spacing: -0.01em; line-height: 1; text-shadow: none; transition: opacity .2s; }
 .lnav a:hover { opacity: .6; }
@@ -179,15 +180,28 @@ body.viewing #bgvid { opacity: 0 !important; }
 
 /* Page d'un chef op : fond (projet survolé) très flouté et assombri ; grille posée sur un fond sombre. */
 #projbg, #projvid { transform: scale(1.15); }
-#projbg { filter: blur(40px) brightness(.5); }
-#projvid { filter: blur(40px) brightness(.4); }
-.feed.gallery { background: rgba(0,0,0,.92); box-shadow: 0 0 0 6px rgba(0,0,0,.92), 0 0 140px 70px rgba(0,0,0,.6); }
+#projbg { filter: blur(40px) brightness(.65); }
+#projvid { filter: blur(40px) brightness(.55); }
+.feed.gallery { background: rgba(0,0,0,.92); box-shadow: 0 0 0 6px rgba(0,0,0,.92); }
 
-/* Survol d'un film : léger voile lumineux (monte à 20 % en 0,25 s, redescend en 1 s). */
+/* Survol d'un film : léger voile lumineux, une seule fois (15 % en 0,25 s, retour à 0 en 1 s). */
 .still { position: relative; }
-.still::after { content: ""; position: absolute; inset: 0; background: var(--kinou-fg); opacity: 0; transition: opacity 1s ease-out; pointer-events: none; }
-.card:hover .still::after { opacity: .2; transition: opacity .25s ease-out; }
+.still::after { content: ""; position: absolute; inset: 0; background: var(--kinou-fg); opacity: 0; pointer-events: none; }
+.card:hover .still::after { animation: glow 1.25s ease-out; }
+@keyframes glow { 0% { opacity: 0; } 20% { opacity: .15; } 100% { opacity: 0; } }
 
 /* Sous le nom du chef op : coupe nette au lieu du dégradé, et barre de défilement masquée. */
 .work { -webkit-mask-image: linear-gradient(to bottom, transparent var(--kinou-zm), #000 var(--kinou-zm)); mask-image: linear-gradient(to bottom, transparent var(--kinou-zm), #000 var(--kinou-zm)); scrollbar-width: none; }
 .work::-webkit-scrollbar { display: none; }
+
+/* Pas de barre de défilement de page : sinon la largeur change entre l'accueil (sans défilement)
+   et la liste, et le logo centré se décale. Le défilement à la molette / au trackpad reste actif. */
+html, html:has(body.is-home) { scrollbar-gutter: auto; scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+
+/* Accueil : la barre du projet en cours s'allonge, un peu plus claire, et un trait montre l'avancement. */
+#home .bars button { transition: flex .6s cubic-bezier(.2, .7, .2, 1); }
+#home .bars button.on { flex: 4; }
+#home .bars button.on::after { background: rgba(255,252,235,.4); }
+#home .bars button::before { content: ""; position: absolute; z-index: 1; left: 0; right: 0; top: 10px; height: 2px; background: var(--kinou-fg); transform: scaleX(0); transform-origin: left; }
+#home .bars button.on::before { transform: scaleX(var(--p, 0)); }

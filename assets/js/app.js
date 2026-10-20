@@ -48,7 +48,19 @@
     window.addEventListener("resize", fit);
 
     function next() { go(cur + 1); }
-    function later() { clearTimeout(timer); timer = setTimeout(next, DURATION); }
+    // timed : le projet en cours avance au minuteur (pas de video, ou video en erreur) depuis timedAt.
+    var timed = false, timedAt = 0;
+    function later() { clearTimeout(timer); timer = setTimeout(next, DURATION); timed = true; timedAt = performance.now(); }
+    // Avancement du projet en cours (0 a 1), affiche par le trait blanc de sa barre.
+    (function tick() {
+      if (active && cur >= 0) {
+        var v = slides[cur].querySelector("video"), p = 0;
+        if (timed) p = (performance.now() - timedAt) / DURATION;
+        else if (v && v.duration) p = v.currentTime / v.duration;
+        buttons[cur].style.setProperty("--p", Math.min(1, p).toFixed(4));
+      }
+      requestAnimationFrame(tick);
+    })();
 
     function go(i) {
       i = (i + PROJECTS.length) % PROJECTS.length;
@@ -61,8 +73,10 @@
         var old = slides[cur].querySelector("video");
         if (old) { old.pause(); }
       }
-      cur = i;
+      cur = i; timed = false;
+      buttons[i].style.setProperty("--p", 0);
       var p = PROJECTS[i];
+      if (window.Site && Site.prefetch) Site.prefetch(p.slug); // vignettes pretes si on clique sur le nom
       slides[i].classList.add("on"); buttons[i].classList.add("on");
 
       cap.classList.remove("show"); name.classList.remove("show");
@@ -91,6 +105,21 @@
       if (e.key === "ArrowRight") go(cur + 1);
       if (e.key === "ArrowLeft") go(cur - 1);
     });
+    // Molette / trackpad : un geste = un projet. Apres un changement, on attend la fin du geste
+    // (inertie du trackpad) et la fin de la transition avant d'accepter le suivant.
+    var wheelSum = 0, wheelLast = 0, wheelUntil = 0;
+    window.addEventListener("wheel", function (e) {
+      if (!active) return;
+      var now = Date.now(), quiet = now - wheelLast > 180;
+      wheelLast = now;
+      if (wheelUntil) {
+        if (now < wheelUntil || !quiet) return; // transition en cours, ou geste (inertie) pas encore fini
+        wheelUntil = 0;
+      }
+      if (quiet) wheelSum = 0;
+      wheelSum += Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (Math.abs(wheelSum) > 40) { go(cur + (wheelSum > 0 ? 1 : -1)); wheelSum = 0; wheelUntil = now + 1200; }
+    }, { passive: true });
     var x0 = null;
     document.addEventListener("touchstart", function (e) { if (!active) return; x0 = e.touches[0].clientX; }, { passive: true });
     document.addEventListener("touchend", function (e) {
@@ -173,10 +202,11 @@
     var bgvid = document.getElementById("bgvid");
     function showBgVideo(a) {
       var slug = a.dataset.view;
+      warmThumbs(slug);
       loadDP(slug).then(function (d) {
-        if (!d || !(a.matches(":hover") || a === document.activeElement)) return;
-        var f = (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0];
-        if (!f) return;
+        if (!(a.matches(":hover") || a === document.activeElement)) return;
+        var f = d && (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0];
+        if (!f) { showBg(a); return; } // pas de fiche ou pas d'extrait : image (ou fond provisoire)
         if (bgvid.dataset.src !== f.video) { bgvid.src = f.video; bgvid.dataset.src = f.video; }
         try { bgvid.currentTime = 0; } catch (e) {}
         bgvid.onplaying = function () { if (a.matches(":hover") || a === document.activeElement) bgvid.classList.add("on"); };
@@ -186,8 +216,8 @@
     function hide() { bg.style.opacity = 0; bgvid.classList.remove("on"); bgvid.onplaying = null; bgvid.pause(); }
 
     document.querySelectorAll("li a").forEach(function (a) {
-      a.addEventListener("mouseenter", function () { showBg(a); showBgVideo(a); });
-      a.addEventListener("focus", function () { showBg(a); showBgVideo(a); });
+      a.addEventListener("mouseenter", function () { showBgVideo(a); });
+      a.addEventListener("focus", function () { showBgVideo(a); });
       a.addEventListener("mouseleave", hide);
       a.addEventListener("blur", hide);
     });
@@ -279,6 +309,15 @@
     // Vignettes Slate allegees par le service d'images de Netlify (site en ligne uniquement ;
     // l'URL Slate signee est transmise telle quelle).
     var IMG_CDN = /(^|\.)netlify\.app$|(^|\.)kinou\.fr$/.test(location.hostname);
+    // Precharge les vignettes FEATURED d'un chef op (survol de son nom, slide d'accueil).
+    var warmed = {};
+    function warmThumbs(slug) {
+      if (!IMG_CDN || warmed[slug]) return;
+      warmed[slug] = true;
+      loadDP(slug).then(function (d) {
+        if (d) (WORK[slug] || []).forEach(function (p) { if (p.f && p.img) new Image().src = thumb(p.img, 800); });
+      });
+    }
     function thumb(u, w) {
       return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=75&fm=webp" : u;
     }
@@ -540,7 +579,7 @@
     document.getElementById("name").addEventListener("mouseenter", function () { loadDP(this.getAttribute("href").slice(1)); }); // precharge la fiche
     // Liens de l'en-tete pas encore actifs (spotlight, fiction).
     document.querySelectorAll("[data-soon]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); }); });
-    window.Site = { fromHome: function (p) { openView({ text: p.dp, slug: p.slug, from: "home", rect: homeNameRect(), film: p }); } };
+    window.Site = { prefetch: warmThumbs, fromHome: function (p) { openView({ text: p.dp, slug: p.slug, from: "home", rect: homeNameRect(), film: p }); } };
     document.querySelector(".logo").addEventListener("click", function (e) { e.preventDefault(); closeView(true); show("home"); });
     document.querySelector(".nav-btn").addEventListener("click", function (e) {
       e.preventDefault();
@@ -568,5 +607,6 @@
   Promise.all([getJSON("home.json"), getJSON("dps/index.json")]).then(function (r) {
     initHome(r[0].slides.map(function (p) { p.href = "#" + p.slug; return p; }), r[0].duration);
     initSite(r[1].dps);
+    Site.prefetch(r[0].slides[0].slug);
   }).catch(function (e) { console.error("kinou : chargement des donnees impossible", e); });
 })();
