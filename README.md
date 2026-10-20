@@ -29,6 +29,9 @@ Site statique Kinou
   en corrections les titres retouchés (ex. « Stings - Energy Drink », « Louis Vuitton - FLIGHT MODE… »).
 - **Badge « Powered by Netlify »** sur le site officiel : vérifier après un nouveau déploiement ;
   s'il reste, c'est lié au plan gratuit (plan payant ou autre hébergeur).
+- **Crédits Netlify avant kinou.fr** : faire tourner le site une semaine avec un peu de trafic, puis lire le détail
+  de consommation (Netlify → Check credit usage). Leviers si c'est juste : vignettes en 600 px au lieu de 800,
+  cache navigateur plus long ; en dernier recours, Cloudflare Pages (trafic gratuit illimité).
 - **Nom de domaine** : brancher kinou.fr sur `main` quand la beta est validée.
 
 ### GitHub
