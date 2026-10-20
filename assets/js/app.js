@@ -317,16 +317,16 @@
       if (!IMG_CDN || warmed[slug]) return;
       warmed[slug] = true;
       loadDP(slug).then(function (d) {
-        if (d) (WORK[slug] || []).forEach(function (p) { if (p.f && p.img) new Image().src = thumb(p.img, 800); });
+        if (d) (WORK[slug] || []).forEach(function (p) { if (p.f && p.img) new Image().src = thumb(p.img, 600); });
       });
     }
     function warmAll(slug) {
       if (!IMG_CDN) return;
       var seen = {};
-      (WORK[slug] || []).forEach(function (p) { if (p.img && !seen[p.img]) { seen[p.img] = true; new Image().src = thumb(p.img, 800); } });
+      (WORK[slug] || []).forEach(function (p) { if (p.img && !seen[p.img]) { seen[p.img] = true; new Image().src = thumb(p.img, 600); } });
     }
     function thumb(u, w) {
-      return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=75&fm=webp" : u;
+      return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=70&fm=webp" : u;
     }
     // Fiche JSON -> format interne du prototype (WORK, CATS_BY, ABOUT).
     function register(d) {
@@ -355,7 +355,7 @@
     // Fond plein ecran du projet survole (ou selectionne par clic / tap). p.img = visuel du projet.
     var projbg = document.getElementById("projbg"), projvid = document.getElementById("projvid"), selCard = null;
     function bgFor(p, w) {
-      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, w || 800) + '")';
+      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, w || 600) + '")';
       return "none"; // pas de fond colore provisoire
     }
     // Ignore les cartes masquees sous l'en-tete (zone du titre) quand on a defile.
@@ -467,7 +467,7 @@
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
         if (p.img) {
-          var url = thumb(p.img, mode === "gallery" ? 800 : 1600), im = new Image();
+          var url = thumb(p.img, mode === "gallery" ? 600 : 1200), im = new Image();
           im.onload = im.onerror = (function (st, url) { return function () { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st, url);
           im.src = url;
         }

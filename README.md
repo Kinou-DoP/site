@@ -34,6 +34,10 @@ Site statique Kinou
   cache navigateur plus long ; en dernier recours, Cloudflare Pages (trafic gratuit illimité).
 - **Nom de domaine** : brancher kinou.fr sur `main` quand la beta est validée.
 
+### Admin (à faire après le 18 novembre, pour ne pas consommer de crédits avant)
+- Le préchauffage des vignettes de l'admin demande encore la taille 800 px (`w=800&q=75`) ; le site utilise
+  maintenant 600 px (`w=600&q=70`). Aligner `warmThumbs` dans `admin/assets/js/admin.js`.
+
 ### GitHub
 - **Passer `kinou-agency` en organisation** (aujourd'hui compte personnel) pour que chacun ait son compte
   et son token. Avant : créer les comptes perso (Gus, beau-frère), ajouter une connexion email/mot de passe
