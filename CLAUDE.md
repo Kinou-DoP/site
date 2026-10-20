@@ -8,8 +8,9 @@ Stack : HTML/CSS/JS vanilla, zéro framework, données JSON statiques.
 Hébergement : Netlify (déploiement automatique sur push GitHub).
 Repo : github.com/kinou-agency/site
 
-La référence visuelle est le prototype `reference/prototype.html` : le site
-refactorisé doit rester visuellement identique à ce fichier.
+La référence visuelle de départ est le prototype `reference/prototype.html`. Depuis, Gus a demandé
+des évolutions (police Satoshi, blanc cassé, en-tête, fonds et survols) : elles sont décrites dans
+les règles visuelles ci-dessous et priment sur le prototype.
 
 ## Architecture des données
 
@@ -86,11 +87,16 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 1. **Pas de framework CSS** — tout en CSS vanilla ; les tokens de design globaux sont des variables `--kinou-*`
    (`--kinou-bg`, `--kinou-fg`, `--kinou-body`, `--kinou-sans`, `--kinou-hero-top`, `--kinou-hero-h`, `--kinou-tabs-top`, `--kinou-zm`).
    Les variables posées par app.js sur les éléments (`--h`, `--img`, `--i`, `--d`, `--near`) gardent leur nom court.
-2. **Palette** : fond noir pur (#000), texte blanc pur (#fff), textes secondaires en blanc transparent ; teinte HSL par clip pour les fonds de remplacement.
-3. **Typographie** : Helvetica Neue 300 pour la liste des DPs ; titres en `--kinou-sans` (SF Pro Display / Inter) 600, interlettrage serré ; étiquettes 11–13px, 600, `letter-spacing: .14em`, majuscules.
+2. **Palette** : fond noir pur (#000), texte blanc cassé `#FFFCEB` (`--kinou-fg`), textes secondaires en `rgba(255,252,235,…)` ; teinte HSL par clip pour les fonds de remplacement.
+3. **Typographie** : **Satoshi** (Fontshare) partout — 300 pour la liste des DPs ; titres 600 (rendu en 700), interlettrage serré ; étiquettes 11–13px, `letter-spacing: .14em`, majuscules.
 4. **Grille clips** : galerie 3 colonnes 16:9 à toutes les tailles (gap 6px, 4px mobile) ; mode feed en 1 colonne.
 5. **Overlay** : plein écran, fond noir 98 %, fermeture sur Escape, croix ou clic hors zone.
-6. **Animations** : celles du prototype, ni plus ni moins (révélation circulaire 1,15s, morphing du nom 1000ms, etc.). Ne pas en ajouter.
+6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms, etc.) + le voile
+   lumineux au survol d'un film (blanc 20 % en 0,25 s, retour en 1 s). Ne pas en ajouter d'autres sans demande.
+8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » et « fiction » (à venir,
+   masqués sous 700px) ; à droite « cinematographers ».
+9. **Fonds** : liste → au survol, extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
+   film survolé très flouté et assombri, grille posée sur un fond noir ; coupe nette sous le nom (pas de dégradé).
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
 ## Branches et mise en ligne
