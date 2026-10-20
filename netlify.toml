@@ -1,3 +1,7 @@
 # Site statique : pas d'étape de build, on publie la racine du repo.
 [build]
   publish = "."
+
+# Service d'images Netlify (/.netlify/images) : autorisé pour les vignettes Slate uniquement.
+[images]
+  remote_images = ["https://images\\.slatecdn\\.net/.*"]

@@ -241,17 +241,32 @@
     var CATS = ["FEATURED", "BEAUTY", "TEXTURES", "FOOD", "COMEDY", "LIFESTYLE", "AUTOMOTIVE"];
     var WORK = {}, CATS_BY = {}, TEMPLATE = {}, loading = {};
     function loadDP(slug) {
-      if (!loading[slug]) loading[slug] = getJSON("dps/" + slug + ".json").then(live).then(register, function () { return null; });
+      if (!loading[slug]) loading[slug] = getJSON("dps/" + slug + ".json").then(function (d) { register(d); live(d); return d; }, function () { return null; });
       return loading[slug];
     }
-    // Fiche avec bundle Slate : clips a jour via /api/dp/<slug> (lu sur Slate, cache 10 min).
-    // Si l'API ne repond pas (ou trop lentement), on garde la copie enregistree dans la fiche.
+    // Fiche avec bundle Slate : la page s'affiche tout de suite avec la copie enregistree dans la fiche,
+    // puis se met a jour sans bruit quand /api/dp/<slug> (lu sur Slate, cache 10 min) repond, si quelque chose a change.
     function live(d) {
-      if (!d.bundle) return d;
-      var api = fetch("/api/dp/" + d.slug).then(function (r) { if (!r.ok) throw r; return r.json(); })
-        .then(function (s) { d.categories = s.categories; d.clips = s.clips; return d; });
-      var copy = new Promise(function (ok) { setTimeout(function () { ok(d); }, 2500); });
-      return Promise.race([api, copy]).catch(function () { return d; });
+      if (!d.bundle) return;
+      fetch("/api/dp/" + d.slug).then(function (r) { if (!r.ok) throw r; return r.json(); }).then(function (s) {
+        if (JSON.stringify(s.clips) === JSON.stringify(d.clips) && JSON.stringify(s.categories) === JSON.stringify(d.categories)) return;
+        d.categories = s.categories; d.clips = s.clips; register(d);
+        if (view && view.o.slug === d.slug && document.body.classList.contains("has-work") && !work.classList.contains("about-mode") && !player.classList.contains("on")) refreshWork(d.slug);
+      }).catch(function () {});
+    }
+    // Reaffiche la page ouverte avec les clips a jour, en gardant l'onglet et la position.
+    function refreshWork(slug) {
+      var cat = curCat, top = work.scrollTop;
+      buildTabs(slug);
+      if ((CATS_BY[slug] || CATS).indexOf(cat) < 0) cat = "FEATURED";
+      cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === cat); });
+      render(slug, cat, 0); work.scrollTop = top;
+    }
+    // Vignettes Slate allegees par le service d'images de Netlify (site en ligne uniquement ;
+    // l'URL Slate signee est transmise telle quelle).
+    var IMG_CDN = /(^|\.)netlify\.app$|(^|\.)kinou\.fr$/.test(location.hostname);
+    function thumb(u, w) {
+      return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=75" : u;
     }
     // Fiche JSON -> format interne du prototype (WORK, CATS_BY, ABOUT).
     function register(d) {
@@ -281,7 +296,7 @@
     var projbg = document.getElementById("projbg"), projvid = document.getElementById("projvid"), selCard = null;
     function bgFor(p) {
       var h = p.h, g = 'radial-gradient(circle at 30% 35%, hsl(' + h + ',70%,38%), transparent 55%), radial-gradient(circle at 75% 70%, hsl(' + (h + 50) + ',65%,30%), transparent 50%), linear-gradient(135deg, hsl(' + h + ',45%,14%), #050505)';
-      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + p.img + '"), ' + g;
+      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, 800) + '"), ' + g; // meme fichier que la vignette (deja en cache)
       return 'linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)), ' + g;
     }
     // Ignore les cartes masquees sous l'en-tete (zone du titre) quand on a defile.
@@ -384,7 +399,7 @@
       WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; }).forEach(function (p, i) {
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
-        if (p.img) st.style.setProperty("--img", "url(" + p.img + ")");
+        if (p.img) st.style.setProperty("--img", 'url("' + thumb(p.img, mode === "gallery" ? 800 : 1600) + '")');
         var meta = document.createElement("div"); meta.className = "meta";
         var h = document.createElement("h3"); h.textContent = p.title;
         var s = document.createElement("p"); s.textContent = p.sub || p.cat;
