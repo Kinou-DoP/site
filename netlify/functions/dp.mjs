@@ -1,13 +1,13 @@
 // GET /api/dp/<slug> : clips à jour lus sur le bundle Slate du DP (lien dans data/dps/<slug>.json).
 // Réponse gardée 10 min en cache par le CDN de Netlify ; en cas d'erreur, le site garde sa copie.
 import { readBundle } from "./slate.mjs";
-import { DATA_BASE } from "./config.mjs";
+import { readData } from "./data-source.mjs";
 
 export default async function (req, context) {
   var slug = context.params.slug;
   try {
     if (!/^[a-z0-9-]+$/.test(slug)) throw new Error("slug invalide");
-    var r = await fetch(new URL(DATA_BASE + "dps/" + slug + ".json", req.url));
+    var r = await readData("dps/" + slug + ".json");
     if (!r.ok) throw new Error("fiche introuvable");
     var dp = await r.json();
     if (!dp.bundle) throw new Error("pas de bundle Slate pour ce DP");

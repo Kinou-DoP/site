@@ -14,9 +14,11 @@ les règles visuelles ci-dessous et priment sur le prototype.
 
 ## Architecture des données
 
-Les données vivent dans le repo `kinou-agency/admin` (dossier `data/`), publiées sur
-https://kinou-admin.netlify.app/data/ et chargées via `fetch()` par le site officiel **et** la beta
-(constante `DATA_BASE` de `assets/js/app.js` et de `netlify/functions/config.mjs`).
+Les données vivent dans le repo `kinou-agency/admin` (dossier `data/`). Le site officiel **et** la beta
+les chargent via `/api/data/<chemin>` (`netlify/functions/data.mjs`), qui les lit **directement dans GitHub**
+avec la clé en lecture seule `GITHUB_DATA_TOKEN` (variable d'environnement Netlify du site), cache CDN 5 min
+vidé à chaque publication (`/api/refresh`). Sans cette clé : copie publiée sur https://kinou-admin.netlify.app/data/.
+Ainsi une publication de l'admin ne déclenche **aucune mise en ligne Netlify** (économie de crédits).
 On les modifie avec l'interface d'admin (https://kinou-admin.netlify.app), pas dans ce repo.
 
 ```
@@ -142,7 +144,7 @@ site/
 ├── assets/
 │   ├── css/main.css    # tout le CSS
 │   └── js/app.js       # chargement JSON + logique + template unique des pages DP
-├── netlify/functions/  # API : /api/dp (clips Slate), /api/bundle (import admin), /api/refresh
+├── netlify/functions/  # API : /api/data (données), /api/dp (clips Slate), /api/bundle (import admin), /api/refresh
 ├── reference/
 │   └── prototype.html  # prototype d'origine, référence visuelle
 ├── CLAUDE.md

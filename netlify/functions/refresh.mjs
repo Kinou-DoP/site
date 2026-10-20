@@ -1,4 +1,5 @@
-// POST /api/refresh/<slug> : vide le cache des clips d'un DP pour relire Slate tout de suite.
+// POST /api/refresh/<slug> : vide le cache des clips d'un DP (relecture de Slate) et des fichiers de données
+// (fiches publiées par l'admin), pour que le site soit à jour tout de suite.
 // Réservé aux personnes ayant le droit d'écrire dans le repo admin (token GitHub dans Authorization).
 import { ADMIN_REPO, CORS } from "./config.mjs";
 
@@ -20,7 +21,7 @@ export default async function (req, context) {
   var r = await fetch("https://api.netlify.com/api/v1/purge", {
     method: "POST",
     headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-    body: JSON.stringify({ site_id: context.site.id, cache_tags: ["dp-" + slug] })
+    body: JSON.stringify({ site_id: context.site.id, cache_tags: ["dp-" + slug, "data"] }) // clips du DP + fichiers de données
   });
   if (!r.ok) return reply(502, { error: "purge refusée par Netlify (" + r.status + ")" });
   return reply(200, { ok: true });

@@ -1,7 +1,8 @@
 // kinou — logique du site. Les donnees viennent des fichiers JSON de DATA_BASE.
 (function () {
   // Donnees JSON : publiees par l'admin (repo kinou-agency/admin), lues ici par le site officiel et la beta.
-  var DATA_BASE = "https://kinou-admin.netlify.app/data/";
+  // (via /api/data du site, qui les lit dans GitHub ; en local, on passe par la beta)
+  var DATA_BASE = /(^|\.)netlify\.app$|(^|\.)kinou\.fr$/.test(location.hostname) ? "/api/data/" : "https://beta--kinou-test.netlify.app/api/data/";
   function getJSON(path) {
     return fetch(DATA_BASE + path).then(function (r) {
       if (!r.ok) throw new Error(r.status + " " + DATA_BASE + path);
@@ -435,7 +436,15 @@
     var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     function snip(st, p, on) {
       var v = st.querySelector("video.snip");
-      if (!on) { if (v) { v.pause(); v.classList.remove("on"); } return; }
+      if (!on) {
+        if (v) {
+          v.pause(); v.classList.remove("on");
+          // Libere la video (memoire, decodeur) une fois le fondu termine, si on n'est pas revenu dessus.
+          v._free = setTimeout(function () { v.removeAttribute("src"); v.load(); v.remove(); }, 600);
+        }
+        return;
+      }
+      if (v && v._free) { clearTimeout(v._free); v._free = null; }
       var vsrc = p.video || p.full; // extrait d'apercu, sinon le film complet
       if (!vsrc || reduceMotion || (navigator.connection && navigator.connection.saveData)) return;
       if (!v) {
