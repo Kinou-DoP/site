@@ -217,8 +217,9 @@ body.viewing #bgvid { opacity: 0 !important; }
 @keyframes glow { 0% { opacity: 0; } 20% { opacity: .15; } 100% { opacity: 0; } }
 
 /* Sous le nom du chef op : barre de défilement masquée. */
-/* Sous le nom : coupe nette sur toute la largeur de l'écran (pas de dégradé). */
-.work { scrollbar-width: none; -webkit-mask-image: none; mask-image: none; clip-path: inset(var(--kinou-zm) 0 0 0); }
+/* Sous le nom : coupe nette sur toute la largeur de l'écran (pas de dégradé). La zone qui défile commence sous la
+   bande (plus fiable qu'une découpe, notamment sur iPhone où les films réapparaissaient derrière la bande). */
+.work { scrollbar-width: none; -webkit-mask-image: none; mask-image: none; top: var(--kinou-zm); padding-top: 16px; }
 .work::-webkit-scrollbar { display: none; }
 
 /* Pas de barre de défilement de page : sinon la largeur change entre l'accueil (sans défilement)
@@ -262,3 +263,54 @@ html::-webkit-scrollbar { display: none; }
 .still video.snip, #home .slide video, #bgvid { transform: scale(var(--z, 1)); }
 /* Accueil : « & » entre deux chefs op, fin et plus petit. */
 #home .name .amp { font-weight: 300; font-size: .6em; margin: 0 .2em; }
+
+/* ---------- Lecteur : flèches film précédent / suivant (onglet affiché), image précédente / suivante ---------- */
+#player .phead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+#player .phead .ptitle { margin: 0; }
+#player .pnav { display: none; flex: none; gap: 6px; margin-bottom: -4px; }
+#player.has-nav .pnav { display: flex; }
+#player .parrow { width: 36px; height: 36px; padding: 0; border: 0; background: none; color: var(--kinou-fg); line-height: 0; cursor: pointer; opacity: .6; transition: opacity .2s; display: inline-flex; align-items: center; justify-content: center; }
+#player .parrow:hover { opacity: 1; }
+#player .plimg { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+#player .plight .parrow { position: absolute; z-index: 1; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); display: none; width: 44px; height: 44px; }
+#player .plight.multi .parrow { display: inline-flex; }
+#player #plprev { left: 24px; }
+#player #plnext { right: 24px; }
+
+/* ---------- Téléphone ---------- */
+.burger { display: none; padding: 0; border: 0; background: none; color: var(--kinou-fg); line-height: 0; cursor: pointer; transition: opacity .3s; }
+body.menu-on .burger { opacity: 0; }
+/* Volet du menu : fond flou de ce qu'il y a derrière (effet verre dépoli) */
+.drawer { position: fixed; inset: 0; z-index: 9; visibility: hidden; transition: visibility .45s; }
+.drawer::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.25); opacity: 0; transition: opacity .45s; }
+.drawer.on { visibility: visible; }
+.drawer.on::before { opacity: 1; }
+.dpanel { position: absolute; top: 0; bottom: 0; left: 0; width: min(78vw, 340px); display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  padding: calc(env(safe-area-inset-top, 0px) + 96px) 28px 32px; background: rgba(30,30,30,.22); -webkit-backdrop-filter: blur(28px) saturate(1.6); backdrop-filter: blur(28px) saturate(1.6);
+  border-right: 1px solid rgba(255,252,235,.12); transform: translateX(-100%); transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
+.drawer.on .dpanel { transform: none; }
+.dpanel a { font-family: var(--kinou-sans); font-weight: 400; font-size: 28px; letter-spacing: -0.02em; line-height: 1.25; }
+.dclose { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 32px); left: 24px; width: 24px; height: 24px; padding: 0; border: 0; background: none; color: var(--kinou-fg); line-height: 0; cursor: pointer; }
+@media (max-width: 700px) {
+  .lnav .ig { display: none; }
+  .burger { display: block; }
+  .logo { font-size: 24px; top: calc(env(safe-area-inset-top, 0px) + 31px); }
+  .logo.img img { height: calc(var(--logo-h, 36px) * .66); }
+  .nav-btn { font-size: 12px; }
+  /* Accueil : nom du chef op plus petit (taille de « Nom & Nom ») ; glisser haut/bas sans faire défiler la page */
+  #home .name { font-size: clamp(20px, 5.8vw, 26px); }
+  #home .name .tags { margin-top: 6px; font-size: 12px; }
+  html:has(body.is-home) { overscroll-behavior: none; }
+  body.is-home { touch-action: none; }
+  /* Page d'un chef op : nom, onglets et bande plus serrés */
+  :root { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 22px); --kinou-zm: calc(var(--kinou-tabs-top) + 28px); }
+  .hero .tags { margin-top: 5px; font-size: 11px; }
+  .work { padding-top: 12px; }
+  .cats { scroll-behavior: auto; }
+  /* film au milieu de l'écran = « survolé » (comme à la souris sur ordinateur) */
+  .card.focus .still { filter: brightness(1.1); }
+}
+@media (max-width: 560px) {
+  :root { --kinou-hero-top: calc(env(safe-area-inset-top, 0px) + 72px); }
+  .hero { top: var(--kinou-hero-top); }
+}

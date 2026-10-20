@@ -130,12 +130,17 @@
       wheelSum += d;
       if (Math.abs(wheelSum) > 40) { go(cur + (wheelSum > 0 ? 1 : -1)); wheelSum = 0; wheelUntil = now + 300; }
     }, { passive: true });
-    var x0 = null;
-    document.addEventListener("touchstart", function (e) { if (!active) return; x0 = e.touches[0].clientX; }, { passive: true });
+    // Glisser (téléphone) : vers la gauche ou vers le haut = projet suivant ; vers la droite ou le bas = précédent.
+    var x0 = null, y0 = null;
+    document.addEventListener("touchstart", function (e) {
+      if (!active || document.body.classList.contains("menu-on")) return;
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    }, { passive: true });
     document.addEventListener("touchend", function (e) {
       if (x0 === null) return;
-      var dx = e.changedTouches[0].clientX - x0; x0 = null;
-      if (Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1));
+      var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = y0 = null;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 50) return;
+      if (Math.abs(dx) >= Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1)); else go(cur + (dy < 0 ? 1 : -1));
     });
 
     // Les textes du bas apparaissent en fondu quand le curseur s'approche du bas de l'ecran.
@@ -357,11 +362,33 @@
       return "none"; // pas de fond colore provisoire
     }
     // Ignore les cartes masquees sous l'en-tete (zone du titre) quand on a defile.
-    function inZone(e) { return e.clientY >= parseFloat(getComputedStyle(work).paddingTop) - 6; }
+    function inZone(e) { return e.clientY >= work.getBoundingClientRect().top; }
   // Lecteur par-dessus la galerie / le feed
     var player = document.getElementById("player"), pstage = document.getElementById("pstage"), pcap = document.getElementById("pcap");
     var ptitle = document.getElementById("ptitle"), pgal = document.getElementById("pgal"), plight = document.getElementById("plight");
-    function openPlayer(p) {
+    // Films de l'onglet affiché (ordre de la page) : flèches ‹ › du lecteur pour passer au précédent / suivant.
+    var playList = [], playIdx = -1;
+    var pprev = document.getElementById("pprev"), pnext = document.getElementById("pnext");
+    function stepPlayer(k) { if (playList.length > 1) openPlayer(playList[(playIdx + k + playList.length) % playList.length], true); }
+    pprev.addEventListener("click", function () { stepPlayer(-1); });
+    pnext.addEventListener("click", function () { stepPlayer(1); });
+    // Bouton retour du téléphone / du navigateur : ferme l'image agrandie, puis le lecteur (pas la page).
+    var pushed = 0, skipPop = 0;
+    function pushStep() { history.pushState({ kinou: "player" }, ""); pushed++; }
+    function popStep() { if (pushed > 0) { pushed--; skipPop++; history.back(); } }
+    window.addEventListener("popstate", function () {
+      if (skipPop) { skipPop--; return; }
+      if (pushed > 0) pushed--;
+      if (plight.classList.contains("on")) closeStill(true);
+      else if (player.classList.contains("on")) closePlayer(true);
+    });
+    function openPlayer(p, keep) {
+      if (!keep) {
+        playList = [].map.call(feed.querySelectorAll(".card"), function (c) { return c._p; });
+        if (!player.classList.contains("on")) pushStep();
+      }
+      playIdx = playList.indexOf(p);
+      player.classList.toggle("has-nav", playList.length > 1 && playIdx > -1);
       projvid.pause(); pauseSnips();
       pstage.textContent = ""; pcap.textContent = "";
       pstage.style.backgroundImage = bgFor(p);
@@ -389,7 +416,7 @@
     }, { root: player }) : null;
     function buildStills(p) {
       if (seen) seen.disconnect();
-      pgal.textContent = ""; closeStill();
+      pgal.textContent = ""; if (plight.classList.contains("on")) closeStill();
       stillsP = p.stills && p.stills.length ? p : null;
       player.classList.toggle("has-stills", !!stillsP);
       if (!stillsP) return;
@@ -409,23 +436,51 @@
       im.onload = im.onerror = function () { b.style.backgroundImage = 'url("' + b.dataset.src + '")'; b.classList.add("shown"); };
       im.src = b.dataset.src;
     }
+    var plimg = document.getElementById("plimg");
     function showStill(i) {
       var n = stillsP.stills.length; i = (i + n) % n;
-      plight.textContent = "";
-      var im = document.createElement("img"); im.src = stillsP.stills[i]; im.alt = stillsP.title; plight.appendChild(im);
+      plimg.textContent = "";
+      var im = document.createElement("img"); im.src = stillsP.stills[i]; im.alt = stillsP.title; plimg.appendChild(im);
+      if (!plight.classList.contains("on")) pushStep();
+      plight.classList.toggle("multi", n > 1);
       stillsIdx = i; plight.classList.add("on");
     }
-    function closeStill() { plight.classList.remove("on"); }
-    plight.addEventListener("click", closeStill);
-    document.addEventListener("keydown", function (e) {
-      if (!stillsP || !plight.classList.contains("on")) return;
-      if (e.key === "ArrowRight") showStill(stillsIdx + 1);
-      if (e.key === "ArrowLeft") showStill(stillsIdx - 1);
+    function closeStill(fromBack) { plight.classList.remove("on"); if (!fromBack) popStep(); }
+    plight.addEventListener("click", function (e) {
+      var a = e.target.closest(".parrow");
+      if (a) { showStill(stillsIdx + (a.id === "plnext" ? 1 : -1)); return; }
+      closeStill();
     });
-    function closePlayer() {
+    // Image suivante : flèches du clavier, glisser sur téléphone, glisser à deux doigts sur le pavé tactile.
+    var sx0 = null, swipeAt = 0;
+    plight.addEventListener("touchstart", function (e) { sx0 = e.touches[0].clientX; }, { passive: true });
+    plight.addEventListener("touchend", function (e) {
+      if (sx0 === null) return;
+      var dx = e.changedTouches[0].clientX - sx0; sx0 = null;
+      if (Math.abs(dx) > 40) { swipeAt = Date.now(); showStill(stillsIdx + (dx < 0 ? 1 : -1)); }
+    });
+    plight.addEventListener("click", function (e) { if (Date.now() - swipeAt < 400) e.stopImmediatePropagation(); }, true);
+    var lwSum = 0, lwLast = 0, lwUntil = 0;
+    plight.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      var now = Date.now(); if (now - lwLast > 200) lwSum = 0; lwLast = now;
+      if (now < lwUntil) return;
+      lwSum += e.deltaX;
+      if (Math.abs(lwSum) > 60) { showStill(stillsIdx + (lwSum > 0 ? 1 : -1)); lwSum = 0; lwUntil = now + 450; }
+    }, { passive: false });
+    document.addEventListener("keydown", function (e) {
       if (!player.classList.contains("on")) return;
+      var k = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!k) return;
+      if (stillsP && plight.classList.contains("on")) showStill(stillsIdx + k); else stepPlayer(k);
+    });
+    function closePlayer(fromBack) {
+      if (!player.classList.contains("on")) return;
+      if (plight.classList.contains("on")) closeStill(fromBack);
       player.classList.remove("on");
-      pstage.textContent = ""; closeStill();
+      if (!fromBack) popStep();
+      pstage.textContent = "";
       if (document.body.classList.contains("proj-on") && projvid.classList.contains("on")) { var pr = projvid.play(); if (pr && pr.catch) pr.catch(function () {}); }
     }
     player.addEventListener("click", function (e) { if (e.target === player || e.target === pgal || e.target.classList.contains("pin") || e.target.closest(".pclose")) closePlayer(); });
@@ -472,8 +527,23 @@
       var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
     }
     function pauseSnips() { document.querySelectorAll("video.snip").forEach(function (v) { v.pause(); }); }
+    var touchOnly = window.matchMedia("(hover: none)"), focusCard = null, focusRaf = 0;
+    function pickFocus() {
+      focusRaf = 0;
+      if (!touchOnly.matches || work.classList.contains("about-mode") || player.classList.contains("on")) return;
+      var r = work.getBoundingClientRect(), line = r.top + r.height * 0.4, best = null, bd = 1e9;
+      feed.querySelectorAll(".card").forEach(function (c) {
+        var b = c.querySelector(".still").getBoundingClientRect(), d = Math.abs((b.top + b.bottom) / 2 - line);
+        if (b.bottom > r.top && d < bd) { bd = d; best = c; }
+      });
+      if (best === focusCard) return;
+      if (focusCard) { focusCard.classList.remove("focus"); snip(focusCard.querySelector(".still"), focusCard._p, false); }
+      focusCard = best;
+      if (best) { best.classList.add("focus"); showProj(best._p); snip(best.querySelector(".still"), best._p, true); }
+    }
+    work.addEventListener("scroll", function () { if (!focusRaf) focusRaf = requestAnimationFrame(pickFocus); }, { passive: true });
     function render(slug, cat, delay) {
-      curCat = cat;
+      curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
       feed.className = "feed" + (mode === "gallery" ? " gallery" : "");
       feed.style.setProperty("--d", delay + "ms");
       clearProj();
@@ -506,22 +576,46 @@
         feed.insertBefore(shade, feed.firstChild);
       }
     }
+    // Sur téléphone, si les onglets dépassent, ils défilent lentement vers la gauche, en boucle (une 2e copie suit
+    // la 1re) ; un doigt sur les onglets met le défilement en pause quelques secondes.
+    var tabsLoop = 0;
+    function marquee() {
+      var run = ++tabsLoop;
+      cats.scrollLeft = 0;
+      if (!phone.matches || reduceMotion || cats.scrollWidth <= cats.clientWidth + 2) return;
+      var first = cats.firstElementChild, n = cats.children.length;
+      tabSet(true);
+      var half = cats.children[n].offsetLeft - first.offsetLeft, pos = 0, last = performance.now(), hold = last + 2500; // pause au début : FEATURED bien visible
+      cats.ontouchstart = function () { hold = performance.now() + 4000; };
+      cats.onscroll = function () { if (performance.now() < hold) pos = cats.scrollLeft; };
+      (function step(t) {
+        if (run !== tabsLoop || !document.body.classList.contains("viewing")) return;
+        if (t > hold) { pos += (t - last) * 0.025; if (pos >= half) pos -= half; cats.scrollLeft = pos; }
+        else if (pos >= half) { pos -= half; cats.scrollLeft = pos; }
+        last = t; requestAnimationFrame(step);
+      })(last);
+    }
+    var tabSet = null;
     function buildTabs(slug) {
       cats.textContent = ""; curCat = "FEATURED";
-      (CATS_BY[slug] || CATS).forEach(function (c) {
+      tabSet = function (copy) { (CATS_BY[slug] || CATS).forEach(function (c) { tabButton(c, copy); }); aboutButton(copy); };
+      function tabButton(c, copy) {
         var b = document.createElement("button");
         b.textContent = c; b.dataset.cat = c; if (c === curCat) b.className = "on";
+        if (copy) b.setAttribute("aria-hidden", "true");
         b.addEventListener("click", function () {
-          cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+          cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === c); });
           work.classList.remove("about-mode"); document.body.classList.remove("about-on");
           work.scrollTop = 0; render(slug, c, 0);
         });
         cats.appendChild(b);
-      });
+      }
+      function aboutButton(copy) {
       var ab = document.createElement("button");
-      ab.textContent = "ABOUT"; ab.className = "sep";
+      ab.textContent = "ABOUT"; ab.className = "sep"; ab.dataset.cat = "ABOUT";
+      if (copy) ab.setAttribute("aria-hidden", "true");
       ab.addEventListener("click", function () {
-        cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === ab); });
+        cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === "ABOUT"); });
         about.textContent = "";
         var d = ABOUT[slug] || {};
         var lang = "fr"; try { if (localStorage.getItem("kinou-lang") === "en") lang = "en"; } catch (e) {}
@@ -561,6 +655,9 @@
         about.style.animation = "none"; void about.offsetWidth; about.style.animation = "";
       });
       cats.appendChild(ab);
+      }
+      tabSet(false);
+      requestAnimationFrame(marquee);
       // Choix de l'affichage (icones, au-dessus du feed) : feed (une colonne) ou galerie (mosaique).
       modes.textContent = "";
       var ICONS = {
@@ -621,6 +718,15 @@
       if (t === "home") HomeAPI.resume(); else { HomeAPI.pause(); window.scrollTo(0, 0); }
     }
     document.getElementById("name").addEventListener("mouseover", function (e) { var a = e.target.closest("a"); if (a && a.dataset.slug) loadDP(a.dataset.slug); }); // precharge la fiche
+    // Menu du téléphone (burger) : volet à gauche, fond flou de ce qu'il y a derrière.
+    var drawer = document.getElementById("drawer"), burger = document.getElementById("burger");
+    function menu(on) {
+      drawer.classList.toggle("on", on); document.body.classList.toggle("menu-on", on);
+      drawer.setAttribute("aria-hidden", on ? "false" : "true"); burger.setAttribute("aria-expanded", on ? "true" : "false");
+    }
+    burger.addEventListener("click", function () { menu(true); });
+    drawer.addEventListener("click", function (e) { if (e.target === drawer || e.target.closest(".dclose")) menu(false); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && drawer.classList.contains("on")) { e.stopImmediatePropagation(); menu(false); } }, true);
     // Liens de l'en-tete pas encore actifs (spotlight, fiction).
     document.querySelectorAll("[data-soon]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); }); });
     window.Site = { prefetch: warmThumbs, fromHome: function (p, a) { openView({ text: a.dataset.name, slug: a.dataset.slug, from: "home", rect: homeNameRect(a), film: p }); } };

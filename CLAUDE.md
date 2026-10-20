@@ -115,6 +115,12 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 12. **Recadrage** : `zoom` (1 à 1,6, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
    agrandit au centre l'extrait pour enlever les bandes noires ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
    jamais dans le lecteur.
+13. **Téléphone** (≤ 700px) : en-tête = burger à gauche (volet flou : spotlight, fiction, instagram, contact), logo réduit ;
+   accueil : glisser gauche/droite ou haut/bas = projet suivant/précédent ; page d'un chef op : la zone qui défile
+   commence sous la bande (`.work { top: var(--kinou-zm) }`), le film au milieu de l'écran (40 %) joue comme au survol,
+   les onglets qui dépassent défilent lentement en boucle.
+14. **Lecteur** : flèches ‹ › (films de l'onglet affiché, aussi au clavier) ; images agrandies : flèches en bas, glisser,
+   pavé tactile ; le bouton retour du téléphone ferme l'image puis le lecteur (`history.pushState`).
 9. **Fonds** : liste → nom survolé en blanc et en gras (500), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
    film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé).
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
