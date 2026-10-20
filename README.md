@@ -2,7 +2,9 @@
 Site statique Kinou
 
 - `index.html` : structure ; `assets/css/main.css` : styles ; `assets/js/app.js` : logique.
-- Données : publiées par l'admin (repo `kinou-agency/admin`, https://kinou-admin.netlify.app). Clips synchronisés depuis Slate par `netlify/functions/`.
+- Données : écrites par l'admin (https://kinou-admin.netlify.app) dans le repo `kinou-agency/admin`, lues par le site
+  via `/api/data` directement dans GitHub (variable Netlify secrète `GITHUB_DATA_TOKEN`, lecture seule).
+  Clips synchronisés depuis Slate par `netlify/functions/`.
 - Test en local : `python3 -m http.server` puis http://localhost:8000 (fetch ne marche pas en `file://` ;
   la fonction Slate n'existe pas en local, le site utilise alors la copie enregistrée dans la fiche).
 - Référence visuelle : `reference/prototype.html`.

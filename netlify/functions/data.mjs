@@ -18,7 +18,8 @@ export default async function (req) {
     "Content-Type": TYPES[ext.toLowerCase()],
     "Cache-Control": "public, max-age=0, must-revalidate",
     "Netlify-CDN-Cache-Control": "public, durable, s-maxage=300, stale-while-revalidate=86400",
-    "Netlify-Cache-Tag": "data"
+    "Netlify-Cache-Tag": "data",
+    "X-Kinou-Source": r.source || "" // github (clé GITHUB_DATA_TOKEN) ou copie (kinou-admin)
   }, CORS);
   if (ext.toLowerCase() === "pdf") headers["Content-Disposition"] = "attachment; filename=\"" + path.split("/").pop() + "\"";
   return new Response(await r.arrayBuffer(), { headers: headers });

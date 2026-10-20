@@ -11,7 +11,9 @@ export async function readData(path) {
   if (token) {
     var url = "https://api.github.com/repos/" + ADMIN_REPO + "/contents/data/" + path.split("/").map(encodeURIComponent).join("/") + "?ref=main";
     var r = await fetch(url, { headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github.raw+json", "User-Agent": "kinou-site" } });
-    if (r.ok || r.status === 404) return r;
+    if (r.ok || r.status === 404) { r.source = "github"; return r; }
   }
-  return fetch(FALLBACK + path);
+  var c = await fetch(FALLBACK + path);
+  c.source = "copie";
+  return c;
 }
