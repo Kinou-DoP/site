@@ -180,11 +180,17 @@ body.viewing #bgvid { opacity: 0 !important; }
 
 /* Page d'un chef op : fond (projet survolé) très flouté et assombri ; grille posée sur un fond sombre. */
 #projbg, #projvid { transform: scale(1.15); }
-#projbg { filter: blur(40px) brightness(.65); }
-#projvid { filter: blur(40px) brightness(.55); }
+#projbg { filter: blur(10px) brightness(.65); } /* image de 64 px agrandie : déjà floue, petit flou de lissage */
+#projvid { filter: blur(16px) brightness(.55); }
 /* Fond noir derrière chaque film (pas toute la grille : rien derrière une case vide), qui s'estompe
    vers l'extérieur. Ombre portée calculée sur la forme des vignettes : elle ne déborde pas sur les voisines. */
-.feed { filter: drop-shadow(0 0 3px rgba(0,0,0,.95)) drop-shadow(0 0 3px rgba(0,0,0,.95)) drop-shadow(0 0 30px rgba(0,0,0,.55)); }
+.feed .shade { display: none; }
+.feed.gallery { position: relative; isolation: isolate; }
+.feed.gallery .shade { position: absolute; inset: 0; z-index: -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: none; will-change: transform;
+  filter: drop-shadow(0 0 3px rgba(0,0,0,.95)) drop-shadow(0 0 3px rgba(0,0,0,.95)) drop-shadow(0 0 30px rgba(0,0,0,.55)); }
+.feed.gallery .shade i { aspect-ratio: 16 / 9; background: #000; }
+@media (max-width: 560px) { .feed.gallery .shade { gap: 4px; } }
+.feed:not(.gallery) .still { box-shadow: 0 0 0 3px rgba(0,0,0,.9), 0 0 36px 14px rgba(0,0,0,.55); }
 
 /* Survol d'un film : léger voile lumineux, une seule fois (15 % en 0,25 s, retour à 0 en 1 s). */
 .still { position: relative; }

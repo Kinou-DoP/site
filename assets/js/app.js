@@ -353,8 +353,8 @@
     var about = document.getElementById("about"), aboutbg = document.getElementById("aboutbg");
     // Fond plein ecran du projet survole (ou selectionne par clic / tap). p.img = visuel du projet.
     var projbg = document.getElementById("projbg"), projvid = document.getElementById("projvid"), selCard = null;
-    function bgFor(p) {
-      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, 800) + '")'; // meme fichier que la vignette (deja en cache)
+    function bgFor(p, w) {
+      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, w || 800) + '")';
       return "none"; // pas de fond colore provisoire
     }
     // Ignore les cartes masquees sous l'en-tete (zone du titre) quand on a defile.
@@ -420,7 +420,7 @@
     }
     player.addEventListener("click", function (e) { if (e.target === player || e.target.closest(".pclose")) closePlayer(); });
     function showProj(p, t) {
-      projbg.style.backgroundImage = bgFor(p);
+      projbg.style.backgroundImage = bgFor(p, 64); // fond flou : une toute petite image agrandie (leger a afficher)
       if (p.video && t !== undefined) {
         if (projvid.dataset.src !== p.video) { projvid.src = p.video; projvid.dataset.src = p.video; }
         if (t) { try { projvid.currentTime = t; } catch (e) {} }
@@ -472,6 +472,12 @@
         d.addEventListener("mouseleave", function () { snip(st, p, false); if (selCard) showProj(selCard._p, 0); else document.body.classList.remove("proj-on"); });
         d.addEventListener("click", function (e) { if (!inZone(e)) return; openPlayer(p); });
       });
+      // Ombre noire des vignettes (galerie) : calque fixe, sans video, derriere la grille ; calcule une fois par affichage.
+      if (mode === "gallery") {
+        var shade = document.createElement("div"); shade.className = "shade";
+        for (var n = feed.children.length; n > 0; n--) shade.appendChild(document.createElement("i"));
+        feed.insertBefore(shade, feed.firstChild);
+      }
     }
     function buildTabs(slug) {
       cats.textContent = ""; curCat = "FEATURED";
