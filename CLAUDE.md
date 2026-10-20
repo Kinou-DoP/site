@@ -113,7 +113,8 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit) ; pas de fond coloré de remplacement (noir) ;
    on arrive sur un film au hasard parmi les 10, puis l'ordre de la bande.
 12. **Recadrage** : `zoom` (1 à 1,6, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
-   agrandit au centre l'extrait et sa vignette pour enlever les bandes noires ; jamais dans le lecteur.
+   agrandit au centre l'extrait pour enlever les bandes noires ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
+   jamais dans le lecteur.
 9. **Fonds** : liste → nom survolé en blanc et en gras (500), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
    film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé).
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.

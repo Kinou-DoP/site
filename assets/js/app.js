@@ -481,7 +481,8 @@
       WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; }).forEach(function (p, i) {
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
-        if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); st.classList.add("zoomed"); } // recadrage (admin)
+        // Recadrage (admin) : l'extrait au survol ; la vignette aussi si « zoomThumb » est coché.
+        if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); if (p.zoomThumb) st.classList.add("zoomed"); }
         if (p.img) {
           var url = thumb(p.img, mode === "gallery" ? GW : FW), im = new Image();
           im.onload = im.onerror = (function (st, url) { return function () { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st, url);
