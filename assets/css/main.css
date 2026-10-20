@@ -238,8 +238,8 @@ html::-webkit-scrollbar { display: none; }
 /* Animations d'arrivée des cartes : une fois jouées, plus rien à suivre pour le navigateur. */
 .card { animation-fill-mode: backwards; }
 
-/* Catégorie du film : en bas à droite au survol (galerie) ; sur téléphone, en haut à droite de la vignette. */
-.ccat { font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; line-height: 1; color: var(--kinou-fg); pointer-events: none; }
+/* Catégorie du film (onglet FEATURED seulement) : en bas à droite au survol (galerie) ; sur téléphone, en haut à droite de la vignette. */
+.ccat { font-family: var(--kinou-sans); font-weight: 400; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; line-height: 1; color: rgba(255,252,235,.6); pointer-events: none; }
 .feed.gallery .meta .ccat { position: absolute; right: 16px; bottom: 14px; }
 .feed:not(.gallery) .still .ccat { position: absolute; z-index: 3; top: 12px; right: 12px; opacity: 0; transition: opacity .3s; text-shadow: 0 0 10px rgba(0,0,0,.6); }
 .feed:not(.gallery) .card:hover .still .ccat { opacity: 1; }
@@ -249,6 +249,7 @@ html::-webkit-scrollbar { display: none; }
   .feed:not(.gallery) .still .ccat { opacity: 1; }
 }
 /* Logo image (testé depuis l'admin) : même place et même effet (différence) que le logo texte. */
+.logo:not(.ready) { visibility: hidden; } /* rien tant que le logo (texte ou image) n'est pas connu */
 .logo.img { line-height: 0; }
 .logo.img img { display: block; height: var(--logo-h, 36px); width: auto; }
 @media (max-width: 560px) { .logo.img img { height: calc(var(--logo-h, 36px) * .83); } }

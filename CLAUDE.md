@@ -24,7 +24,8 @@ On les modifie avec l'interface d'admin (https://kinou-admin.netlify.app), pas d
 ```
 data/
 ├── home.json              # slideshow de l'accueil (PROJECTS) + durée ; importé d'une bande Slate dans l'admin
-├── site.json              # réglages (logo image : { logo: "brand/logo.png", logoHeight: 36 })
+├── site.json              # réglages (logo image : { logo: "brand/logo.png", logoHeight: 36 }) ; le site réduit le logo
+│                          # (8 × la hauteur affichée) et le garde dans le navigateur (localStorage « kinou-logo »)
 └── dps/
     ├── index.json         # liste ordonnée des DPs : [{ slug, name, img? }]
     ├── <slug>.json        # une fiche par DP (clips + about)
@@ -107,7 +108,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    lumineux au survol d'un film (blanc 20 % en 0,25 s, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » et « fiction » (à venir,
    masqués sous 700px) ; à droite « cinematographers ».
-10. **Catégorie du film** : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
+10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
    toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.
 11. **Accueil** : un lien par chef op crédité (« Nom & Nom ») ; pas de fond coloré de remplacement (noir).
 9. **Fonds** : liste → nom survolé en blanc et en gras (500), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du

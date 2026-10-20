@@ -488,7 +488,7 @@
         var h = document.createElement("h3"); h.textContent = p.title;
         var s = document.createElement("p"); s.textContent = p.sub || p.cat;
         meta.appendChild(h); meta.appendChild(s);
-        if (p.cat) { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
+        if (p.cat && cat === "FEATURED") { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
         d._p = p;
         d.addEventListener("mouseenter", function (e) { if (!inZone(e)) return; showProj(p); snip(st, p, true); });
@@ -644,17 +644,48 @@
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (plight.classList.contains("on")) closeStill(); else if (player.classList.contains("on")) closePlayer(); else closeView(); } });
   }
 
-  // Réglages du site (data/site.json, onglet « contact » de l'admin) : logo image à la place du texte « kinou ».
+  // Logo (data/site.json, onglet « contact » de l'admin) : image à la place du texte « kinou ».
+  // Le logo n'apparaît qu'une fois connu (pas de « kinou » texte juste avant l'image) ; la dernière version,
+  // réduite proprement (8 × sa hauteur affichée : nette au zoom), est gardée dans le navigateur pour s'afficher tout de suite.
+  var logoEl = document.querySelector(".logo"), LOGO_KEY = "kinou-logo", logoSaved = null;
+  try { logoSaved = JSON.parse(localStorage.getItem(LOGO_KEY)); } catch (e) {}
+  function logoText() {
+    logoEl.classList.remove("img"); logoEl.textContent = "kinou"; logoEl.classList.add("ready");
+  }
+  function logoImg(src, h) {
+    var im = new Image(); im.alt = "kinou"; im.src = src;
+    logoEl.textContent = ""; logoEl.appendChild(im); logoEl.classList.add("img", "ready");
+    logoEl.style.setProperty("--logo-h", (h || 36) + "px");
+  }
+  function logoKeep(o) { try { localStorage.setItem(LOGO_KEY, JSON.stringify(o)); } catch (e) {} }
+  // Réduction par moitiés successives : bien plus net qu'une seule réduction d'une très grande image.
+  function logoShrink(im, h) {
+    var H = h * 8, W = Math.round(im.naturalWidth * H / im.naturalHeight), src = im, w = im.naturalWidth, hh = im.naturalHeight;
+    if (hh <= H) return null;
+    while (hh / 2 > H) {
+      var c = document.createElement("canvas"); c.width = w = Math.round(w / 2); c.height = hh = Math.round(hh / 2);
+      var x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(src, 0, 0, w, hh); src = c;
+    }
+    var f = document.createElement("canvas"); f.width = W; f.height = H;
+    var fx = f.getContext("2d"); fx.imageSmoothingQuality = "high"; fx.drawImage(src, 0, 0, W, H);
+    try { return f.toDataURL("image/png"); } catch (e) { return null; }
+  }
+  if (logoSaved) { if (logoSaved.data) logoImg(logoSaved.data, logoSaved.h); else logoText(); }
+  var logoWait = setTimeout(function () { if (!logoEl.classList.contains("ready")) logoText(); }, 2500);
   getJSON("site.json").then(function (c) {
-    if (!c.logo) return;
-    var im = new Image();
+    if (!c.logo) { clearTimeout(logoWait); logoKeep({}); if (!logoSaved || logoSaved.data) logoText(); return; }
+    var h = c.logoHeight || 36;
+    if (logoSaved && logoSaved.path === c.logo && logoSaved.h === h) return; // déjà affiché
+    var im = new Image(); im.crossOrigin = "anonymous"; // lisible par le canvas (en local, les données viennent de la beta)
     im.onload = function () {
-      var l = document.querySelector(".logo"); l.textContent = ""; l.classList.add("img");
-      if (c.logoHeight) l.style.setProperty("--logo-h", c.logoHeight + "px");
-      im.alt = "kinou"; l.appendChild(im);
+      clearTimeout(logoWait);
+      var data = logoShrink(im, h) || im.src;
+      logoImg(data, h);
+      logoKeep(data.indexOf("data:") === 0 ? { path: c.logo, h: h, data: data } : {});
     };
+    im.onerror = function () { clearTimeout(logoWait); if (!logoEl.classList.contains("ready")) logoText(); };
     im.src = DATA_BASE + c.logo;
-  }).catch(function () {}); // pas de réglages : logo texte
+  }).catch(function () { clearTimeout(logoWait); if (!logoEl.classList.contains("ready")) logoText(); });
 
   Promise.all([getJSON("home.json"), getJSON("dps/index.json")]).then(function (r) {
     // Ancien format : { dp, slug } ; nouveau (admin, bande Slate) : dps: [{ name, slug }].
