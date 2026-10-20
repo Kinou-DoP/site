@@ -187,9 +187,9 @@ body.viewing #bgvid { opacity: 0 !important; }
 .feed .shade { display: none; }
 .feed.gallery { position: relative; isolation: isolate; }
 .feed.gallery .shade { position: absolute; inset: 0; z-index: -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: none; }
-.feed.gallery .shade i { aspect-ratio: 16 / 9; background: rgba(0,0,0,.75); box-shadow: 0 0 0 3px rgba(0,0,0,.75), 0 0 40px 12px rgba(0,0,0,.42); }
+.feed.gallery .shade i { aspect-ratio: 16 / 9; background: rgba(0,0,0,.55); box-shadow: 0 0 0 3px rgba(0,0,0,.55), 0 0 40px 12px rgba(0,0,0,.3); }
 @media (max-width: 560px) { .feed.gallery .shade { gap: 4px; } }
-.feed:not(.gallery) .still { box-shadow: 0 0 0 3px rgba(0,0,0,.75), 0 0 36px 14px rgba(0,0,0,.42); }
+.feed:not(.gallery) .still { box-shadow: 0 0 0 3px rgba(0,0,0,.55), 0 0 36px 14px rgba(0,0,0,.3); }
 
 /* Survol d'un film : léger voile lumineux, une seule fois (15 % en 0,25 s, retour à 0 en 1 s). */
 .still { position: relative; }

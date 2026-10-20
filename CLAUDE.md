@@ -98,7 +98,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » et « fiction » (à venir,
    masqués sous 700px) ; à droite « cinematographers ».
 9. **Fonds** : liste → au survol, extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
-   film survolé très flouté et assombri, ombre noire (75 %) derrière chaque vignette ; sous le nom, coupe nette au-dessus de la grille (pas de dégradé), l'ombre passe sur les côtés.
+   film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette au-dessus de la grille (pas de dégradé), l'ombre passe sur les côtés.
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
 ## Branches et mise en ligne
