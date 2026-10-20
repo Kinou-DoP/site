@@ -267,8 +267,12 @@ html::-webkit-scrollbar { display: none; }
 /* ---------- Lecteur : flèches film précédent / suivant (onglet affiché), image précédente / suivante ---------- */
 #player .phead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
 #player .phead .ptitle { margin: 0; }
-#player .pnav { display: none; flex: none; gap: 6px; margin-bottom: -4px; }
-#player.has-nav .pnav { display: flex; }
+/* flèches ‹ › du lecteur : tout en bas de l'écran, à gauche et à droite */
+#player .pnav { display: none; }
+#player.has-nav .pnav { display: block; }
+#player .pnav .parrow { position: fixed; z-index: 2; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); width: 44px; height: 44px; }
+#player #pprev { left: 24px; }
+#player #pnext { right: 24px; }
 #player .parrow { width: 36px; height: 36px; padding: 0; border: 0; background: none; color: var(--kinou-fg); line-height: 0; cursor: pointer; opacity: .6; transition: opacity .2s; display: inline-flex; align-items: center; justify-content: center; }
 #player .parrow:hover { opacity: 1; }
 #player .plimg { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
@@ -278,6 +282,7 @@ html::-webkit-scrollbar { display: none; }
 #player #plnext { right: 24px; }
 
 /* ---------- Téléphone ---------- */
+.nav-btn .short { display: none; }
 .burger { display: none; padding: 0; border: 0; background: none; color: var(--kinou-fg); line-height: 0; cursor: pointer; transition: opacity .3s; }
 body.menu-on .burger { opacity: 0; }
 /* Volet du menu : fond flou de ce qu'il y a derrière (effet verre dépoli) */
@@ -285,7 +290,7 @@ body.menu-on .burger { opacity: 0; }
 .drawer::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.25); opacity: 0; transition: opacity .45s; }
 .drawer.on { visibility: visible; }
 .drawer.on::before { opacity: 1; }
-.dpanel { position: absolute; top: 0; bottom: 0; left: 0; width: min(78vw, 340px); display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+.dpanel { position: absolute; top: 0; bottom: 0; left: 0; width: max(50vw, 190px); display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
   padding: calc(env(safe-area-inset-top, 0px) + 96px) 28px 32px; background: rgba(30,30,30,.22); -webkit-backdrop-filter: blur(28px) saturate(1.6); backdrop-filter: blur(28px) saturate(1.6);
   border-right: 1px solid rgba(255,252,235,.12); transform: translateX(-100%); transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
 .drawer.on .dpanel { transform: none; }
@@ -294,16 +299,22 @@ body.menu-on .burger { opacity: 0; }
 @media (max-width: 700px) {
   .lnav .ig { display: none; }
   .burger { display: block; }
-  .logo { font-size: 24px; top: calc(env(safe-area-inset-top, 0px) + 31px); }
+  /* burger, logo et « DoP » centrés sur la même ligne (milieu à 44px du haut) */
+  .lnav { top: calc(env(safe-area-inset-top, 0px) + 37px); }
+  .logo { font-size: 24px; top: calc(env(safe-area-inset-top, 0px) + 32px); }
   .logo.img img { height: calc(var(--logo-h, 36px) * .66); }
-  .nav-btn { font-size: 12px; }
+  .nav-btn { font-size: 15px; top: calc(env(safe-area-inset-top, 0px) + 36px); }
+  .nav-btn .long { display: none; }
+  .nav-btn .short { display: inline; }
   /* Accueil : nom du chef op plus petit (taille de « Nom & Nom ») ; glisser haut/bas sans faire défiler la page */
-  #home .name { font-size: clamp(20px, 5.8vw, 26px); }
+  #home .name { font-size: clamp(17px, 4.9vw, 22px); }
   #home .name .tags { margin-top: 6px; font-size: 12px; }
   html:has(body.is-home) { overscroll-behavior: none; }
   body.is-home { touch-action: none; }
   /* Page d'un chef op : nom, onglets et bande plus serrés */
-  :root { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 22px); --kinou-zm: calc(var(--kinou-tabs-top) + 28px); }
+  /* même écart partout : en-tête → nom → onglets → bande (≈ 14px) ; « AFC… » sous le nom ajoute sa hauteur */
+  :root { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 10px); --kinou-zm: calc(var(--kinou-tabs-top) + 27px); }
+  body.hero-tags { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 26px); --kinou-zm: calc(var(--kinou-tabs-top) + 27px); }
   .hero .tags { margin-top: 5px; font-size: 11px; }
   .work { padding-top: 12px; }
   .cats { scroll-behavior: auto; }
@@ -311,6 +322,6 @@ body.menu-on .burger { opacity: 0; }
   .card.focus .still { filter: brightness(1.1); }
 }
 @media (max-width: 560px) {
-  :root { --kinou-hero-top: calc(env(safe-area-inset-top, 0px) + 72px); }
+  :root { --kinou-hero-top: calc(env(safe-area-inset-top, 0px) + 68px); }
   .hero { top: var(--kinou-hero-top); }
 }

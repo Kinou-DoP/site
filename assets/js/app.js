@@ -246,6 +246,7 @@
       hero.textContent = ""; hero.classList.remove("ready");
       var n = document.createElement("span"); n.className = "n"; n.textContent = parts.main; hero.appendChild(n);
       if (parts.tags) { var tg = document.createElement("div"); tg.className = "tags"; tg.textContent = parts.tags; hero.appendChild(tg); }
+      document.body.classList.toggle("hero-tags", !!parts.tags); // place pour « AFC… » sous le nom (téléphone)
       hero.style.transition = "none"; hero.style.transform = "none"; hero.style.opacity = 0;
       var f = n.getBoundingClientRect();
       hero.style.transform = o.instant ? "none" : startTransform(r, f);
