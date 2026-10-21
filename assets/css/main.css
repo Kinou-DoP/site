@@ -364,3 +364,5 @@ body.closing #roulette { transition: opacity .3s .7s; }
 #player .pdps { margin: 0 0 6px; font-family: var(--kinou-sans); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--kinou-fg); }
 #player .pdps a { padding: 0; font: inherit; color: inherit; transition: opacity .2s; }
 #player .pdps a:hover { opacity: .7; }
+/* Portraits (onglet About) toujours en noir et blanc, quelle que soit la photo déposée */
+#aboutbg { filter: grayscale(1); }
