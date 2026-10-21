@@ -704,15 +704,19 @@
         cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === "ABOUT"); });
         about.textContent = "";
         var d = ABOUT[slug] || {};
-        var lang = "fr"; try { if (localStorage.getItem("kinou-lang") === "en") lang = "en"; } catch (e) {}
+        // Bio : anglais d'abord. Une seule langue renseignée : elle seule, sans choix FR/EN ; les deux : choix EN/FR
+        // (le dernier choix du visiteur est gardé).
+        var hasEn = !!(d.bioEn && d.bioEn.length), hasFr = !!(d.bio && d.bio.length);
+        var lang = hasEn ? "en" : "fr";
+        if (hasEn && hasFr) { try { if (localStorage.getItem("kinou-lang") === "fr") lang = "fr"; } catch (e) {} }
         var bio = document.createElement("div");
         function fill() {
           bio.textContent = "";
-          (lang === "en" && d.bioEn ? d.bioEn : (d.bio || [])).forEach(function (t) { var p = document.createElement("p"); p.textContent = t; bio.appendChild(p); });
+          ((lang === "en" ? d.bioEn : d.bio) || []).forEach(function (t) { var p = document.createElement("p"); p.textContent = t; bio.appendChild(p); });
         }
-        if (d.bioEn) {
+        if (hasEn && hasFr) {
           var tg = document.createElement("div"); tg.className = "lang";
-          ["fr", "en"].forEach(function (l) {
+          ["en", "fr"].forEach(function (l) {
             var b = document.createElement("button"); b.textContent = l.toUpperCase(); b.setAttribute("aria-label", l === "fr" ? "Français" : "English");
             if (l === lang) b.className = "on";
             b.addEventListener("click", function () {
