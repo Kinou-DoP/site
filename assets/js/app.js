@@ -669,7 +669,8 @@
       if (!phone.matches || reduceMotion || cats.scrollWidth <= cats.clientWidth + 2) return;
       var first = cats.firstElementChild, n = cats.children.length;
       tabSet(true);
-      var half = cats.children[n].offsetLeft - first.offsetLeft, pos = 0, last = performance.now(), hold = last + 2500; // pause au début : FEATURED bien visible
+      var on = cats.querySelector("button.on"), half = cats.children[n].offsetLeft - first.offsetLeft, last = performance.now(), hold = last + 2500; // pause au début : onglet ouvert bien visible
+      var pos = on ? Math.max(0, on.offsetLeft - first.offsetLeft) : 0; cats.scrollLeft = pos;
       cats.ontouchstart = function () { hold = performance.now() + 4000; };
       cats.onscroll = function () { if (performance.now() < hold) pos = cats.scrollLeft; };
       (function step(t) {
@@ -925,7 +926,8 @@
           cancelAnimationFrame(glide); offset = slot * H; render();
           return pool.filter(function (el) { return el._slot === slot; })[0] || null;
         },
-        kick: function () { if (active()) { roulSel = null; sel = -1; render(); } }
+        // Arrivée sur la liste : un nom au hasard au centre (comme l'accueil), pas toujours le premier.
+        kick: function () { if (active()) { cancelAnimationFrame(glide); offset = Math.floor(Math.random() * N) * H; roulSel = null; sel = -1; render(); } }
       };
     })();
     document.getElementById("name").addEventListener("mouseover", function (e) { var a = e.target.closest("a"); if (a && a.dataset.slug) loadDP(a.dataset.slug); }); // precharge la fiche
