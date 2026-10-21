@@ -17,10 +17,11 @@ les règles visuelles ci-dessous et priment sur le prototype.
 Les données vivent dans le repo `Kinou-DoP/admin` (dossier `data/`). Le site officiel **et** la beta
 les chargent via `/api/data/<chemin>` (`netlify/functions/data.mjs`), qui les lit **directement dans GitHub**
 avec la clé en lecture seule `GITHUB_DATA_TOKEN` (variable d'environnement Netlify du site), cache CDN 5 min
-vidé à chaque publication (`/api/refresh`). Sans cette clé : copie publiée sur https://kinou-admin.netlify.app/data/.
+vidé à chaque publication (`/api/refresh`). Sans cette clé (ou si GitHub refuse) : le même fichier lu sans clé
+(dépôt admin public, `raw.githubusercontent.com/Kinou-DoP/admin/main/data/`).
 Les tokens GitHub (organisation Kinou-DoP) sont créés sans expiration.
 Ainsi une publication de l'admin ne déclenche **aucune mise en ligne Netlify** (économie de crédits).
-On les modifie avec l'interface d'admin (https://kinou-admin.netlify.app), pas dans ce repo.
+On les modifie avec l'interface d'admin (https://kinou-dop.github.io/admin/, GitHub Pages), pas dans ce repo.
 
 ```
 data/
