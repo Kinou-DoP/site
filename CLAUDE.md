@@ -206,6 +206,9 @@ site/
 └── README.md
 ```
 
+À chaque modification de `main.css` ou `app.js`, mettre à jour le numéro `?v=` dans `index.html` (date-heure) :
+sinon les navigateurs (cache de 10 min de GitHub Pages, Safari surtout) gardent l'ancienne version.
+
 Les pages DP ne sont pas des fichiers séparés : `index.html#<slug>` ouvre la page du DP.
 `#<slug>/<categorie>` ouvre directement un onglet (ex. `#lara-perrotte-boucard-cinematographer/fashion`,
 `…/music-video`, `…/about`) ; changer d'onglet met l'adresse à jour (`replaceState`, sans étape de plus pour le bouton retour).
