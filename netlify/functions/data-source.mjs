@@ -11,7 +11,13 @@ export async function readData(path) {
   if (token) {
     var url = "https://api.github.com/repos/" + ADMIN_REPO + "/contents/data/" + path.split("/").map(encodeURIComponent).join("/") + "?ref=main";
     var r = await fetch(url, { headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github.raw+json", "User-Agent": "kinou-site" } });
-    if (r.ok || r.status === 404) { r.source = "github"; return r; }
+    if (r.ok) { r.source = "github"; return r; }
+    // 404 : fichier absent… ou clé qui ne voit plus le repo (ex. repo déplacé) : on tente la copie de secours.
+    if (r.status === 404) {
+      var f = await fetch(FALLBACK + path);
+      if (f.ok) { f.source = "copie"; return f; }
+      r.source = "github"; return r;
+    }
   }
   var c = await fetch(FALLBACK + path);
   c.source = "copie";
