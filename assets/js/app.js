@@ -264,7 +264,8 @@
       document.body.classList.add("viewing");
       hero.style.transition = o.instant ? "none" : "transform " + ANIM + "ms " + EASE + ", opacity .25s";
       hero.style.transform = "none"; hero.style.opacity = 1;
-      if (!o.noHistory) pushPage({ k: "dp", slug: o.slug });
+      if (o.replaceHistory) { try { history.replaceState({ k: "dp", slug: o.slug }, "", "#" + o.slug); } catch (e) {} }
+      else if (!o.noHistory) pushPage({ k: "dp", slug: o.slug });
       hero.classList.add("ready");
       if (o.from === "home") HomeAPI.pause();
       openWork(o.slug, o.from === "home" ? o.film : null);
@@ -384,7 +385,11 @@
       var title = sl.film + (sl.song ? " · " + sl.song : ""), dp = sl.dps && sl.dps[0], same = null;
       if (dp && dp.slug && WORK[dp.slug]) same = WORK[dp.slug].filter(function (c) { return c.slate && c.slate === sl.slate; })[0];
       return { title: title, sub: sl.legend, video: sl.video, full: sl.full || (same && same.full) || "", nosnip: true, img: sl.img || (same && same.img),
-        stills: sl.stills && sl.stills.length ? sl.stills : (same && same.stills) || null, h: sl.h, slate: sl.slate };
+        stills: sl.stills && sl.stills.length ? sl.stills : (same && same.stills) || null, h: sl.h, slate: sl.slate, dps: sl.dps, slide: sl };
+    }
+    function dpFromPlayer(d, a, p) {
+      closePlayer(true); if (pushed > 0) pushed--;
+      openView({ text: d.name, slug: d.slug, from: "home", rect: a.getBoundingClientRect(), film: p.slide, replaceHistory: true });
     }
     function playHome(slides, i) {
       var need = [];
@@ -440,8 +445,8 @@
       player.classList.toggle("has-nav", playList.length > 1 && playIdx > -1);
       projvid.pause(); pauseSnips();
       pstage.textContent = ""; pcap.textContent = "";
-      pstage.style.backgroundImage = bgFor(p);
       var src = p.full || (p.nosnip ? "" : p.video); // film complet (avec son) ; l'extrait seulement hors accueil
+      pstage.style.backgroundImage = src ? "none" : bgFor(p); // vidéo : fond noir (pas la vignette autour du film)
       if (src) {
         var v = document.createElement("video");
         v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = "auto";
@@ -452,6 +457,17 @@
         var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
       }
       ptitle.textContent = p.title;
+      // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page.
+      if (p.dps && p.dps.length) {
+        var who = document.createElement("div"); who.className = "pdps";
+        p.dps.forEach(function (d, k) {
+          if (k) who.appendChild(document.createTextNode(" & "));
+          var a = document.createElement(d.slug ? "a" : "span"); a.textContent = split(d.name).main;
+          if (d.slug) { a.href = "#" + d.slug; a.addEventListener("click", function (e) { e.preventDefault(); dpFromPlayer(d, a, p); }); }
+          who.appendChild(a);
+        });
+        pcap.appendChild(who);
+      }
       var s = document.createElement("p"); s.textContent = p.sub || p.cat; pcap.appendChild(s);
       buildStills(p);
       player.scrollTop = 0;

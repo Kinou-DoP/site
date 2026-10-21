@@ -133,6 +133,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 17. **Accueil → lecteur** : clic sur la vidéo = le film **complet avec le son** dans le lecteur (jamais l'extrait ; flèches = films
    de l'accueil) ; film complet et stills de la slide (`full`, importé avec la bande), sinon ceux du même film (id Slate)
    dans la fiche du chef op. Zone de l'en-tête (90 px du haut) exclue ; boutons de l'en-tête avec zone de clic agrandie.
+   Sous le film : nom du ou des chefs op en blanc (liens vers leur page). Pendant une vidéo, fond noir (pas la vignette).
 14. **Lecteur** : flèches ‹ › tout en bas de l'écran (films de l'onglet affiché, aussi au clavier) ; images agrandies : flèches en bas, glisser,
    pavé tactile ; le bouton retour du téléphone ferme l'image puis le lecteur (`history.pushState`).
 9. **Fonds** : liste → nom survolé en blanc et en gras (700), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du

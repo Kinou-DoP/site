@@ -360,3 +360,7 @@ body.closing #roulette { transition: opacity .3s .7s; }
 .burger::after { inset: -16px -20px -16px -24px; } /* burger : petite icône, grande zone (jusqu'au bord de l'écran) */
 /* Téléphone : lecteur sans stills plus haut dans l'écran */
 @media (max-width: 700px) { #player:not(.has-stills) .pin { margin: 12vh 0 auto; } }
+/* Lecteur depuis l'accueil : chef(s) op du film, en blanc, liens vers leur page */
+#player .pdps { margin: 0 0 6px; font-family: var(--kinou-sans); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--kinou-fg); }
+#player .pdps a { padding: 0; font: inherit; color: inherit; transition: opacity .2s; }
+#player .pdps a:hover { opacity: .7; }
