@@ -734,12 +734,13 @@
         }
         fill(); about.appendChild(bio);
         var links = document.createElement("div"); links.className = "links";
+        // Seulement les liens renseignés dans l'admin (pas de CV, d'Instagram ou de site : pas de lien).
         [["CV", "cv"], ["INSTAGRAM", "instagram"], ["WEBSITE", "website"]].forEach(function (l) {
-          var a = document.createElement("a"); a.textContent = l[0] + " \u2197"; a.href = d[l[1]] || "#";
-          if (d[l[1]]) { a.target = "_blank"; a.rel = "noopener"; } else { a.addEventListener("click", function (e) { e.preventDefault(); }); }
+          var u = String(d[l[1]] || "").trim(); if (!u) return;
+          var a = document.createElement("a"); a.textContent = l[0] + " \u2197"; a.href = u; a.target = "_blank"; a.rel = "noopener";
           links.appendChild(a);
         });
-        about.appendChild(links);
+        if (links.children.length) about.appendChild(links);
         work.classList.add("about-mode"); work.scrollTop = 0; clearProj();
         if (d.img) {
           aboutbg.style.backgroundImage = (d.shade || 'linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.3) 45%, rgba(0,0,0,.6))') + ', url("' + d.img + '")';
