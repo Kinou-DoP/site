@@ -357,5 +357,6 @@ body.closing #roulette { transition: opacity .3s .7s; }
 /* En-tête : zones de clic plus grandes que le texte (moins de mauvais clics, surtout sur la vidéo de l'accueil) */
 .lnav a, .burger { position: relative; }
 .logo::after, .nav-btn::after, .lnav a::after, .burger::after { content: ""; position: absolute; inset: -14px -10px; }
+.burger::after { inset: -16px -20px -16px -24px; } /* burger : petite icône, grande zone (jusqu'au bord de l'écran) */
 /* Téléphone : lecteur sans stills plus haut dans l'écran */
 @media (max-width: 700px) { #player:not(.has-stills) .pin { margin: 12vh 0 auto; } }
