@@ -13,6 +13,7 @@ Site statique Kinou
 ## À faire plus tard
 
 ### Site
+- **Téléphone en paysage et tablette** : mise en page dédiée à faire.
 - **Vraies adresses de pages (référencement Google)** : remplacer `kinou.fr/#slug` par des adresses réelles
   (`kinou.fr/<adresse>/`), Google ignorant ce qui suit le `#`. Les anciennes adresses n'ont pas de logique
   commune : chacune sera saisie à la main dans l'admin. Ajouter aussi un titre et une description par page.

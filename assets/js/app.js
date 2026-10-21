@@ -155,7 +155,7 @@
     }
     // Clic (ou toucher) sur la vidéo de l'accueil : le film dans le lecteur, comme depuis la page d'un chef op.
     document.getElementById("home").addEventListener("click", function (e) {
-      if (!active || e.target.closest("a, button, .info")) return;
+      if (!active || e.target.closest("a, button, .info") || e.clientY < 90) return; // zone de l'en-tête : pas de lecteur
       if (window.Site && Site.playHome) Site.playHome(PROJECTS, cur);
     });
     name.addEventListener("click", function (e) {
@@ -383,7 +383,7 @@
     function homeItem(sl) {
       var title = sl.film + (sl.song ? " · " + sl.song : ""), dp = sl.dps && sl.dps[0], same = null;
       if (dp && dp.slug && WORK[dp.slug]) same = WORK[dp.slug].filter(function (c) { return c.slate && c.slate === sl.slate; })[0];
-      return { title: title, sub: sl.legend, video: sl.video, full: sl.full || (same && same.full), img: sl.img || (same && same.img),
+      return { title: title, sub: sl.legend, video: sl.video, full: sl.full || (same && same.full) || "", nosnip: true, img: sl.img || (same && same.img),
         stills: sl.stills && sl.stills.length ? sl.stills : (same && same.stills) || null, h: sl.h, slate: sl.slate };
     }
     function playHome(slides, i) {
@@ -441,7 +441,7 @@
       projvid.pause(); pauseSnips();
       pstage.textContent = ""; pcap.textContent = "";
       pstage.style.backgroundImage = bgFor(p);
-      var src = p.full || p.video; // film complet (avec son) si disponible, sinon l'extrait
+      var src = p.full || (p.nosnip ? "" : p.video); // film complet (avec son) ; l'extrait seulement hors accueil
       if (src) {
         var v = document.createElement("video");
         v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = "auto";
@@ -531,6 +531,7 @@
       if (!fromBack) popStep();
       pstage.textContent = "";
       if (document.body.classList.contains("proj-on") && projvid.classList.contains("on")) { var pr = projvid.play(); if (pr && pr.catch) pr.catch(function () {}); }
+      if (GIF) feed.querySelectorAll("video.gif[src]").forEach(function (v) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); });
       if (homePlay) { homePlay = false; if (!view && document.body.classList.contains("is-home")) HomeAPI.resume(); }
     }
     player.addEventListener("click", function (e) { if (e.target === player || e.target === pgal || e.target.classList.contains("pin") || e.target.closest(".pclose")) closePlayer(); });
@@ -554,7 +555,30 @@
     });
     // Au survol d'un projet : la vignette joue un extrait video muet ; le fond plein ecran reste l'image fixe
     var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Essai « vignettes animées » : chaque vignette joue son extrait en boucle (sans son), seulement quand elle est à
+    // l'écran. Activer avec ?gif=1 dans l'adresse (gardé dans ce navigateur), désactiver avec ?gif=0.
+    var GIF = false;
+    try {
+      var gq = (location.search.match(/[?&]gif=([01])/) || [])[1];
+      if (gq) localStorage.setItem("kinou-gif", gq);
+      GIF = localStorage.getItem("kinou-gif") === "1";
+    } catch (e) {}
+    var gifSeen = GIF && "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var v = e.target.querySelector("video.gif"); if (!v) return;
+        if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+        else v.pause();
+      });
+    }, { root: work, rootMargin: "200px 0px" }) : null;
+    function gifThumb(st, p) {
+      if (!gifSeen || !p.video) return;
+      var v = document.createElement("video");
+      v.className = "snip gif"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "none"; v.dataset.src = p.video;
+      v.addEventListener("playing", function () { v.classList.add("on"); });
+      st.appendChild(v); gifSeen.observe(st);
+    }
     function snip(st, p, on) {
+      if (GIF) return; // essai vignettes animées : elles jouent déjà toutes
       var v = st.querySelector("video.snip");
       if (!on) {
         if (v) {
@@ -598,6 +622,7 @@
     work.addEventListener("scroll", function () { if (!focusRaf) focusRaf = requestAnimationFrame(pickFocus); }, { passive: true });
     function render(slug, cat, delay) {
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
+      if (gifSeen) { gifSeen.disconnect(); feed.querySelectorAll("video.gif").forEach(function (v) { v.pause(); v.removeAttribute("src"); v.load(); }); }
       feed.className = "feed" + (mode === "gallery" ? " gallery" : "");
       feed.style.setProperty("--d", delay + "ms");
       clearProj();
@@ -618,6 +643,7 @@
         meta.appendChild(h); meta.appendChild(s);
         if (p.cat && cat === "FEATURED") { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
+        gifThumb(st, p);
         d._p = p;
         d.addEventListener("mouseenter", function (e) { if (!inZone(e)) return; showProj(p); snip(st, p, true); });
         d.addEventListener("mouseleave", function () { snip(st, p, false); if (selCard) showProj(selCard._p, 0); else document.body.classList.remove("proj-on"); });
