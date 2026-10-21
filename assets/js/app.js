@@ -415,20 +415,34 @@
       else if (player.classList.contains("on")) closePlayer(true);
       else restorePage(e.state);
     });
+    // Adresse d'une page de chef op : #<slug>, ou #<slug>/<categorie> (ex. #lara-…/fashion, #lara-…/about) pour partager
+    // directement un onglet. Changer d'onglet met l'adresse à jour sans ajouter d'étape au bouton retour.
+    function catSlug(c) { return c.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+    function parseHash() {
+      var h = location.hash.slice(1).split("/");
+      return { slug: decodeURIComponent(h[0] || ""), cat: (h[1] || "").toLowerCase() };
+    }
+    function tabUrl(slug, c) {
+      try { history.replaceState({ k: "dp", slug: slug }, "", "#" + slug + (c && c !== "FEATURED" ? "/" + catSlug(c) : "")); } catch (e) {}
+    }
     // Pages du site dans l'historique (accueil, liste, page d'un chef op) : le bouton retour revient à la précédente.
     function pushPage(st) {
       try { history.pushState(st, "", st.k === "dp" ? "#" + st.slug : location.pathname + location.search); } catch (e) {}
     }
     function restorePage(st) {
       if (st && st.kinou) return; // entrée du lecteur (bouton « suivant » du navigateur) : rien à faire
-      if (!st || !st.k) st = location.hash.length > 1 ? { k: "dp", slug: location.hash.slice(1) } : { k: "home" };
+      if (!st || !st.k) st = location.hash.length > 1 ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat } : { k: "home" };
       if (st.k === "dp") {
-        if (view && view.o.slug === st.slug) return;
+        if (view && view.o.slug === st.slug) { // même page, autre onglet (adresse modifiée à la main)
+          var tb = st.cat && [].filter.call(cats.querySelectorAll("button"), function (x) { return catSlug(x.dataset.cat) === st.cat; })[0];
+          if (tb && !tb.classList.contains("on")) tb.click();
+          return;
+        }
         if (view) closeView(true);
         var a = document.querySelector('li a[data-view="' + st.slug + '"]');
         if (!a) return;
         if (document.body.classList.contains("is-home")) show("list");
-        openView({ text: a.textContent, slug: st.slug, from: "list", a: a, instant: true, noHistory: true });
+        openView({ text: a.textContent, slug: st.slug, from: "list", a: a, instant: true, noHistory: true, cat: st.cat });
         return;
       }
       if (view) closeView(); // le nom repart à sa place (accueil ou liste)
@@ -676,7 +690,7 @@
         b.addEventListener("click", function () {
           cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === c); });
           work.classList.remove("about-mode"); document.body.classList.remove("about-on");
-          work.scrollTop = 0; render(slug, c, 0);
+          work.scrollTop = 0; render(slug, c, 0); tabUrl(slug, c);
         });
         cats.appendChild(b);
       }
@@ -685,6 +699,7 @@
       ab.textContent = "ABOUT"; ab.className = "sep"; ab.dataset.cat = "ABOUT";
       if (copy) ab.setAttribute("aria-hidden", "true");
       ab.addEventListener("click", function () {
+        tabUrl(slug, "ABOUT");
         cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === "ABOUT"); });
         about.textContent = "";
         var d = ABOUT[slug] || {};
@@ -758,7 +773,15 @@
       }
       document.body.classList.add("has-work");
       setTimeout(function () { warmAll(slug); }, 1200); // apres FEATURED : les autres categories
-      work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = defMode(); buildTabs(slug); render(slug, "FEATURED", 700);
+      work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = defMode(); buildTabs(slug);
+      // Onglet demandé dans l'adresse (#slug/fashion) : ouvert directement, sinon FEATURED.
+      var want = view && view.o.cat, c0 = want && (CATS_BY[slug] || CATS).filter(function (c) { return catSlug(c) === want; })[0];
+      if (want === "about") { var abt = cats.querySelector('button[data-cat="ABOUT"]'); if (abt) { render(slug, "FEATURED", 0); abt.click(); return; } }
+      if (c0 && c0 !== "FEATURED") {
+        curCat = c0; cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === c0); });
+        render(slug, c0, 700); return;
+      }
+      render(slug, "FEATURED", 700);
       if (film) {
         var cards = feed.querySelectorAll(".card");
         var pick = film.slate && [].some.call(cards, function (c) { return c._p.slate === film.slate; });
@@ -935,11 +958,11 @@
     });
     // Liens directs : page-du-site#slug-du-chef-op ouvre directement sa page.
     function routeFromHash() {
-      var slug = location.hash.slice(1);
+      var h = parseHash(), slug = h.slug;
       var a = slug && document.querySelector('li a[data-view="' + slug + '"]');
       if (!a || view) return;
       show("list");
-      openView({ text: a.textContent, slug: slug, from: "list", a: a, instant: true, noHistory: true });
+      openView({ text: a.textContent, slug: slug, from: "list", a: a, instant: true, noHistory: true, cat: h.cat });
     }
     if (location.hash.length > 1) routeFromHash();
     try { history.replaceState(view ? { k: "dp", slug: view.o.slug } : { k: "home" }, ""); } catch (e) {}

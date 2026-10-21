@@ -207,6 +207,8 @@ site/
 ```
 
 Les pages DP ne sont pas des fichiers séparés : `index.html#<slug>` ouvre la page du DP.
+`#<slug>/<categorie>` ouvre directement un onglet (ex. `#lara-perrotte-boucard-cinematographer/fashion`,
+`…/music-video`, `…/about`) ; changer d'onglet met l'adresse à jour (`replaceState`, sans étape de plus pour le bouton retour).
 Pour tester en local, servir le dossier (fetch ne marche pas en `file://`) :
 `python3 -m http.server` puis http://localhost:8000.
 
