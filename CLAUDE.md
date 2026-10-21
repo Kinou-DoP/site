@@ -142,8 +142,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 ## À faire (noté par Gus)
 - **Téléphone en paysage et tablette** : mise en page dédiée à prévoir (aujourd'hui : roulette en portrait seulement,
   sinon la mise en page ordinateur ou téléphone selon la largeur).
-- **Essai « vignettes animées »** (`?gif=1` dans l'adresse, `?gif=0` pour revenir) : chaque vignette d'une page de chef op
-  joue son extrait en boucle ; à garder ou supprimer selon l'avis de Gus (fonctions `gifThumb`, `GIF` dans app.js).
+- Vignettes animées (extrait en boucle à la place de l'image) : essayé le 22/10/2026, Gus préfère les vignettes fixes.
 
 ## Branches et mise en ligne
 
