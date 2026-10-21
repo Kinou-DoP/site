@@ -128,6 +128,10 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    grand (26px) et blanc, les autres plus petits et estompés ; élan au doigt, arrivée calculée pile sur un nom ;
    le nom au centre affiche en fond l'extrait de son 1er film FEATURED ; toucher un nom l'amène au centre, toucher
    le nom au centre ouvre sa page. Commence sous l'en-tête (coupe nette).
+16. **Historique** : accueil, liste et page d'un chef op sont des entrées d'historique (`pushPage`) : le bouton retour
+   revient à la page précédente (le nom repart à sa place) ; lecteur et image agrandie se ferment d'abord.
+17. **Accueil → lecteur** : clic sur la vidéo = le film dans le lecteur (flèches = films de l'accueil) ; film complet et
+   stills de la slide, sinon ceux du même film (id Slate) dans la fiche du chef op.
 14. **Lecteur** : flèches ‹ › tout en bas de l'écran (films de l'onglet affiché, aussi au clavier) ; images agrandies : flèches en bas, glisser,
    pavé tactile ; le bouton retour du téléphone ferme l'image puis le lecteur (`history.pushState`).
 9. **Fonds** : liste → nom survolé en blanc et en gras (700), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du

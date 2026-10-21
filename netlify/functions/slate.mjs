@@ -142,7 +142,7 @@ export async function readReel(link, max) {
     return {
       slate: c.slate, title: t,
       film: k > -1 ? t.slice(0, k).trim() : t, song: k > -1 ? t.slice(k + 3).trim() : "",
-      legend: c.sub || "", video: c.video || "", img: c.img || "",
+      legend: c.sub || "", video: c.video || "", full: c.full || "", img: c.img || "",
       artists: (x.m.artists_names || []).map(function (n) { return String(n).trim(); }).filter(Boolean)
     };
   });

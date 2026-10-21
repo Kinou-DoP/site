@@ -347,7 +347,10 @@ body.roulette-on.is-list #roulette { display: block; }
 body.viewing #roulette { opacity: 0; pointer-events: none; }
 body.closing #roulette { transition: opacity .3s .7s; }
 .ritem { position: absolute; left: 0; right: 0; top: 0; height: 58px; display: flex; align-items: center; justify-content: center; white-space: nowrap;
-  font-family: var(--kinou-sans); font-weight: 700; letter-spacing: -0.02em; line-height: 1; color: var(--kinou-fg); text-shadow: 0 0 18px rgba(0,0,0,.5);
+  font-family: var(--kinou-sans); font-weight: 700; font-size: 26px; letter-spacing: -0.02em; line-height: 1; color: var(--kinou-fg); transform-origin: 50% 50%;
   user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer; will-change: transform; }
 .ritem .t { margin-left: .45em; font-size: .42em; font-weight: 600; letter-spacing: .08em; opacity: .7; }
 .ritem .t:empty { display: none; }
+/* Accueil : la vidéo s'ouvre dans le lecteur au clic */
+#home { cursor: pointer; }
+#home .info, #home .bars { cursor: auto; }
