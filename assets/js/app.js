@@ -366,7 +366,7 @@
     function inZone(e) { return e.clientY >= work.getBoundingClientRect().top; }
   // Lecteur par-dessus la galerie / le feed
     var player = document.getElementById("player"), pstage = document.getElementById("pstage"), pcap = document.getElementById("pcap");
-    var ptitle = document.getElementById("ptitle"), pgal = document.getElementById("pgal"), plight = document.getElementById("plight");
+    var pglass = document.getElementById("pglass"), ptitle = document.getElementById("ptitle"), pgal = document.getElementById("pgal"), plight = document.getElementById("plight");
     // Films de l'onglet affiché (ordre de la page) : flèches ‹ › du lecteur pour passer au précédent / suivant.
     var playList = [], playIdx = -1;
     var pprev = document.getElementById("pprev"), pnext = document.getElementById("pnext");
@@ -407,7 +407,7 @@
       var s = document.createElement("p"); s.textContent = p.sub || p.cat; pcap.appendChild(s);
       buildStills(p);
       player.scrollTop = 0;
-      player.classList.add("on");
+      player.classList.add("on"); pglass.classList.add("on");
     }
     // Galerie de stills (p.stills) sous les credits : chaque image apparait en arrivant a l'ecran ;
     // un clic l'agrandit (fleches : precedente / suivante).
@@ -479,7 +479,7 @@
     function closePlayer(fromBack) {
       if (!player.classList.contains("on")) return;
       if (plight.classList.contains("on")) closeStill(fromBack);
-      player.classList.remove("on");
+      player.classList.remove("on"); pglass.classList.remove("on");
       if (!fromBack) popStep();
       pstage.textContent = "";
       if (document.body.classList.contains("proj-on") && projvid.classList.contains("on")) { var pr = projvid.play(); if (pr && pr.catch) pr.catch(function () {}); }
