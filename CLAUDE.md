@@ -103,7 +103,8 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 2. **Palette** : fond noir pur (#000), texte blanc cassé `#FFFCEB` (`--kinou-fg`), textes secondaires en `rgba(255,252,235,…)` ; teinte HSL par clip pour les fonds de remplacement.
 3. **Typographie** : **Satoshi** (Fontshare) partout — 300 pour la liste des DPs ; titres 600 (rendu en 700), interlettrage serré ; étiquettes 11–13px, `letter-spacing: .14em`, majuscules.
 4. **Grille clips** : galerie 3 colonnes 16:9 à toutes les tailles (gap 6px, 4px mobile) ; mode feed en 1 colonne.
-5. **Overlay** : plein écran, fond noir 98 %, fermeture sur Escape, croix ou clic hors zone.
+5. **Overlay** : plein écran, fermeture sur Escape, croix ou clic hors zone ; lecteur sur fond « verre dépoli »
+   (page floutée 36px, voile noir 62 %), image agrandie sur fond noir 98 %.
 6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms, etc.) + le voile
    lumineux au survol d'un film (blanc 20 % en 0,25 s, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » et « fiction » (à venir,
