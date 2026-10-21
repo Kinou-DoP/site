@@ -18,6 +18,7 @@ Les données vivent dans le repo `Kinou-DoP/admin` (dossier `data/`). Le site of
 les chargent via `/api/data/<chemin>` (`netlify/functions/data.mjs`), qui les lit **directement dans GitHub**
 avec la clé en lecture seule `GITHUB_DATA_TOKEN` (variable d'environnement Netlify du site), cache CDN 5 min
 vidé à chaque publication (`/api/refresh`). Sans cette clé : copie publiée sur https://kinou-admin.netlify.app/data/.
+Les tokens GitHub (organisation Kinou-DoP) expirent au bout de 366 jours : voir « À renouveler » dans le README.
 Ainsi une publication de l'admin ne déclenche **aucune mise en ligne Netlify** (économie de crédits).
 On les modifie avec l'interface d'admin (https://kinou-admin.netlify.app), pas dans ce repo.
 
