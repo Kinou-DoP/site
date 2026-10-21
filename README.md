@@ -2,7 +2,7 @@
 Site statique Kinou
 
 - `index.html` : structure ; `assets/css/main.css` : styles ; `assets/js/app.js` : logique.
-- Données : écrites par l'admin (https://kinou-admin.netlify.app) dans le repo `kinou-agency/admin`, lues par le site
+- Données : écrites par l'admin (https://kinou-admin.netlify.app) dans le repo `Kinou-DoP/admin`, lues par le site
   via `/api/data` directement dans GitHub (variable Netlify secrète `GITHUB_DATA_TOKEN`, lecture seule).
   Clips synchronisés depuis Slate par `netlify/functions/`.
 - Test en local : `python3 -m http.server` puis http://localhost:8000 (fetch ne marche pas en `file://` ;
@@ -40,10 +40,10 @@ Site statique Kinou
   (préchauffer les tailles courantes : 600 et 1000).
 
 ### GitHub
-- **Passer `kinou-agency` en organisation** (aujourd'hui compte personnel) pour que chacun ait son compte
-  et son token. Avant : créer les comptes perso (Gus, beau-frère), ajouter une connexion email/mot de passe
-  sur Netlify et refaire la connexion GitHub de claude.ai. Puis Settings → Account → Turn into an organization.
-  Après : réautoriser GitHub dans Netlify (`kinou-test`, `kinou-admin`) et réinstaller l'application Claude.
+- **Organisation GitHub `Kinou-DoP`** (oct. 2026) : les dépôts site, admin et app y ont été déplacés depuis le compte
+  personnel `kinou-agency` (resté le compte de Gus, propriétaire de l'organisation). Chacun a son propre compte GitHub,
+  invité dans l'organisation, et crée ses tokens « fine-grained » avec Resource owner = Kinou-DoP.
+- **Collègues** : un compte GitHub chacun (créé par Gus si besoin) et leur propre token pour l'admin.
 - **Mini-applis des collègues** : pas de compte GitHub pour eux ; la clé GitHub reste côté serveur (Netlify),
   accès par mot de passe ou code personnel.
 

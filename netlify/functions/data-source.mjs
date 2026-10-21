@@ -1,4 +1,4 @@
-// Lecture des fichiers de données (repo kinou-agency/admin, dossier data/).
+// Lecture des fichiers de données (repo Kinou-DoP/admin, dossier data/).
 // Avec la clé GITHUB_DATA_TOKEN (lecture seule, réglages Netlify du site) : directement dans GitHub,
 // donc une publication de l'admin est visible sans aucune mise en ligne.
 // Sans clé : copie publiée sur kinou-admin.netlify.app (ancien fonctionnement).

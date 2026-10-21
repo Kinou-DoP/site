@@ -6,7 +6,7 @@ kinou.fr est le site d'une agence de cinématographes parisienne.
 Environ 70 directeurs de la photographie (DPs) référencés.
 Stack : HTML/CSS/JS vanilla, zéro framework, données JSON statiques.
 Hébergement : Netlify (déploiement automatique sur push GitHub).
-Repo : github.com/kinou-agency/site
+Repo : github.com/Kinou-DoP/site
 
 La référence visuelle de départ est le prototype `reference/prototype.html`. Depuis, Gus a demandé
 des évolutions (police Satoshi, blanc cassé, en-tête, fonds et survols) : elles sont décrites dans
@@ -14,7 +14,7 @@ les règles visuelles ci-dessous et priment sur le prototype.
 
 ## Architecture des données
 
-Les données vivent dans le repo `kinou-agency/admin` (dossier `data/`). Le site officiel **et** la beta
+Les données vivent dans le repo `Kinou-DoP/admin` (dossier `data/`). Le site officiel **et** la beta
 les chargent via `/api/data/<chemin>` (`netlify/functions/data.mjs`), qui les lit **directement dans GitHub**
 avec la clé en lecture seule `GITHUB_DATA_TOKEN` (variable d'environnement Netlify du site), cache CDN 5 min
 vidé à chaque publication (`/api/refresh`). Sans cette clé : copie publiée sur https://kinou-admin.netlify.app/data/.
