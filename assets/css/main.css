@@ -34,7 +34,6 @@ html { scrollbar-gutter: stable; }
 #projbg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center; background-repeat: no-repeat; opacity: 0; transition: opacity .45s ease; pointer-events: none; }
 body.viewing.proj-on #projbg { opacity: 1; }
 .card { cursor: pointer; }
-.card.sel .still { box-shadow: inset 0 0 0 2px rgba(255,252,235,.9); }
 #aboutbg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center 30%; background-repeat: no-repeat; opacity: 0; transition: opacity .7s ease; pointer-events: none; }
 body.viewing.about-on #aboutbg { opacity: 1; }
 .about .links { display: flex; flex-wrap: wrap; gap: 6px 28px; margin-top: 34px; }
