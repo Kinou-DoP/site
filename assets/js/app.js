@@ -1,5 +1,9 @@
 // kinou — logique du site. Les donnees viennent des fichiers JSON de DATA_BASE.
 (function () {
+  // Arrivée directe sur la page d'un chef op (lien, rechargement) : accueil et liste masqués le temps qu'elle s'ouvre
+  // (sinon on les voit passer une fraction de seconde).
+  if (location.hash.length > 1) document.documentElement.classList.add("deep");
+  function undeep(ms) { setTimeout(function () { document.documentElement.classList.remove("deep"); }, ms || 0); }
   // Donnees JSON : publiees par l'admin (repo Kinou-DoP/admin), lues ici par le site officiel et la beta.
   // (via /api/data du site, qui les lit dans GitHub ; en local, on passe par la beta)
   var DATA_BASE = /(^|\.)netlify\.app$|(^|\.)kinou\.fr$/.test(location.hostname) ? "/api/data/" : "https://beta--kinou-test.netlify.app/api/data/";
@@ -966,11 +970,12 @@
     function routeFromHash() {
       var h = parseHash(), slug = h.slug;
       var a = slug && document.querySelector('li a[data-view="' + slug + '"]');
-      if (!a || view) return;
+      if (!a || view) { undeep(); return; }
       show("list");
       openView({ text: a.textContent, slug: slug, from: "list", a: a, instant: true, noHistory: true, cat: h.cat });
+      undeep(700); // la liste a fini de s'effacer derrière la page
     }
-    if (location.hash.length > 1) routeFromHash();
+    if (location.hash.length > 1) routeFromHash(); else undeep();
     try { history.replaceState(view ? { k: "dp", slug: view.o.slug } : { k: "home" }, ""); } catch (e) {}
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (plight.classList.contains("on")) closeStill(); else if (player.classList.contains("on")) closePlayer(); else closeView(); } });
   }
@@ -1023,5 +1028,5 @@
     var slides = r[0].slides.map(function (p) { if (!p.dps) p.dps = [{ name: p.dp, slug: p.slug }]; return p; });
     initHome(slides, r[0].duration);
     initSite(r[1].dps);
-  }).catch(function (e) { console.error("kinou : chargement des donnees impossible", e); });
+  }).catch(function (e) { undeep(); console.error("kinou : chargement des donnees impossible", e); });
 })();

@@ -366,3 +366,7 @@ body.closing #roulette { transition: opacity .3s .7s; }
 #player .pdps a:hover { opacity: .7; }
 /* Portraits (onglet About) toujours en noir et blanc, quelle que soit la photo déposée */
 #aboutbg { filter: grayscale(1); }
+/* Arrivée directe sur la page d'un chef op : rien de l'accueil ni de la liste pendant l'ouverture */
+html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: hidden !important; }
+/* Arrivée directe sur la page d'un chef op : rien de l'accueil ni de la liste pendant l'ouverture */
+html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: hidden !important; }
