@@ -190,7 +190,7 @@
       var im = cache[u];
       if (!im) { im = cache[u] = new Image(); im.src = u; }
       function apply(u) {
-        if (a.matches(":hover") || a === document.activeElement) {
+        if (bgWanted(a)) {
           bg.style.backgroundImage = 'linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.35)),url("' + u + '")';
           bg.style.opacity = 1;
         }
@@ -204,16 +204,19 @@
       var slug = a.dataset.view;
       warmThumbs(slug);
       loadDP(slug).then(function (d) {
-        if (!(a.matches(":hover") || a === document.activeElement)) return;
+        if (!bgWanted(a)) return;
         var f = d && (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0];
         if (!f) { showBg(a); return; } // pas de fiche ou pas d'extrait : image s'il y en a une
         if (bgvid.dataset.src !== f.video) { bgvid.src = f.video; bgvid.dataset.src = f.video; }
         bgvid.style.setProperty("--z", f.zoom > 1 ? f.zoom : 1);
         try { bgvid.currentTime = 0; } catch (e) {}
-        bgvid.onplaying = function () { if (a.matches(":hover") || a === document.activeElement) bgvid.classList.add("on"); };
+        bgvid.onplaying = function () { if (bgWanted(a)) bgvid.classList.add("on"); };
         var pr = bgvid.play(); if (pr && pr.catch) pr.catch(function () {});
       });
     }
+    // Le fond suit le nom survolé, focalisé, ou au centre de la roulette (téléphone).
+    var roulSel = null;
+    function bgWanted(a) { return a.matches(":hover") || a === document.activeElement || a.dataset.view === roulSel; }
     function hide() { bg.style.opacity = 0; bgvid.classList.remove("on"); bgvid.onplaying = null; bgvid.pause(); }
 
     document.querySelectorAll("li a").forEach(function (a) {
@@ -263,7 +266,9 @@
     }
     function closeView(instant) {
       if (!view) return;
-      var o = view.o, rect = o.from === "home" ? homeNameRect() : nameRect(o.a, view.main);
+      var o = view.o;
+      if (o.from === "list" && roul.active()) o.a = roul.center(o.slug);
+      var rect = o.from === "home" ? homeNameRect() : nameRect(o.a, view.main);
       view = null;
       try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
       var f = hero.querySelector(".n").getBoundingClientRect();
@@ -721,7 +726,123 @@
       document.documentElement.style.overflow = t === "home" ? "hidden" : "";
       document.getElementById("home").style.display = t === "home" ? "" : "none";
       if (t === "home") HomeAPI.resume(); else { HomeAPI.pause(); window.scrollTo(0, 0); }
+      if (t === "list") roul.kick();
     }
+
+    // ---------- Roulette des chefs op (téléphone, en portrait) ----------
+    // Inspirée de la roulette Squarespace : noms en boucle, le nom au repère (38 % de la hauteur) est grand et blanc,
+    // les autres rapetissent et s'estompent. Défilement au doigt avec élan ; au lâcher, la course est calculée pour
+    // s'arrêter pile sur un nom (pas d'arrêt entre deux noms puis de recalage brusque). Le nom au centre affiche
+    // en fond l'extrait de son 1er film FEATURED ; toucher un autre nom l'amène au centre, toucher le nom au centre
+    // ouvre sa page.
+    var roul = (function () {
+      var box = document.getElementById("roulette"), mq = window.matchMedia("(max-width: 700px) and (hover: none) and (orientation: portrait)");
+      var N = DPS.length, H = 58, POOL = 30, REF = 0.38, TAU = 300; // TAU : durée de l'élan (ms), plus grand = défile plus longtemps
+      var SIZE = [11, 20, 26], OP = [0.2, 0.65, 1], SPREAD = 4.5, MID = 0.7, PLATEAU = 0.3;
+      var offset = 0, pool = [], raf = 0, glide = null, touch = null, selTimer = 0, sel = -1;
+      function mod(i) { return ((i % N) + N) % N; }
+      function smooth(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+      function look(d) { // d : distance au repère, en nombre de noms
+        if (d >= SPREAD) return [SIZE[0], OP[0]];
+        if (d >= MID) { var t = smooth(1 - (d - MID) / (SPREAD - MID)); return [SIZE[0] + (SIZE[1] - SIZE[0]) * t, OP[0] + (OP[1] - OP[0]) * t]; }
+        if (d >= PLATEAU) { var u = smooth(smooth(1 - (d - PLATEAU) / (MID - PLATEAU))); return [SIZE[1] + (SIZE[2] - SIZE[1]) * u, OP[1] + (OP[2] - OP[1]) * u]; }
+        return [SIZE[2], OP[2]];
+      }
+      for (var i = 0; i < POOL; i++) {
+        var el = document.createElement("div"); el.className = "ritem";
+        el.appendChild(document.createTextNode(""));
+        var t = document.createElement("span"); t.className = "t"; el.appendChild(t);
+        box.appendChild(el); pool.push(el);
+      }
+      function render() {
+        raf = 0;
+        var h = box.clientHeight || window.innerHeight, ref = h * REF, c = offset / H, first = Math.floor(c) - Math.floor(POOL / 2);
+        pool.forEach(function (el, k) {
+          var slot = first + k, y = ref + (slot - c) * H;
+          if (y < -80 || y > h + 80) { el.style.display = "none"; return; }
+          var d = DPS[mod(slot)], parts = split(d.name), st = look(Math.abs(y - ref) / H);
+          el.style.display = "";
+          if (el._slug !== d.slug) { el.firstChild.nodeValue = parts.main; el.lastChild.textContent = parts.tags; el._slug = d.slug; el._name = d.name; }
+          el._slot = slot;
+          el.style.transform = "translate3d(0," + (y - H / 2) + "px,0)";
+          el.style.fontSize = st[0] + "px"; el.style.opacity = st[1];
+        });
+        var s = mod(Math.round(c));
+        if (s !== sel) { sel = s; clearTimeout(selTimer); selTimer = setTimeout(pick, 260); }
+      }
+      function draw() { if (!raf) raf = requestAnimationFrame(render); }
+      // Nom resté au centre un instant (pas pendant un défilement rapide) : fond vidéo de son 1er film.
+      function pick() {
+        if (!active() || !document.body.classList.contains("is-list") || document.body.classList.contains("viewing")) return;
+        var d = DPS[sel], a = document.querySelector('li a[data-view="' + d.slug + '"]');
+        if (roulSel === d.slug) return;
+        hide(); roulSel = d.slug; loadDP(d.slug);
+        if (a) showBgVideo(a);
+      }
+      // Glisse jusqu'à « target » : décélération exponentielle (élan naturel), arrivée exacte.
+      function glideTo(target, tau) {
+        var from = offset, t0 = performance.now();
+        cancelAnimationFrame(glide);
+        (function step(now) {
+          var k = 1 - Math.exp(-(now - t0) / tau);
+          offset = from + (target - from) * k;
+          if (Math.abs(target - offset) < 0.4) { offset = target; render(); glide = null; return; }
+          render(); glide = requestAnimationFrame(step);
+        })(t0);
+      }
+      box.addEventListener("touchstart", function (e) {
+        cancelAnimationFrame(glide); glide = null;
+        var y = e.touches[0].clientY;
+        touch = { y: y, y0: y, t: performance.now(), v: 0, moved: false, dir: 0 };
+      }, { passive: true });
+      box.addEventListener("touchmove", function (e) {
+        e.preventDefault();
+        if (!touch) return;
+        var y = e.touches[0].clientY, now = performance.now(), dy = touch.y - y, dt = Math.max(1, now - touch.t);
+        touch.v = 0.7 * (dy / dt) + 0.3 * touch.v; // vitesse lissée (px/ms)
+        if (Math.abs(dy) > 0.5) touch.dir = dy > 0 ? 1 : -1;
+        if (Math.abs(y - touch.y0) > 6) touch.moved = true;
+        touch.y = y; touch.t = now; offset += dy; draw();
+      }, { passive: false });
+      box.addEventListener("touchend", function (e) {
+        if (!touch) return;
+        var tc = touch; touch = null;
+        if (!tc.moved) { // simple toucher
+          var el = e.target.closest(".ritem");
+          if (!el) return;
+          e.preventDefault();
+          if (el._slot === Math.round(offset / H)) open(el); else glideTo(el._slot * H, 160);
+          return;
+        }
+        var v = performance.now() - tc.t > 80 ? 0 : tc.v; // doigt immobile avant de lâcher : pas d'élan
+        var end = offset + v * TAU, target = Math.round(end / H) * H;
+        if (Math.abs(v) < 0.05) { // lâché lentement : on finit vers le nom suivant dans le sens du geste
+          var c = offset / H;
+          target = (tc.dir > 0 ? Math.ceil(c - 0.15) : tc.dir < 0 ? Math.floor(c + 0.15) : Math.round(c)) * H;
+          glideTo(target, 140);
+        } else glideTo(target, TAU);
+      }, { passive: false });
+      function open(el) {
+        var d = DPS[mod(el._slot)];
+        openView({ text: d.name, slug: d.slug, from: "list", a: el, rect: nameRect(el, split(d.name).main) });
+      }
+      function active() { return mq.matches; }
+      function sync() { document.body.classList.toggle("roulette-on", mq.matches); if (mq.matches) draw(); }
+      mq.addEventListener ? mq.addEventListener("change", sync) : mq.addListener(sync);
+      window.addEventListener("resize", draw);
+      sync();
+      return {
+        active: active,
+        // Centre la roulette sur un chef op (retour depuis sa page) et renvoie l'élément de son nom.
+        center: function (slug) {
+          var i = DPS.findIndex(function (d) { return d.slug === slug; }); if (i < 0) return null;
+          var c = Math.round(offset / H), slot = c + ((i - mod(c) + N + Math.floor(N / 2)) % N) - Math.floor(N / 2);
+          cancelAnimationFrame(glide); offset = slot * H; render();
+          return pool.filter(function (el) { return el._slot === slot; })[0] || null;
+        },
+        kick: function () { if (active()) { roulSel = null; sel = -1; render(); } }
+      };
+    })();
     document.getElementById("name").addEventListener("mouseover", function (e) { var a = e.target.closest("a"); if (a && a.dataset.slug) loadDP(a.dataset.slug); }); // precharge la fiche
     // Menu du téléphone (burger) : volet à gauche, fond flou de ce qu'il y a derrière.
     var drawer = document.getElementById("drawer"), burger = document.getElementById("burger");

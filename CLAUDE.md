@@ -124,6 +124,10 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    accueil : glisser gauche/droite ou haut/bas = projet suivant/précédent ; page d'un chef op : la zone qui défile
    commence sous la bande (`.work { top: var(--kinou-zm) }`), le film au milieu de l'écran (40 %) joue comme au survol,
    les onglets qui dépassent défilent lentement en boucle.
+15. **Roulette des chefs op** (téléphone en portrait, remplace la liste) : noms en boucle, le nom au repère (38 %)
+   grand (26px) et blanc, les autres plus petits et estompés ; élan au doigt, arrivée calculée pile sur un nom ;
+   le nom au centre affiche en fond l'extrait de son 1er film FEATURED ; toucher un nom l'amène au centre, toucher
+   le nom au centre ouvre sa page. Commence sous l'en-tête (coupe nette).
 14. **Lecteur** : flèches ‹ › tout en bas de l'écran (films de l'onglet affiché, aussi au clavier) ; images agrandies : flèches en bas, glisser,
    pavé tactile ; le bouton retour du téléphone ferme l'image puis le lecteur (`history.pushState`).
 9. **Fonds** : liste → nom survolé en blanc et en gras (700), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
