@@ -10,6 +10,13 @@ Site statique Kinou
 - Référence visuelle : `reference/prototype.html`.
 - Branches : `main` = site officiel, `beta` = test (https://beta--kinou-test.netlify.app).
 
+## ⚠️ À renouveler
+- **Tokens GitHub (expirent en octobre 2027)** : créés le 21/10/2026 pour 366 jours maximum (règle de l'organisation
+  Kinou-DoP). Avant le **20/10/2027**, en recréer avec les mêmes réglages (fine-grained, Resource owner Kinou-DoP, dépôt admin) :
+  - `GITHUB_DATA_TOKEN` (Contents : Read-only) → Netlify, site kinou-test, Environment variables, puis redéployer la beta/le site.
+    S'il expire, le site affiche la copie de secours (anciennes données) et les publications de l'admin n'apparaissent plus.
+  - Token de chaque personne pour l'admin (Contents : Read and write) → se reconnecter dans l'admin avec le nouveau.
+
 ## À faire plus tard
 
 ### Site
