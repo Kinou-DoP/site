@@ -620,10 +620,14 @@
       var r = work.getBoundingClientRect(), best = null, bd = 1e9, f1 = feed.querySelector(".card .still");
       var line = r.top + r.height * 0.4;
       if (f1) { var b1 = f1.getBoundingClientRect(); line = Math.min(line, (b1.top + b1.bottom) / 2 + work.scrollTop); }
-      feed.querySelectorAll(".card").forEach(function (c) {
+      var cards = feed.querySelectorAll(".card"), sizes = [];
+      cards.forEach(function (c) {
         var b = c.querySelector(".still").getBoundingClientRect(), d = Math.abs((b.top + b.bottom) / 2 - line);
         if (b.bottom > r.top && d < bd) { bd = d; best = c; }
+        // Légère perspective : plus un film est loin du repère, plus il est petit (au plus -7 %, à une demi-hauteur d'écran).
+        sizes.push(1 - 0.07 * Math.min(1, d / (r.height * 0.5)));
       });
+      cards.forEach(function (c, i) { c.style.transform = "scale(" + sizes[i].toFixed(4) + ")"; }); // écrit après toutes les lectures
       if (best === focusCard) return;
       if (focusCard) { focusCard.classList.remove("focus"); snip(focusCard.querySelector(".still"), focusCard._p, false); }
       focusCard = best;
