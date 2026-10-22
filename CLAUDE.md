@@ -139,6 +139,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 9. **Fonds** : liste → nom survolé en blanc et en gras (700), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
    film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé).
    Portrait de l'onglet About : toujours en noir et blanc (`filter: grayscale(1)` sur `#aboutbg`).
+   Cadrage : `about.pos` (background-position) ; zoom `about.zoom` = `transform: scale` avec `transform-origin` = pos.
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
 ## À faire (noté par Gus)

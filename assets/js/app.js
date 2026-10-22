@@ -745,6 +745,9 @@
         if (d.img) {
           aboutbg.style.backgroundImage = (d.shade || 'linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.3) 45%, rgba(0,0,0,.6))') + ', url("' + d.img + '")';
           aboutbg.style.backgroundPosition = d.pos || "center 30%";
+          // Zoom réglé dans l'admin (about.zoom) : agrandissement vers le point de cadrage.
+          aboutbg.style.transformOrigin = d.pos || "center 30%";
+          aboutbg.style.transform = d.zoom > 1 ? "scale(" + d.zoom + ")" : "";
           document.body.classList.add("about-on");
         }
         about.style.animation = "none"; void about.offsetWidth; about.style.animation = "";
