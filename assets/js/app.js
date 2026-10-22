@@ -383,6 +383,9 @@
         var p = {}; for (var k in c) p[k] = c[k];
         if (ov[c.slate]) for (k in ov[c.slate]) p[k] = ov[c.slate][k];
         if (d.open !== undefined && c.slate === d.open) p.open = true;
+        // Projet en stills avec un extrait vidéo choisi dans l'admin (court métrage sans film ni bande-annonce) :
+        // l'extrait joue au survol seulement ; au clic, le lecteur montre la galerie (pas de vidéo).
+        if (p.hover && p.hover.video && !p.full && !p.video) { p.video = p.hover.video; p.nosnip = true; }
         p.f = !!c.featured; if (c.featuredOrder) p.fo = c.featuredOrder;
         if (p.h === undefined) p.h = (i * 47 + hue) % 360;
         return p;

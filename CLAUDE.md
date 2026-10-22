@@ -111,6 +111,9 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   Projet en images seulement (type « illustration » sur Slate, sans vidéo) : ses images deviennent `stills` à la lecture du bundle
   (pas encore en ligne : fonctions Netlify figées ; en attendant, le robot de l'admin les met dans `overrides[<id>].images`) ;
   le lecteur n'a pas de grande image (`.nostage`) : la galerie directement sous le titre et les crédits.
+- `hover` (dans `overrides[<id>]` d'un projet en stills, case « Extrait vidéo au survol » de l'admin) : `{ link, title, video, img? }`,
+  extrait d'une autre vidéo Slate (court métrage qu'on ne peut pas montrer en entier, sans bande-annonce) ; `register()` le
+  met dans `p.video` avec `p.nosnip` : il joue au survol (et au repère sur téléphone), jamais dans le lecteur (galerie au clic).
 - `extras` (dans `overrides[<id>]` d'une fiche ou dans une slide de l'accueil) : ce qui s'affiche sous le film dans le lecteur,
   dans l'ordre de l'admin : `[{ link, title, stills: [...] } | { link, title, full, video, img }]` — galeries (3 colonnes, 2 sur
   téléphone) et vidéos à la taille du film (montée en fondu comme les stills ; une seule vidéo joue à la fois).
