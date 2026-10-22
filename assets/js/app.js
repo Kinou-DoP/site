@@ -525,7 +525,9 @@
     // Ancien format : p.stills seul. Projet sans film : ses images (p.stills) d'abord, puis les extras.
     function blocksOf(p, src) {
       var b = (p.extras || []).filter(function (x) { return (x.stills && x.stills.length) || x.full || x.video; });
-      var st = p.stills && p.stills.length ? [{ stills: p.stills }] : [];
+      // p.images : images d'un projet en images seulement, ajoutées par le robot GitHub de l'admin (lues sur Slate).
+      var own = p.stills && p.stills.length ? p.stills : !src && p.images && p.images.length ? p.images : null;
+      var st = own ? [{ stills: own }] : [];
       if (!p.extras) return st;
       return src ? b : st.concat(b);
     }

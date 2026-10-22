@@ -31,8 +31,9 @@ Contournements en place (à retirer ou simplifier au retour sur Netlify) :
   bande (`/api/reel`, 1er film : titre, extrait, vignette, **sans `full`**). Le robot GitHub de l'admin ajoute le `full`
   après chaque publication (fiches et accueil). Sans `full`, le site joue l'extrait.
 - Film complet des slides de l'accueil : ajouté par le même robot (`/api/reel` figé ne renvoie pas `full`).
-- Projet en images seulement (type « illustration » sur Slate) : `/api/dp` figé ne renvoie pas ses images ; il faut coller
-  le lien Slate de ses stills dans l'admin, sous le projet (`extras`). Le site affiche alors la galerie directement.
+- Projet en images seulement (type « illustration » sur Slate) : `/api/dp` figé ne renvoie pas ses images ; le robot GitHub
+  de l'admin les lit sur le bundle et les écrit dans `overrides[<id>].images` de la fiche (à chaque publication de la fiche ;
+  toutes les fiches au lancement manuel). Le site les affiche en galerie directe (`p.images`, comme `stills`).
 - Vignettes : le service d'images Netlify (`/.netlify/images`, `thumb()` dans app.js, `IMG_CDN`) n'est utilisé que sur
   `*.netlify.app` / `kinou.fr` : sur GitHub Pages, les vignettes sont les images Slate d'origine (non réduites).
 
@@ -108,7 +109,7 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 - `open` : clip présélectionné quand on arrive sur la page depuis l'accueil.
 - `stills` : galerie de stills (optionnelle), affichée sous le film dans le lecteur (3 colonnes, 2 sur téléphone), agrandie au clic.
   Projet en images seulement (type « illustration » sur Slate, sans vidéo) : ses images deviennent `stills` à la lecture du bundle
-  (pas encore en ligne : fonctions Netlify figées, voir « Hébergement actuel » ; en attendant, ses stills en `extras`) ;
+  (pas encore en ligne : fonctions Netlify figées ; en attendant, le robot de l'admin les met dans `overrides[<id>].images`) ;
   le lecteur n'a pas de grande image (`.nostage`) : la galerie directement sous le titre et les crédits.
 - `extras` (dans `overrides[<id>]` d'une fiche ou dans une slide de l'accueil) : ce qui s'affiche sous le film dans le lecteur,
   dans l'ordre de l'admin : `[{ link, title, stills: [...] } | { link, title, full, video, img }]` — galeries (3 colonnes, 2 sur
