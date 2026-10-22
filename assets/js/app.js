@@ -612,8 +612,8 @@
     }
     function pauseSnips() { document.querySelectorAll("video.snip").forEach(function (v) { v.pause(); }); }
     var touchOnly = window.matchMedia("(hover: none)"), focusCard = null, focusRaf = 0;
-    function pickFocus() {
-      focusRaf = 0;
+    function pickFocus(sizesOnly) {
+      if (sizesOnly !== true) focusRaf = 0;
       if (!touchOnly.matches || work.classList.contains("about-mode") || player.classList.contains("on")) return;
       // Repère à 40 % de la hauteur, mais près du haut de la page il descend avec le défilement depuis le centre du
       // 1er film : tout en haut, c'est toujours le 1er film (le plus important) qui est choisi.
@@ -627,8 +627,9 @@
         // Légère perspective : plus un film est loin du repère, plus il est petit (au plus -7 %, à une demi-hauteur d'écran).
         sizes.push(1 - 0.07 * Math.min(1, d / (r.height * 0.5)));
       });
-      cards.forEach(function (c, i) { c.style.transform = "scale(" + sizes[i].toFixed(4) + ")"; }); // écrit après toutes les lectures
-      if (best === focusCard) return;
+      // Propriété « scale » (pas « transform ») : elle s'ajoute à l'animation d'arrivée au lieu d'attendre sa fin.
+      cards.forEach(function (c, i) { c.style.scale = sizes[i].toFixed(4); }); // écrit après toutes les lectures
+      if (sizesOnly === true || best === focusCard) return;
       if (focusCard) { focusCard.classList.remove("focus"); snip(focusCard.querySelector(".still"), focusCard._p, false); }
       focusCard = best;
       if (best) { best.classList.add("focus"); showProj(best._p); snip(best.querySelector(".still"), best._p, true); }
@@ -636,6 +637,7 @@
     work.addEventListener("scroll", function () { if (!focusRaf) focusRaf = requestAnimationFrame(pickFocus); }, { passive: true });
     function render(slug, cat, delay) {
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
+      requestAnimationFrame(function () { pickFocus(true); }); // tailles (perspective) dès l'affichage des films
       feed.className = "feed" + (mode === "gallery" ? " gallery" : "");
       feed.style.setProperty("--d", delay + "ms");
       clearProj();
