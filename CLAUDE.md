@@ -71,6 +71,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 - `featured` / `featuredOrder` : clip du showreel FEATURED et son rang.
 - `open` : clip présélectionné quand on arrive sur la page depuis l'accueil.
 - `stills` : galerie de stills (optionnelle), affichée sous le film dans le lecteur (3 colonnes, 2 sur téléphone), agrandie au clic.
+  Projet en images seulement (type « illustration » sur Slate, sans vidéo) : ses images deviennent `stills` à la lecture du bundle ;
+  le lecteur montre la 1re image en grand (agrandie au clic) puis la galerie dessous, comme pour un film.
 - `about.img` : chemin relatif au dossier `data/dps/`.
 - Exception de mise en page = ajouter `"template": "special"` dans le JSON.
 

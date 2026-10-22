@@ -34,6 +34,9 @@ function clip(m, img, cat) {
   if (sn) c.video = sn.remote_address;
   if (streams[0]) c.full = streams[0].file.remote_address;
   if (img) c.img = img;
+  // Projet en images seulement (type « illustration » sur Slate) : ses images = galerie de stills du lecteur.
+  var ims = (m.images || []).map(function (im) { return im.image_player_url; }).filter(Boolean);
+  if (ims.length && !c.video && !c.full) c.stills = ims;
   c.cat = cat;
   c.slate = m.id;
   return c;

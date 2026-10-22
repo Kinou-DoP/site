@@ -500,8 +500,10 @@
         if (p.img) v.poster = p.img;
         v.src = src; pstage.appendChild(v);
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
-      } else if (p.img) {
-        var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
+      } else if (p.img || (p.stills && p.stills.length)) {
+        // Projet sans film (stills seulement) : la 1re image en grand, agrandie au clic ; la galerie suit dessous.
+        var im = document.createElement("img"); im.src = p.img || p.stills[0]; im.alt = p.title; pstage.appendChild(im);
+        if (p.stills && p.stills.length) { im.className = "pzoom"; im.addEventListener("click", function () { showStill(0); }); }
       }
       ptitle.textContent = p.title;
       // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page.
