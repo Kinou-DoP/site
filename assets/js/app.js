@@ -602,9 +602,8 @@
       var vsrc = p.video; // extrait d'apercu seulement (le film complet, trop lourd, est reserve au lecteur)
       if (!vsrc || reduceMotion || (navigator.connection && navigator.connection.saveData)) return;
       if (!v) {
-        v = document.createElement("video"); v.className = "snip"; v.muted = true; v.playsInline = true; v.preload = "auto";
-        v.addEventListener("loadedmetadata", function () { var d = v.duration || 0; v._a = d > 12 ? d * 0.3 : 0; v._b = v._a + 4; try { v.currentTime = v._a; } catch (e) {} });
-        v.addEventListener("timeupdate", function () { if (v._b && v.currentTime >= v._b) v.currentTime = v._a; });
+        // Extrait Slate en entier et en boucle (il est monté pour boucler ; ne pas le couper).
+        v = document.createElement("video"); v.className = "snip"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
         v.addEventListener("playing", function () { v.classList.add("on"); });
         v.src = vsrc; st.appendChild(v);
       }
