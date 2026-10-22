@@ -418,7 +418,8 @@
       var title = sl.film + (sl.song ? " · " + sl.song : ""), dp = sl.dps && sl.dps[0], same = null;
       if (dp && dp.slug && WORK[dp.slug]) same = WORK[dp.slug].filter(function (c) { return c.slate && c.slate === sl.slate; })[0];
       return { title: title, sub: sl.legend, video: sl.video, full: sl.full || (same && same.full) || "", nosnip: true, img: sl.img || (same && same.img),
-        stills: sl.stills && sl.stills.length ? sl.stills : (same && same.stills) || null, h: sl.h, slate: sl.slate, dps: sl.dps, slide: sl };
+        stills: sl.stills && sl.stills.length ? sl.stills : (same && same.stills) || null,
+        extras: sl.extras && sl.extras.length ? sl.extras : sl.stills && sl.stills.length ? null : (same && same.extras) || null, h: sl.h, slate: sl.slate, dps: sl.dps, slide: sl };
     }
     function dpFromPlayer(d, a, p) {
       closePlayer(true); if (pushed > 0) pushed--;
@@ -500,11 +501,11 @@
         if (p.img) v.poster = p.img;
         v.src = src; pstage.appendChild(v);
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
-      } else if (p.img || (p.stills && p.stills.length)) {
-        // Projet sans film (stills seulement) : la 1re image en grand, agrandie au clic ; la galerie suit dessous.
-        var im = document.createElement("img"); im.src = p.img || p.stills[0]; im.alt = p.title; pstage.appendChild(im);
-        if (p.stills && p.stills.length) { im.className = "pzoom"; im.addEventListener("click", function () { showStill(0); }); }
+      } else if (p.img && !(p.stills && p.stills.length)) {
+        var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
       }
+      // Projet sans film avec des stills : pas de grande image, la galerie directement sous le titre.
+      player.classList.toggle("nostage", !src && !!(p.stills && p.stills.length));
       ptitle.textContent = p.title;
       // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page.
       if (p.dps && p.dps.length) {
@@ -518,34 +519,58 @@
         pcap.appendChild(who);
       }
       var s = document.createElement("p"); s.textContent = p.sub || p.cat; pcap.appendChild(s);
-      buildStills(p);
+      buildStills(p, src);
       player.scrollTop = 0;
       player.classList.add("on"); pglass.classList.add("on");
     }
-    // Galerie de stills (p.stills) sous les credits : chaque image apparait en arrivant a l'ecran ;
-    // un clic l'agrandit (fleches : precedente / suivante).
+    // Sous les credits, dans l'ordre de l'admin (p.extras) : galeries de stills et autres videos.
+    // Ancien format : p.stills seul. Projet sans film : ses images (p.stills) d'abord, puis les extras.
+    function blocksOf(p, src) {
+      var b = (p.extras || []).filter(function (x) { return (x.stills && x.stills.length) || x.full || x.video; });
+      var st = p.stills && p.stills.length ? [{ stills: p.stills }] : [];
+      if (!p.extras) return st;
+      return src ? b : st.concat(b);
+    }
+    // Chaque element apparait en arrivant a l'ecran ; un clic sur une image l'agrandit (fleches : toutes les images).
     var stillsP = null, stillsIdx = 0;
     var seen = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { seen.unobserve(e.target); reveal(e.target); } });
     }, { root: player }) : null;
-    function buildStills(p) {
+    function buildStills(p, src) {
       if (seen) seen.disconnect();
       pgal.textContent = ""; if (plight.classList.contains("on")) closeStill();
-      stillsP = p.stills && p.stills.length ? p : null;
-      player.classList.toggle("has-stills", !!stillsP);
-      if (!stillsP) return;
-      p.stills.forEach(function (u, i) {
-        var b = document.createElement("button");
-        b.dataset.src = thumb(u, GW);
-        b.style.setProperty("--i", i % 3);
-        b.setAttribute("aria-label", "Image " + (i + 1));
-        b.addEventListener("click", function () { showStill(i); });
-        pgal.appendChild(b);
-        if (seen) seen.observe(b); else reveal(b);
+      var blocks = blocksOf(p, src), all = [];
+      stillsP = { title: p.title, stills: all };
+      player.classList.toggle("has-stills", blocks.length > 0);
+      blocks.forEach(function (x) {
+        if (x.stills && x.stills.length) {
+          var g = document.createElement("div"); g.className = "pgrid"; pgal.appendChild(g);
+          x.stills.forEach(function (u, i) {
+            var k = all.push(u) - 1, b = document.createElement("button");
+            b.dataset.src = thumb(u, GW);
+            b.style.setProperty("--i", i % 3);
+            b.setAttribute("aria-label", "Image " + (k + 1));
+            b.addEventListener("click", function () { showStill(k); });
+            g.appendChild(b);
+            if (seen) seen.observe(b); else reveal(b);
+          });
+          return;
+        }
+        var w = document.createElement("div"); w.className = "pxv";
+        var v = document.createElement("video");
+        v.controls = true; v.playsInline = true; v.preload = "metadata";
+        if (x.img) v.poster = x.img;
+        v.src = x.full || x.video; w.appendChild(v); pgal.appendChild(w);
+        if (seen) seen.observe(w); else reveal(w);
       });
     }
-    // L'image monte une fois chargee (pas de case vide qui apparait).
+    // Une seule video du lecteur joue a la fois (film et videos du dessous).
+    player.addEventListener("play", function (e) {
+      [].forEach.call(player.querySelectorAll("video"), function (v) { if (v !== e.target) v.pause(); });
+    }, true);
+    // L'image monte une fois chargee (pas de case vide qui apparait) ; une video monte tout de suite.
     function reveal(b) {
+      if (b.classList.contains("pxv")) { b.classList.add("shown"); return; }
       var im = new Image();
       im.onload = im.onerror = function () { b.style.backgroundImage = 'url("' + b.dataset.src + '")'; b.classList.add("shown"); };
       im.src = b.dataset.src;
@@ -595,6 +620,7 @@
       player.classList.remove("on"); pglass.classList.remove("on");
       if (!fromBack) popStep();
       pstage.textContent = "";
+      [].forEach.call(pgal.querySelectorAll("video"), function (v) { v.pause(); });
       if (document.body.classList.contains("proj-on") && projvid.classList.contains("on")) { var pr = projvid.play(); if (pr && pr.catch) pr.catch(function () {}); }
       if (homePlay) { homePlay = false; if (!view && document.body.classList.contains("is-home")) HomeAPI.resume(); }
     }

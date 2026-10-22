@@ -72,7 +72,11 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 - `open` : clip présélectionné quand on arrive sur la page depuis l'accueil.
 - `stills` : galerie de stills (optionnelle), affichée sous le film dans le lecteur (3 colonnes, 2 sur téléphone), agrandie au clic.
   Projet en images seulement (type « illustration » sur Slate, sans vidéo) : ses images deviennent `stills` à la lecture du bundle ;
-  le lecteur montre la 1re image en grand (agrandie au clic) puis la galerie dessous, comme pour un film.
+  le lecteur n'a pas de grande image (`.nostage`) : la galerie directement sous le titre et les crédits.
+- `extras` (dans `overrides[<id>]` d'une fiche ou dans une slide de l'accueil) : ce qui s'affiche sous le film dans le lecteur,
+  dans l'ordre de l'admin : `[{ link, title, stills: [...] } | { link, title, full, video, img }]` — galeries (3 colonnes, 2 sur
+  téléphone) et vidéos à la taille du film (montée en fondu comme les stills ; une seule vidéo joue à la fois).
+  Remplace l'ancien `stills` + `stillsLink` des overrides (toujours lu s'il n'y a pas d'`extras`).
 - `about.img` : chemin relatif au dossier `data/dps/`.
 - Exception de mise en page = ajouter `"template": "special"` dans le JSON.
 
@@ -84,6 +88,7 @@ via la fonction Netlify `/api/dp/<slug>` (`netlify/functions/dp.mjs` + `slate.mj
 - `open` : id Slate du clip présélectionné depuis l'accueil.
 - `overrides` : corrections par id Slate, appliquées par-dessus Slate, ex. `{"10903": {"title": "…"}, "534": {"hidden": true}}`.
 - Stills d'un film : dans l'admin, sous le film, lien d'une page Slate `https://kinou.slateapp.com/work/<adresse>` (ou shots.re).
+  Une page Slate de vidéo est aussi acceptée (→ `full`, `video`, `img`) : vidéo de plus sous le film (`extras`).
   L'admin lit les images via `/api/stills?link=…` (`netlify/functions/stills.mjs`, `readStills` de `slate.mjs` :
   `data-media` → `images[].image_player_url`, URLs signées copiées telles quelles) et les enregistre dans
   `overrides[<id>].stills` (+ `stillsLink`). Recoller le lien pour reprendre les changements faits sur Slate.

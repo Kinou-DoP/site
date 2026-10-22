@@ -155,15 +155,22 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 #player .ptitle { margin: 0 0 14px; font-family: var(--kinou-sans); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
 #player .pstage { width: 100%; aspect-ratio: 16 / 9; background-size: cover; background-position: center; background-color: var(--kinou-bg); }
 #player .pstage video, #player .pstage img { display: block; width: 100%; height: 100%; object-fit: contain; background: transparent; }
-#player .pstage img.pzoom { cursor: zoom-in; }
 #player .pcap { margin-top: 18px; font-family: var(--kinou-sans); }
 #player .pcap p { margin: 0; white-space: pre-line; font-size: 11px; line-height: 1.7; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.55); }
 #player .pclose { position: fixed; z-index: 3; top: calc(env(safe-area-inset-top, 0px) + 20px); right: 28px; width: 40px; height: 40px; padding: 0; border: 0; background: none; color: var(--kinou-fg); cursor: pointer; opacity: .7; transition: opacity .2s; }
 #player .pclose:hover { opacity: 1; }
-/* Galerie : 3 colonnes (2 sur téléphone) ; chaque image monte comme les vignettes d'une page de chef op
-   quand elle arrive à l'écran ; léger fondu au noir en bas de l'écran. */
-#player .pgal { display: none; flex: none; width: min(100%, 1800px); grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 64px; padding-bottom: 22vh; }
-#player.has-stills .pgal { display: grid; }
+/* Sous le film : galeries (3 colonnes, 2 sur téléphone) et vidéos (taille du film), dans l'ordre de l'admin ;
+   chaque élément monte comme les vignettes d'une page de chef op quand il arrive à l'écran ;
+   léger fondu au noir en bas de l'écran. Projet sans film : directement la galerie sous le titre. */
+#player .pgal { display: none; flex: none; flex-direction: column; align-items: center; gap: 32px; width: min(100%, 1800px); margin-top: 64px; padding-bottom: 22vh; }
+#player.has-stills .pgal { display: flex; }
+#player .pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; width: 100%; }
+#player .pxv { width: min(100%, 1400px, calc((100vh - 290px) * 16 / 9)); aspect-ratio: 16 / 9; background: #000; opacity: 0; }
+#player .pxv.shown { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
+#player .pxv video { display: block; width: 100%; height: 100%; object-fit: contain; }
+#player.nostage .pstage { display: none; }
+#player.nostage .pin { --pw: min(100%, 1800px); }
+#player.nostage .pgal { margin-top: 40px; }
 #player .pgal button { aspect-ratio: 16 / 9; padding: 0; border: 0; background: #070707 center / cover no-repeat; cursor: zoom-in; opacity: 0; }
 #player .pgal button.shown { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
 #player .pfade { display: none; position: fixed; z-index: 1; left: 0; right: 0; bottom: 0; height: 22vh; pointer-events: none;
@@ -175,7 +182,9 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 #player .plight img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
 @media (max-width: 560px) {
   #player { padding-left: 16px; padding-right: 16px; }
-  #player .pgal { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 40px; }
+  #player .pgal { gap: 8px; margin-top: 40px; }
+  #player .pxv { margin: 16px 0; }
+  #player .pgrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   #player .plight { padding: 56px 0; }
 }
 

@@ -102,7 +102,7 @@ export async function readBundle(bundle) {
   return { name: name, categories: categories, clips: clips };
 }
 
-// Galerie de stills : page Slate « work » (https://kinou.slateapp.com/work/<adresse>) ou lien court shots.re.
+// Galerie de stills ou vidéo : page Slate « work » (https://kinou.slateapp.com/work/<adresse>) ou lien court shots.re.
 // Les images viennent de la playlist (data-media → images[].image_player_url), URLs signées copiées telles quelles.
 export async function readStills(link) {
   var s = String(link || "").trim(), url;
@@ -119,9 +119,13 @@ export async function readStills(link) {
   if (i < 0) throw new Error("images introuvables sur cette page Slate");
   i += 12;
   var media = JSON.parse(decode(html.slice(i, html.indexOf('"', i))))[0] || {};
+  var title = String(media.title || "").trim();
   var stills = (media.images || []).map(function (im) { return im.image_player_url; }).filter(Boolean);
-  if (!stills.length) throw new Error("aucune image sur cette page Slate");
-  return { link: url, title: String(media.title || "").trim(), stills: stills };
+  if (stills.length) return { link: url, title: title, stills: stills };
+  // Page d'une vidéo : film complet (1080p), extrait et image d'aperçu, pour l'afficher sous un autre film.
+  var c = clip(media, media.thumbnail && media.thumbnail.image_player_url, "");
+  if (c.full || c.video) return { link: url, title: title, full: c.full, video: c.video, img: c.img };
+  throw new Error("ni images ni vidéo sur cette page Slate");
 }
 
 // Bande de l'accueil : n'importe quelle page Slate avec une playlist (showreel, page d'un bundle) ou un bundle
