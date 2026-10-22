@@ -501,11 +501,9 @@
         if (p.img) v.poster = p.img;
         v.src = src; pstage.appendChild(v);
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
-      } else if (p.img && !(p.stills && p.stills.length)) {
+      } else if (p.img) {
         var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
       }
-      // Projet sans film avec des stills : pas de grande image, la galerie directement sous le titre.
-      player.classList.toggle("nostage", !src && !!(p.stills && p.stills.length));
       ptitle.textContent = p.title;
       // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page.
       if (p.dps && p.dps.length) {
@@ -542,6 +540,8 @@
       var blocks = blocksOf(p, src), all = [];
       stillsP = { title: p.title, stills: all };
       player.classList.toggle("has-stills", blocks.length > 0);
+      // Projet sans film qui commence par des stills : pas de grande image, la galerie directement sous le titre.
+      player.classList.toggle("nostage", !src && !!(blocks[0] && blocks[0].stills));
       blocks.forEach(function (x) {
         if (x.stills && x.stills.length) {
           var g = document.createElement("div"); g.className = "pgrid"; pgal.appendChild(g);

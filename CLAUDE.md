@@ -12,6 +12,42 @@ La référence visuelle de départ est le prototype `reference/prototype.html`. 
 des évolutions (police Satoshi, blanc cassé, en-tête, fonds et survols) : elles sont décrites dans
 les règles visuelles ci-dessous et priment sur le prototype.
 
+## ⚠️ Hébergement actuel : GitHub Pages seulement (Netlify bloqué)
+
+Depuis le 21/10/2026 vers 14 h 30, **les crédits Netlify sont épuisés** : plus aucune mise en ligne Netlify n'est
+possible. On travaille **uniquement sur GitHub** :
+- Site (beta) : **GitHub Pages** https://kinou-dop.github.io/site/ (branche `beta`) — en ligne ~1 min après un push.
+- Admin : GitHub Pages https://kinou-dop.github.io/admin/ (branche `beta` du repo admin).
+- Données : `data/` de la branche `main` du repo admin, lues par le site via `https://beta--kinou-test.netlify.app/api/data/`.
+- Les **fonctions Netlify** (`/api/data`, `/api/dp`, `/api/bundle`, `/api/stills`, `/api/reel`, `/api/refresh`) répondent
+  toujours sur `beta--kinou-test.netlify.app`, mais **figées dans leur version du 21/10** (avant le commit 37b726a) :
+  toute modification de `netlify/functions/` poussée depuis **n'est pas en ligne**. Le site et l'admin les appellent quand même.
+- Donc : ne pas compter sur un changement de `netlify/functions/` pour une fonctionnalité ; passer par le site (app.js),
+  l'admin, ou le robot GitHub de l'admin (Actions, gratuit : `tools/fill-home.mjs`, lit Slate directement).
+  Slate n'autorise pas la lecture depuis le navigateur (pas de CORS) : l'admin ne peut pas lire Slate lui-même.
+
+Contournements en place (à retirer ou simplifier au retour sur Netlify) :
+- Vidéo ajoutée sous un film (`extras`) : `/api/stills` figé ne lit que les images ; l'admin lit alors la page comme une
+  bande (`/api/reel`, 1er film : titre, extrait, vignette, **sans `full`**). Le robot GitHub de l'admin ajoute le `full`
+  après chaque publication (fiches et accueil). Sans `full`, le site joue l'extrait.
+- Film complet des slides de l'accueil : ajouté par le même robot (`/api/reel` figé ne renvoie pas `full`).
+- Projet en images seulement (type « illustration » sur Slate) : `/api/dp` figé ne renvoie pas ses images ; il faut coller
+  le lien Slate de ses stills dans l'admin, sous le projet (`extras`). Le site affiche alors la galerie directement.
+- Vignettes : le service d'images Netlify (`/.netlify/images`, `thumb()` dans app.js, `IMG_CDN`) n'est utilisé que sur
+  `*.netlify.app` / `kinou.fr` : sur GitHub Pages, les vignettes sont les images Slate d'origine (non réduites).
+
+### À faire au retour sur Netlify (crédits rechargés ou plan payant)
+1. Relier Netlify au dépôt **`Kinou-DoP/site`** (le dépôt a été déplacé depuis `kinou-agency/site` : GitHub répond
+   « This repository moved » à chaque push ; installer l'appli Netlify sur l'organisation Kinou-DoP si besoin).
+2. Remettre en ligne la **beta** (`beta--kinou-test.netlify.app`, branch deploy de `beta`) : les fonctions reprennent alors
+   le code du repo — `/api/stills` lit aussi les vidéos (`full`), `/api/dp` les images des projets « illustration »
+   (`stills`), `/api/reel` le `full`. Vérifier : `/api/stills?link=https://shots.re/19c405` doit renvoyer `full`.
+3. **Compression des vignettes** : servir le site depuis Netlify (ou étendre `IMG_CDN` à l'adresse utilisée) pour que
+   `thumb()` passe par `/.netlify/images` (WebP réduit) ; l'admin « chauffe » déjà ces vignettes (`warmThumbs`).
+4. Décider où vit le site : GitHub Pages (actuel) ou Netlify ; mettre à jour `DATA_BASE`, `IMG_CDN` (app.js) et `SITE`
+   (admin.js) en conséquence ; le contournement `/api/reel` de l'admin (`importStills`) peut rester (sans effet).
+5. Puis seulement, après validation de Gus : fusion `beta` → `main` (production kinou.fr, ≈ 15 crédits par mise en ligne).
+
 ## Architecture des données
 
 Les données vivent dans le repo `Kinou-DoP/admin` (dossier `data/`). Le site officiel **et** la beta
@@ -71,7 +107,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 - `featured` / `featuredOrder` : clip du showreel FEATURED et son rang.
 - `open` : clip présélectionné quand on arrive sur la page depuis l'accueil.
 - `stills` : galerie de stills (optionnelle), affichée sous le film dans le lecteur (3 colonnes, 2 sur téléphone), agrandie au clic.
-  Projet en images seulement (type « illustration » sur Slate, sans vidéo) : ses images deviennent `stills` à la lecture du bundle ;
+  Projet en images seulement (type « illustration » sur Slate, sans vidéo) : ses images deviennent `stills` à la lecture du bundle
+  (pas encore en ligne : fonctions Netlify figées, voir « Hébergement actuel » ; en attendant, ses stills en `extras`) ;
   le lecteur n'a pas de grande image (`.nostage`) : la galerie directement sous le titre et les crédits.
 - `extras` (dans `overrides[<id>]` d'une fiche ou dans une slide de l'accueil) : ce qui s'affiche sous le film dans le lecteur,
   dans l'ordre de l'admin : `[{ link, title, stills: [...] } | { link, title, full, video, img }]` — galeries (3 colonnes, 2 sur
@@ -164,8 +201,9 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 
 ## Branches et mise en ligne
 
-- `main` = site officiel (kinou.fr). Netlify publie `main` en production.
-- `beta` = version de test (branch deploy Netlify : `beta--<site>.netlify.app`).
+- `main` = site officiel (kinou.fr). Netlify publie `main` en production (aujourd'hui bloqué : voir plus haut).
+- `beta` = version de test : GitHub Pages https://kinou-dop.github.io/site/ (et, quand Netlify marchait,
+  branch deploy `beta--kinou-test.netlify.app`, figé depuis le 21/10).
 - On travaille et on pousse sur `beta` (ou une branche de travail fusionnée dans `beta`).
 - On ne fusionne `beta` dans `main` qu'après validation explicite de Gus.
 - Pour l'instant seule la beta compte : le site `main` (kinou-test.netlify.app) n'est pas suivi et peut ne plus
