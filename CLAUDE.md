@@ -35,7 +35,7 @@ data/
 ```
 
 Chaque DP a :
-- Un slug unique, immuable : `prenom-nom-cinematographer` (ex. `lara-perrotte-boucard-cinematographer`)
+- Un slug unique (adresse de la page, comme sur kinou.fr) : `prenom-nom-cinematographer` (ex. `lara-perrotte-boucard-cinematographer`)
 - Une liste de clips avec catégories (chargée dans `WORK[slug]`)
 - Un ordre d'affichage des catégories (chargé dans `CATS_BY[slug]`)
 
@@ -179,7 +179,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 - Ne jamais inventer d'URLs CloudFront ou Slate — elles viennent des bundles Slate réels
 - Les URLs d'images Slate (`images.slatecdn.net/<signature>/<options>/<source>`) sont signées :
   les copier telles quelles depuis le bundle, sans changer taille, options ni source (sinon erreur 403)
-- Les slugs sont immutables — ne pas les renommer
+- Les slugs ne se renomment que dans l'admin (champ « Adresse de la page »), pour reprendre les adresses de kinou.fr
 - Commit atomique par DP ajouté ou fonctionnalité implémentée
 - Message de commit en français : "Ajout [Prénom Nom]" ou "Fix [description]"
 
