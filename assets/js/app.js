@@ -627,6 +627,7 @@
       pstage.textContent = "";
       [].forEach.call(pgal.querySelectorAll("video"), function (v) { v.pause(); });
       if (document.body.classList.contains("proj-on") && projvid.classList.contains("on")) { var pr = projvid.play(); if (pr && pr.catch) pr.catch(function () {}); }
+      if (liveSeen) feed.querySelectorAll("video.live[src]").forEach(function (v) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); });
       if (homePlay) { homePlay = false; if (!view && document.body.classList.contains("is-home")) HomeAPI.resume(); }
     }
     player.addEventListener("click", function (e) { if (e.target === player || e.target === pgal || e.target.classList.contains("pin") || e.target.closest(".pclose")) closePlayer(); });
@@ -650,7 +651,25 @@
     });
     // Au survol d'un projet : la vignette joue un extrait video muet ; le fond plein ecran reste l'image fixe
     var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Version « live » (adresse …/site/live ou ?live) : chaque vignette joue son extrait en boucle (sans son), seulement
+    // quand elle est à l'écran. Même site, même code : seul cet interrupteur change ; l'adresse normale reste en vignettes fixes.
+    var LIVE = /[?&]live\b/.test(location.search);
+    var liveSeen = LIVE && "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var v = e.target.querySelector("video.live"); if (!v) return;
+        if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+        else v.pause();
+      });
+    }, { root: work, rootMargin: "200px 0px" }) : null;
+    function liveThumb(st, p) {
+      if (!liveSeen || !p.video || reduceMotion) return;
+      var v = document.createElement("video");
+      v.className = "snip live"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "none"; v.dataset.src = p.video;
+      v.addEventListener("playing", function () { v.classList.add("on"); });
+      st.appendChild(v); liveSeen.observe(st);
+    }
     function snip(st, p, on) {
+      if (liveSeen) return; // version live : les extraits jouent déjà tous
       var v = st.querySelector("video.snip");
       if (!on) {
         if (v) {
@@ -712,6 +731,7 @@
     }
     function render(slug, cat, delay) {
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
+      if (liveSeen) { liveSeen.disconnect(); feed.querySelectorAll("video.live").forEach(function (v) { v.pause(); v.removeAttribute("src"); v.load(); }); }
       autoCard = null; var run = ++renderRun; setTimeout(function () { autoFirst(run); }, (delay || 0) + 450);
       requestAnimationFrame(function () { pickFocus(true); }); // tailles (perspective) dès l'affichage des films
       feed.className = "feed" + (mode === "gallery" ? " gallery" : "");
@@ -734,6 +754,7 @@
         meta.appendChild(h); meta.appendChild(s);
         if (p.cat && cat === "FEATURED") { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
+        liveThumb(st, p);
         d._p = p;
         d.addEventListener("mouseenter", function (e) { if (!inZone(e)) return; dropAuto(d); showProj(p); snip(st, p, true); });
         d.addEventListener("mouseleave", function () { snip(st, p, false); if (selCard) showProj(selCard._p, 0); else document.body.classList.remove("proj-on"); });

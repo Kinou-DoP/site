@@ -207,7 +207,10 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 ## À faire (noté par Gus)
 - **Téléphone en paysage et tablette** : mise en page dédiée à prévoir (aujourd'hui : roulette en portrait seulement,
   sinon la mise en page ordinateur ou téléphone selon la largeur).
-- Vignettes animées (extrait en boucle à la place de l'image) : essayé le 22/10/2026, Gus préfère les vignettes fixes.
+- Vignettes animées (extrait en boucle à la place de l'image) : essayé le 22/10/2026, Gus préfère les vignettes fixes
+  sur le site normal. **Version « live »** (23/10) : https://kinou-dop.github.io/site/live (simple renvoi `live/index.html`
+  → `../?live`, garde le `#slug`) = le même site avec toutes les vignettes qui jouent leur extrait en boucle (`LIVE`,
+  `liveThumb` dans app.js, seulement les vignettes à l'écran). Un seul site : ne rien dupliquer, ne pas modifier `live/`.
 
 ## Branches et mise en ligne
 
