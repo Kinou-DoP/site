@@ -217,7 +217,7 @@
         var f = d && (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0];
         if (!f) { showBg(a); return; } // pas de fiche ou pas d'extrait : image s'il y en a une
         if (bgvid.dataset.src !== f.video) { bgvid.src = f.video; bgvid.dataset.src = f.video; }
-        bgvid.style.setProperty("--z", f.zoom > 1 ? f.zoom : 1); bgvid.style.setProperty("--zp", f.zoomPos || "50% 50%");
+        bgvid.style.setProperty("--z", f.zoom > 1 ? f.zoom : 1); bgvid.style.setProperty("--zp", f.zoomPos || "50% 50%"); bgvid.style.setProperty("--pp", (f.phoneX !== undefined ? f.phoneX : 50) + "%"); // cadrage téléphone (admin)
         try { bgvid.currentTime = 0; } catch (e) {}
         bgvid.onplaying = function () { if (bgWanted(a)) bgvid.classList.add("on"); };
         var pr = bgvid.play(); if (pr && pr.catch) pr.catch(function () {});

@@ -302,6 +302,7 @@ body.menu-on .burger { opacity: 0; }
   .lnav { top: calc(env(safe-area-inset-top, 0px) + 37px); }
   .logo { font-size: 20px; top: calc(env(safe-area-inset-top, 0px) + 32px); }
   .logo.img img { height: calc(var(--logo-h, 36px) * .56); }
+  #bgvid { object-position: var(--pp, 50%) 50%; } /* fond de la liste : partie de l'extrait choisie dans l'admin (phoneX) */
   .logo:not(.img) { font-size: 28px; top: calc(env(safe-area-inset-top, 0px) + 28px); } /* texte « kinou » (sans logo image) : à l'échelle de « DOP » */
   .nav-btn { font-size: 19px; font-weight: 400; letter-spacing: .02em; top: calc(env(safe-area-inset-top, 0px) + 35px); }
   .nav-btn .long { display: none; }

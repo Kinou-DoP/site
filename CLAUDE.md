@@ -130,7 +130,8 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    dès l'affichage puis au défilement ; pas `transform`, que l'animation d'arrivée écraserait).
 15. **Roulette des chefs op** (téléphone en portrait, remplace la liste) : noms en boucle, le nom au repère (38 %)
    grand (26px) et blanc, les autres plus petits et estompés ; élan au doigt, arrivée calculée pile sur un nom ;
-   le nom au centre affiche en fond l'extrait de son 1er film FEATURED ; toucher un nom l'amène au centre, toucher
+   le nom au centre affiche en fond l'extrait de son 1er film FEATURED (cadrage horizontal sur téléphone : `phoneX` de
+   l'admin → `--pp` = object-position de `#bgvid`) ; toucher un nom l'amène au centre, toucher
    le nom au centre ouvre sa page. Commence sous l'en-tête (coupe nette). Arrivée sur la liste : un nom au hasard au centre.
 16. **Historique** : accueil, liste et page d'un chef op sont des entrées d'historique (`pushPage`) : le bouton retour
    revient à la page précédente (le nom repart à sa place) ; lecteur et image agrandie se ferment d'abord.
