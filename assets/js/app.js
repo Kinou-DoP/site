@@ -27,10 +27,16 @@
       s.className = "slide";
       s.style.setProperty("--h", p.h);
       if (p.zoom > 1) { s.style.setProperty("--z", p.zoom); if (p.zoomPos) s.style.setProperty("--zp", p.zoomPos); } // recadrage réglé dans l'admin (enlève les bandes noires)
+      if (p.phoneX !== undefined) s.style.setProperty("--pp", p.phoneX + "%"); // cadrage téléphone (admin)
       var inner = document.createElement("div"); inner.className = "in"; s.appendChild(inner);
-      if (p.video) {
+      // Extrait HD (admin) : passage du film complet, de « start » pendant la durée d'un projet, sans le son.
+      // Sinon (ou si le film complet ne se lit pas) : l'extrait Slate, plus compressé.
+      var hd = p.full && p.start !== undefined;
+      if (p.video || hd) {
         var v = document.createElement("video");
-        v.muted = true; v.playsInline = true; v.preload = "none"; v.dataset.src = p.video;
+        v.muted = true; v.playsInline = true; v.preload = "none";
+        v.dataset.src = hd ? p.full + "#t=" + p.start : p.video;
+        if (hd) { v._hd = true; v._start = +p.start; }
         inner.appendChild(v);
       }
       wrap.appendChild(s); slides.push(s);
@@ -61,6 +67,7 @@
       if (active && cur >= 0) {
         var v = slides[cur].querySelector("video"), p = 0;
         if (timed) p = (performance.now() - timedAt) / DURATION;
+        else if (v && v._hd) p = (v.currentTime - v._start) * 1000 / DURATION;
         else if (v && v.duration) p = v.currentTime / v.duration;
         buttons[cur].style.setProperty("--p", Math.min(1, p).toFixed(4));
       }
@@ -106,11 +113,33 @@
       var v = slides[i].querySelector("video");
       if (v) {
         if (!v.src) v.src = v.dataset.src;
-        v.currentTime = 0;
+        try { v.currentTime = v._hd ? v._start : 0; } catch (e) {}
         v.onended = next;
-        v.onerror = later;
-        var pr = v.play(); if (pr && pr.catch) pr.catch(later);
+        v.onerror = function () {
+          if (!v._hd) { if (i === cur) later(); return; }
+          if (!snippetOf(v, i)) { if (i === cur) later(); return; }
+          if (i === cur) { var r = v.play(); if (r && r.catch) r.catch(function () {}); }
+        };
+        if (v.error) v.onerror(); // passage HD préchargé déjà en erreur
+        else { var pr = v.play(); if (pr && pr.catch) pr.catch(function () { if (i === cur && !v.error) later(); }); }
+        preloadNext(i);
       } else { later(); }
+    }
+    // Passage HD fini (durée d'un projet) : projet suivant.
+    slides.forEach(function (s, i) {
+      var v = s.querySelector("video");
+      if (v) v.addEventListener("timeupdate", function () { if (v._hd && i === cur && active && v.currentTime >= v._start + DURATION / 1000) next(); });
+    });
+    // Film complet illisible : retour à l'extrait Slate pour ce projet.
+    function snippetOf(v, i) {
+      v._hd = false;
+      if (!PROJECTS[i].video) return false;
+      v.dataset.src = v.src = PROJECTS[i].video; return true;
+    }
+    // Le passage HD du projet suivant se charge à l'avance (le film complet est plus long à démarrer).
+    function preloadNext(i) {
+      var n = slides[(i + 1) % slides.length].querySelector("video");
+      if (n && n._hd && !n.src) { n.preload = "auto"; n.src = n.dataset.src; }
     }
 
     document.addEventListener("keydown", function (e) {
@@ -805,7 +834,7 @@
         var pick = film.slate && [].some.call(cards, function (c) { return c._p.slate === film.slate; });
         for (var i = 0; i < cards.length; i++) if (pick ? cards[i]._p.slate === film.slate : cards[i]._p.open) {
           var hv = HomeAPI.videoEl();
-          selCard = cards[i]; selCard.classList.add("sel"); showProj(selCard._p, hv ? hv.currentTime : 0);
+          selCard = cards[i]; selCard.classList.add("sel"); showProj(selCard._p, hv && !hv._hd ? hv.currentTime : 0);
           break;
         }
       }

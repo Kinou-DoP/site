@@ -86,7 +86,7 @@ via la fonction Netlify `/api/dp/<slug>` (`netlify/functions/dp.mjs` + `slate.mj
   `data-media` → `images[].image_player_url`, URLs signées copiées telles quelles) et les enregistre dans
   `overrides[<id>].stills` (+ `stillsLink`). Recoller le lien pour reprendre les changements faits sur Slate.
 
-Accueil (`home.json`) : `{ duration, reel, overrides, slides: [{ slate, film, song, legend, video, img, dps: [{ name, slug }] }] }`.
+Accueil (`home.json`) : `{ duration, reel, overrides, slides: [{ slate, film, song, legend, video, full, img, dps: [{ name, slug }], start?, phoneX?, zoom?, zoomPos? }] }`.
 L'admin importe les 10 premiers films d'une bande Slate (`/api/reel?link=…`, `readReel` de `slate.mjs`) ; les chefs op crédités
 sont reliés à leur page par leur nom (liste des DPs) ; `overrides` (par id Slate) garde les textes corrigés au rafraîchissement.
 Ancien format accepté : `{ dp, slug }` par slide.
@@ -115,6 +115,9 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.
 11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit ; plusieurs chefs op = noms plus petits) ; pas de fond coloré de remplacement (noir) ;
    on arrive sur un film au hasard parmi les 10, puis l'ordre de la bande.
+   Extrait HD (admin) : si la slide a `start` (secondes) et `full`, l'accueil lit le film complet de `start` pendant
+   `duration` (sans le son), au lieu de l'extrait Slate ; le suivant se précharge ; film illisible → extrait Slate.
+   `phoneX` de la slide = cadrage horizontal sur téléphone (`--pp`, object-position), comme le fond de la liste.
 12. **Recadrage** : `zoom` (1 à 1,6, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
    agrandit l'extrait pour enlever les bandes noires, vers la position `zoomPos` ("X% Y%", absent = centre ; cadre rouge
    déplacé dans l'admin → `--zp` = transform-origin / background-position) ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
