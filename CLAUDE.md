@@ -116,7 +116,8 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit ; plusieurs chefs op = noms plus petits) ; pas de fond coloré de remplacement (noir) ;
    on arrive sur un film au hasard parmi les 10, puis l'ordre de la bande.
 12. **Recadrage** : `zoom` (1 à 1,6, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
-   agrandit au centre l'extrait pour enlever les bandes noires ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
+   agrandit l'extrait pour enlever les bandes noires, vers la position `zoomPos` ("X% Y%", absent = centre ; cadre rouge
+   déplacé dans l'admin → `--zp` = transform-origin / background-position) ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
    jamais dans le lecteur.
 13. **Téléphone** (≤ 700px) : en-tête = burger à gauche (volet flou sur la moitié de l'écran : spotlight, fiction, instagram,
    contact), logo réduit, « DOP » à droite (au lieu de « cinematographers », même hauteur que le logo), les trois centrés sur la même ligne ;

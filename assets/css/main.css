@@ -255,11 +255,11 @@ html::-webkit-scrollbar { display: none; }
 @media (max-width: 560px) { .logo.img img { height: calc(var(--logo-h, 36px) * .83); } }
 /* Accueil : la légende garde sa largeur, c'est le nom (un ou plusieurs chefs op) qui se réduit. */
 #home .caption { flex: none; }
-/* Recadrage par film (--z, réglé dans l'admin) : zoom au centre de l'extrait et de sa vignette, pour enlever
+/* Recadrage par film (--z, réglé dans l'admin ; --zp = position du cadre, centre par défaut) : zoom de l'extrait et de sa vignette, pour enlever
    les bandes noires. Le lecteur montre toujours le film entier. */
 .still { overflow: hidden; }
-.still.zoomed { background-size: calc(var(--z) * 100%) auto; }
-.still video.snip, #home .slide video, #bgvid { transform: scale(var(--z, 1)); }
+.still.zoomed { background-size: calc(var(--z) * 100%) auto; background-position: var(--zp, center); }
+.still video.snip, #home .slide video, #bgvid { transform: scale(var(--z, 1)); transform-origin: var(--zp, 50% 50%); }
 /* Accueil : « & » entre deux chefs op, fin et plus petit. */
 #home .name .amp { font-weight: 300; font-size: .6em; margin: 0 .2em; }
 

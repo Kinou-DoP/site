@@ -26,7 +26,7 @@
       var s = document.createElement("div");
       s.className = "slide";
       s.style.setProperty("--h", p.h);
-      if (p.zoom > 1) s.style.setProperty("--z", p.zoom); // recadrage réglé dans l'admin (enlève les bandes noires)
+      if (p.zoom > 1) { s.style.setProperty("--z", p.zoom); if (p.zoomPos) s.style.setProperty("--zp", p.zoomPos); } // recadrage réglé dans l'admin (enlève les bandes noires)
       var inner = document.createElement("div"); inner.className = "in"; s.appendChild(inner);
       if (p.video) {
         var v = document.createElement("video");
@@ -217,7 +217,7 @@
         var f = d && (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0];
         if (!f) { showBg(a); return; } // pas de fiche ou pas d'extrait : image s'il y en a une
         if (bgvid.dataset.src !== f.video) { bgvid.src = f.video; bgvid.dataset.src = f.video; }
-        bgvid.style.setProperty("--z", f.zoom > 1 ? f.zoom : 1);
+        bgvid.style.setProperty("--z", f.zoom > 1 ? f.zoom : 1); bgvid.style.setProperty("--zp", f.zoomPos || "50% 50%");
         try { bgvid.currentTime = 0; } catch (e) {}
         bgvid.onplaying = function () { if (bgWanted(a)) bgvid.classList.add("on"); };
         var pr = bgvid.play(); if (pr && pr.catch) pr.catch(function () {});
@@ -643,8 +643,8 @@
       WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; }).forEach(function (p, i) {
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
-        // Recadrage (admin) : l'extrait au survol ; la vignette aussi si « zoomThumb » est coché.
-        if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); if (p.zoomThumb) st.classList.add("zoomed"); }
+        // Recadrage (admin, position du cadre = --zp) : l'extrait au survol ; la vignette aussi si « zoomThumb » est coché.
+        if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); if (p.zoomPos) st.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) st.classList.add("zoomed"); }
         if (p.img) {
           var url = thumb(p.img, mode === "gallery" ? GW : FW), im = new Image();
           im.onload = im.onerror = (function (st, url) { return function () { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st, url);
