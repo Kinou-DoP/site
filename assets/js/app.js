@@ -640,7 +640,7 @@
       } else { projvid.classList.remove("on"); projvid.pause(); }
       document.body.classList.add("proj-on");
     }
-    function clearProj() { if (selCard) selCard.classList.remove("sel"); selCard = null; projvid.classList.remove("on"); projvid.pause(); document.body.classList.remove("proj-on"); }
+    function clearProj() { dropAuto(); if (selCard) selCard.classList.remove("sel"); selCard = null; projvid.classList.remove("on"); projvid.pause(); document.body.classList.remove("proj-on"); }
     var mode = "gallery", curCat = "FEATURED";
     // Sur téléphone, toujours en feed (la grille est trop petite) : pas de choix d'affichage.
     var phone = window.matchMedia("(max-width: 700px)");
@@ -696,8 +696,23 @@
       if (best) { best.classList.add("focus"); showProj(best._p); snip(best.querySelector(".still"), best._p, true); }
     }
     work.addEventListener("scroll", function () { if (!focusRaf) focusRaf = requestAnimationFrame(pickFocus); }, { passive: true });
+    // Sur ordinateur, en arrivant sur un onglet : le 1er film est déjà « survolé » (extrait + fond flou), pour ne pas
+    // arriver sur une page figée ; dès qu'on survole un film, tout redevient normal (autoCard oublié).
+    var autoCard = null, renderRun = 0;
+    function autoFirst(run) {
+      if (run !== renderRun || touchOnly.matches || selCard || player.classList.contains("on") || work.classList.contains("about-mode")) return;
+      if (feed.querySelector(".card:hover")) return;
+      var c = feed.querySelector(".card"); if (!c) return;
+      autoCard = c; showProj(c._p); snip(c.querySelector(".still"), c._p, true);
+    }
+    function dropAuto(keep) {
+      if (!autoCard) return;
+      if (autoCard !== keep) { snip(autoCard.querySelector(".still"), autoCard._p, false); }
+      autoCard = null;
+    }
     function render(slug, cat, delay) {
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
+      autoCard = null; var run = ++renderRun; setTimeout(function () { autoFirst(run); }, (delay || 0) + 450);
       requestAnimationFrame(function () { pickFocus(true); }); // tailles (perspective) dès l'affichage des films
       feed.className = "feed" + (mode === "gallery" ? " gallery" : "");
       feed.style.setProperty("--d", delay + "ms");
@@ -720,7 +735,7 @@
         if (p.cat && cat === "FEATURED") { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
         d._p = p;
-        d.addEventListener("mouseenter", function (e) { if (!inZone(e)) return; showProj(p); snip(st, p, true); });
+        d.addEventListener("mouseenter", function (e) { if (!inZone(e)) return; dropAuto(d); showProj(p); snip(st, p, true); });
         d.addEventListener("mouseleave", function () { snip(st, p, false); if (selCard) showProj(selCard._p, 0); else document.body.classList.remove("proj-on"); });
         d.addEventListener("click", function (e) { if (!inZone(e)) return; openPlayer(p); });
       });
