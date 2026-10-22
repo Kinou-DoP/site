@@ -223,7 +223,7 @@ body.viewing #bgvid { opacity: 0 !important; }
 .still { position: relative; }
 .still::after { content: ""; position: absolute; inset: 0; background: var(--kinou-fg); opacity: 0; pointer-events: none; }
 .card:hover .still::after { animation: glow 1.25s ease-out; }
-@keyframes glow { 0% { opacity: 0; } 20% { opacity: .15; } 100% { opacity: 0; } }
+@keyframes glow { 0% { opacity: 0; } 20% { opacity: .1; } 100% { opacity: 0; } }
 
 /* Sous le nom du chef op : barre de défilement masquée. */
 /* Sous le nom : coupe nette sur toute la largeur de l'écran (pas de dégradé). La zone qui défile commence sous la
@@ -324,8 +324,8 @@ body.menu-on .burger { opacity: 0; }
   body.is-home { touch-action: none; }
   /* Page d'un chef op : nom, onglets et bande plus serrés */
   /* même écart partout : en-tête → nom → onglets → bande (≈ 14px) ; « AFC… » sous le nom ajoute sa hauteur */
-  :root { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 10px); --kinou-zm: calc(var(--kinou-tabs-top) + 27px); }
-  body.hero-tags { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 26px); --kinou-zm: calc(var(--kinou-tabs-top) + 27px); }
+  :root { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 15px); --kinou-zm: calc(var(--kinou-tabs-top) + 32px); }
+  body.hero-tags { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 31px); --kinou-zm: calc(var(--kinou-tabs-top) + 32px); }
   .hero .tags { margin-top: 5px; font-size: 11px; }
   /* ESSAI (Gus, 22/10) : nom du chef op centré sur téléphone. Pour revenir à l'ancienne position (collé à droite,
      comme sur ordinateur : .hero { right: 32px / 24px; text-align: right }), supprimer seulement la ligne suivante. */
@@ -387,7 +387,7 @@ html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: h
 /* Téléphone, page d'un chef op : de la place sous le dernier film pour qu'il puisse venir au repère (être sélectionné) ;
    voile lumineux quand un film est sélectionné (comme au survol sur ordinateur) ; perspective : taille réglée par app.js. */
 @media (hover: none) and (max-width: 700px) {
-  .work { padding-bottom: calc(60vh - 190px); } /* juste assez pour que le dernier film atteigne le repère */
+  .work { padding-bottom: 6vh; } /* le repère descend vers le dernier film en bas de page (pickFocus) */
   .card.focus .still::after { animation: glow 1.25s ease-out; }
   .card { transform-origin: 50% 50%; will-change: transform, scale; }
 }

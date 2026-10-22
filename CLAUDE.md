@@ -156,7 +156,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 5. **Overlay** : plein écran, fermeture sur Escape, croix ou clic hors zone ; lecteur sur fond « verre dépoli »
    (page floutée 36px, voile noir 62 %), image agrandie sur fond noir 98 %.
 6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms, etc.) + le voile
-   lumineux au survol d'un film (blanc 20 % en 0,25 s, retour en 1 s). Ne pas en ajouter d'autres sans demande.
+   lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » et « fiction » (à venir,
    masqués sous 700px) ; à droite « cinematographers ».
 10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
@@ -172,15 +172,16 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    jamais dans le lecteur.
 13. **Téléphone** (≤ 700px) : en-tête = burger à gauche (volet flou sur la moitié de l'écran : spotlight, fiction, instagram,
    contact), logo réduit (texte « kinou » sans logo image : 28px), « DOP » à droite (au lieu de « cinematographers », même hauteur que le logo), les trois centrés sur la même ligne ;
-   écart identique (≈ 14px) entre en-tête, nom, onglets et bande ;
+   écart identique (≈ 15px depuis le 23/10, avant ≈ 10–14px) entre nom, onglets et bande ;
    **ESSAI en cours (22/10)** : nom du chef op (`.hero`) **centré** sur téléphone. Ancienne position, à remettre si Gus revient
    en arrière : collé à droite comme sur ordinateur (`right: 32px`, 24px sous 560px, `text-align: right`) — il suffit de
    supprimer la ligne `.hero { left: 0; right: 0; text-align: center; }` (marquée « ESSAI ») dans `main.css` ;
    accueil : glisser gauche/droite ou haut/bas = projet suivant/précédent ; page d'un chef op : la zone qui défile
    commence sous la bande (`.work { top: var(--kinou-zm) }`), le film au milieu de l'écran (40 %) joue comme au survol,
    les onglets qui dépassent défilent lentement en boucle.
-   Espace sous le dernier film (`calc(60vh - 190px)`, juste assez) pour qu'il puisse être sélectionné ; voile lumineux sur le film sélectionné ;
-   légère perspective : les films loin du repère rapetissent (au plus -7 %, propriété `scale` posée par `pickFocus`
+   Petit espace sous le dernier film (6vh) : en bas de page le repère descend vers le dernier film (comme en haut vers le 1er),
+   qui peut donc être sélectionné ; voile lumineux sur le film sélectionné ;
+   perspective (« roulette ») : les films loin du repère rapetissent (au plus -13 %, propriété `scale` posée par `pickFocus`
    dès l'affichage puis au défilement ; pas `transform`, que l'animation d'arrivée écraserait).
 15. **Roulette des chefs op** (téléphone en portrait, remplace la liste) : noms en boucle, le nom au repère (38 %)
    grand (26px) et blanc, les autres plus petits et estompés ; élan au doigt, arrivée calculée pile sur un nom ;

@@ -700,12 +700,16 @@
       var r = work.getBoundingClientRect(), best = null, bd = 1e9, f1 = feed.querySelector(".card .still");
       var line = r.top + r.height * 0.4;
       if (f1) { var b1 = f1.getBoundingClientRect(); line = Math.min(line, (b1.top + b1.bottom) / 2 + work.scrollTop); }
+      // Même chose en bas : en approchant de la fin, le repère descend vers le dernier film (choisi tout en bas),
+      // ce qui évite un grand espace vide sous la liste.
+      var fl = feed.querySelectorAll(".card .still"), ln = fl[fl.length - 1];
+      if (ln && ln !== f1) { var bl = ln.getBoundingClientRect(), left = work.scrollHeight - work.clientHeight - work.scrollTop; line = Math.max(line, (bl.top + bl.bottom) / 2 - 2 * left); }
       var cards = feed.querySelectorAll(".card"), sizes = [];
       cards.forEach(function (c) {
         var b = c.querySelector(".still").getBoundingClientRect(), d = Math.abs((b.top + b.bottom) / 2 - line);
         if (b.bottom > r.top && d < bd) { bd = d; best = c; }
-        // Légère perspective : plus un film est loin du repère, plus il est petit (au plus -7 %, à une demi-hauteur d'écran).
-        sizes.push(1 - 0.07 * Math.min(1, d / (r.height * 0.5)));
+        // Perspective : plus un film est loin du repère, plus il est petit (au plus -13 %, à une demi-hauteur d'écran).
+        sizes.push(1 - 0.13 * Math.min(1, d / (r.height * 0.5)));
       });
       // Propriété « scale » (pas « transform ») : elle s'ajoute à l'animation d'arrivée au lieu d'attendre sa fin.
       cards.forEach(function (c, i) { c.style.scale = sizes[i].toFixed(4); }); // écrit après toutes les lectures
