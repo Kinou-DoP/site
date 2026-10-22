@@ -327,6 +327,9 @@ body.menu-on .burger { opacity: 0; }
   :root { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 10px); --kinou-zm: calc(var(--kinou-tabs-top) + 27px); }
   body.hero-tags { --kinou-tabs-top: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 26px); --kinou-zm: calc(var(--kinou-tabs-top) + 27px); }
   .hero .tags { margin-top: 5px; font-size: 11px; }
+  /* ESSAI (Gus, 22/10) : nom du chef op centré sur téléphone. Pour revenir à l'ancienne position (collé à droite,
+     comme sur ordinateur : .hero { right: 32px / 24px; text-align: right }), supprimer seulement la ligne suivante. */
+  .hero { left: 0; right: 0; text-align: center; }
   .work { padding-top: 12px; }
   .cats { scroll-behavior: auto; }
   /* film au milieu de l'écran = « survolé » (comme à la souris sur ordinateur) */

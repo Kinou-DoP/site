@@ -173,6 +173,9 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 13. **Téléphone** (≤ 700px) : en-tête = burger à gauche (volet flou sur la moitié de l'écran : spotlight, fiction, instagram,
    contact), logo réduit (texte « kinou » sans logo image : 28px), « DOP » à droite (au lieu de « cinematographers », même hauteur que le logo), les trois centrés sur la même ligne ;
    écart identique (≈ 14px) entre en-tête, nom, onglets et bande ;
+   **ESSAI en cours (22/10)** : nom du chef op (`.hero`) **centré** sur téléphone. Ancienne position, à remettre si Gus revient
+   en arrière : collé à droite comme sur ordinateur (`right: 32px`, 24px sous 560px, `text-align: right`) — il suffit de
+   supprimer la ligne `.hero { left: 0; right: 0; text-align: center; }` (marquée « ESSAI ») dans `main.css` ;
    accueil : glisser gauche/droite ou haut/bas = projet suivant/précédent ; page d'un chef op : la zone qui défile
    commence sous la bande (`.work { top: var(--kinou-zm) }`), le film au milieu de l'écran (40 %) joue comme au survol,
    les onglets qui dépassent défilent lentement en boucle.
