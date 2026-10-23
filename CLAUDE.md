@@ -166,7 +166,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    Extrait HD (admin) : si la slide a `start` (secondes) et `full`, l'accueil lit le film complet de `start` pendant
    `duration` (sans le son), au lieu de l'extrait Slate ; le suivant se précharge ; film illisible → extrait Slate.
    `phoneX` de la slide = cadrage horizontal sur téléphone (`--pp`, object-position), comme le fond de la liste.
-12. **Recadrage** : `zoom` (1 à 1,6, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
+12. **Recadrage** : `zoom` (1 à 2,5, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
    agrandit l'extrait pour enlever les bandes noires, vers la position `zoomPos` ("X% Y%", absent = centre ; cadre rouge
    déplacé dans l'admin → `--zp` = transform-origin / background-position) ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
    jamais dans le lecteur.
