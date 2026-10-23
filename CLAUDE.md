@@ -284,6 +284,8 @@ sinon les navigateurs (cache de 10 min de GitHub Pages, Safari surtout) gardent 
 Les pages DP ne sont pas des fichiers séparés : `index.html#<slug>` ouvre la page du DP.
 `#<slug>/<categorie>` ouvre directement un onglet (ex. `#lara-perrotte-boucard-cinematographer/fashion`,
 `…/music-video`, `…/about`) ; changer d'onglet met l'adresse à jour (`replaceState`, sans étape de plus pour le bouton retour).
+Affichage (ordinateur) dans l'adresse : `/feed` à la fin = une colonne (`#<slug>/feed`, `#<slug>/fashion/feed`) ; rien
+(ou `/grid`) = grille. Les boutons grille / colonne mettent l'adresse à jour ; sur téléphone, toujours une colonne (`wantMode`).
 Pour tester en local, servir le dossier (fetch ne marche pas en `file://`) :
 `python3 -m http.server` puis http://localhost:8000.
 

@@ -454,32 +454,40 @@
     });
     // Adresse d'une page de chef op : #<slug>, ou #<slug>/<categorie> (ex. #lara-…/fashion, #lara-…/about) pour partager
     // directement un onglet. Changer d'onglet met l'adresse à jour sans ajouter d'étape au bouton retour.
+    // Affichage (ordinateur) : « /feed » à la fin = une colonne (#lara-…/feed, #lara-…/fashion/feed) ; « /grid » ou rien = grille.
+    // Sur téléphone, toujours une colonne (le mot est ignoré).
     function catSlug(c) { return c.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
     function parseHash() {
-      var h = location.hash.slice(1).split("/");
-      return { slug: decodeURIComponent(h[0] || ""), cat: (h[1] || "").toLowerCase() };
+      var h = location.hash.slice(1).split("/"), m = null, last = (h[h.length - 1] || "").toLowerCase();
+      if (h.length > 1 && /^(feed|grid|grille|colonne)$/.test(last)) { m = /^(feed|colonne)$/.test(last) ? "feed" : "gallery"; h.pop(); }
+      return { slug: decodeURIComponent(h[0] || ""), cat: (h[1] || "").toLowerCase(), mode: m };
     }
     function tabUrl(slug, c) {
-      try { history.replaceState({ k: "dp", slug: slug }, "", "#" + slug + (c && c !== "FEATURED" ? "/" + catSlug(c) : "")); } catch (e) {}
+      var feedUrl = view && view.o.mode === "feed";
+      try { history.replaceState({ k: "dp", slug: slug }, "", "#" + slug + (c && c !== "FEATURED" ? "/" + catSlug(c) : "") + (feedUrl ? "/feed" : "")); } catch (e) {}
     }
+    // Affichage voulu : une colonne sur téléphone ; sinon celui de l'adresse ou du bouton choisi (grille par défaut).
+    function wantMode() { return phone.matches ? "feed" : (view && view.o.mode) || "gallery"; }
     // Pages du site dans l'historique (accueil, liste, page d'un chef op) : le bouton retour revient à la précédente.
     function pushPage(st) {
       try { history.pushState(st, "", st.k === "dp" ? "#" + st.slug : location.pathname + location.search); } catch (e) {}
     }
     function restorePage(st) {
       if (st && st.kinou) return; // entrée du lecteur (bouton « suivant » du navigateur) : rien à faire
-      if (!st || !st.k) st = location.hash.length > 1 ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat } : { k: "home" };
+      if (!st || !st.k) st = location.hash.length > 1 ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat, mode: parseHash().mode } : { k: "home" };
       if (st.k === "dp") {
-        if (view && view.o.slug === st.slug) { // même page, autre onglet (adresse modifiée à la main)
+        if (view && view.o.slug === st.slug) { // même page, autre onglet ou autre affichage (adresse modifiée à la main)
           var tb = st.cat && [].filter.call(cats.querySelectorAll("button"), function (x) { return catSlug(x.dataset.cat) === st.cat; })[0];
           if (tb && !tb.classList.contains("on")) tb.click();
+          var mb = st.mode && !phone.matches && modes.querySelector('button[data-mode="' + st.mode + '"]');
+          if (mb && st.mode !== mode) mb.click();
           return;
         }
         if (view) closeView(true);
         var a = document.querySelector('li a[data-view="' + st.slug + '"]');
         if (!a) return;
         if (document.body.classList.contains("is-home")) show("list");
-        openView({ text: a.textContent, slug: st.slug, from: "list", a: a, instant: true, noHistory: true, cat: st.cat });
+        openView({ text: a.textContent, slug: st.slug, from: "list", a: a, instant: true, noHistory: true, cat: st.cat, mode: st.mode });
         return;
       }
       if (view) closeView(); // le nom repart à sa place (accueil ou liste)
@@ -645,9 +653,8 @@
     var mode = "gallery", curCat = "FEATURED";
     // Sur téléphone, toujours en feed (la grille est trop petite) : pas de choix d'affichage.
     var phone = window.matchMedia("(max-width: 700px)");
-    function defMode() { return phone.matches ? "feed" : "gallery"; }
     phone.addEventListener && phone.addEventListener("change", function () {
-      if (view && WORK[view.o.slug] && !work.classList.contains("about-mode")) { mode = defMode(); render(view.o.slug, curCat, 0); }
+      if (view && WORK[view.o.slug] && !work.classList.contains("about-mode")) { mode = wantMode(); render(view.o.slug, curCat, 0); }
     });
     // Onglets en boucle (téléphone) : recalculés quand la largeur change (rotation, fenêtre redimensionnée).
     var marqueeT = 0;
@@ -891,6 +898,7 @@
         b.addEventListener("click", function () {
           mode = phone.matches ? "feed" : m;
           try { localStorage.setItem("kinou-mode", mode); } catch (e) {}
+          if (view && !phone.matches) { view.o.mode = m; tabUrl(slug, curCat); } // l'adresse garde l'affichage choisi
           modes.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
           work.scrollTop = 0; render(slug, curCat, 0);
         });
@@ -906,7 +914,7 @@
       }
       document.body.classList.add("has-work");
       setTimeout(function () { warmAll(slug); }, 1200); // apres FEATURED : les autres categories
-      work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = defMode(); buildTabs(slug);
+      work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = wantMode(); buildTabs(slug);
       // Onglet demandé dans l'adresse (#slug/fashion) : ouvert directement, sinon FEATURED.
       var want = view && view.o.cat, c0 = want && (CATS_BY[slug] || CATS).filter(function (c) { return catSlug(c) === want; })[0];
       if (want === "about") { var abt = cats.querySelector('button[data-cat="ABOUT"]'); if (abt) { render(slug, "FEATURED", 0); abt.click(); return; } }
@@ -1096,7 +1104,7 @@
       var a = slug && document.querySelector('li a[data-view="' + slug + '"]');
       if (!a || view) { undeep(); return; }
       show("list");
-      openView({ text: a.textContent, slug: slug, from: "list", a: a, instant: true, noHistory: true, cat: h.cat });
+      openView({ text: a.textContent, slug: slug, from: "list", a: a, instant: true, noHistory: true, cat: h.cat, mode: h.mode });
       undeep(700); // la liste a fini de s'effacer derrière la page
     }
     if (location.hash.length > 1) routeFromHash(); else undeep();
