@@ -659,8 +659,10 @@
     var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     // Version « live » (adresse …/site/live ou ?live) : chaque vignette joue son extrait en boucle (sans son), seulement
     // quand elle est à l'écran. Même site, même code : seul cet interrupteur change ; l'adresse normale reste en vignettes fixes.
+    // Sur téléphone (≤ 700px), toujours : les extraits tournent tout le temps (demande de Gus, 24/10) ; ordinateur inchangé.
     var LIVE = /[?&]live\b/.test(location.search);
-    var liveSeen = LIVE && "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
+    function liveOn() { return LIVE || phone.matches; }
+    var liveSeen = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         var v = e.target.querySelector("video.live"); if (!v) return;
         if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
@@ -668,14 +670,14 @@
       });
     }, { root: work, rootMargin: "200px 0px" }) : null;
     function liveThumb(st, p) {
-      if (!liveSeen || !p.video || reduceMotion) return;
+      if (!liveSeen || !liveOn() || !p.video || reduceMotion) return;
       var v = document.createElement("video");
       v.className = "snip live"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "none"; v.dataset.src = p.video;
       v.addEventListener("playing", function () { v.classList.add("on"); });
       st.appendChild(v); liveSeen.observe(st);
     }
     function snip(st, p, on) {
-      if (liveSeen) return; // version live : les extraits jouent déjà tous
+      if (liveSeen && liveOn()) return; // version live / téléphone : les extraits jouent déjà tous
       var v = st.querySelector("video.snip");
       if (!on) {
         if (v) {

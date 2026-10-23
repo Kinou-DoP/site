@@ -213,6 +213,8 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
   sur le site normal. **Version « live »** (23/10) : https://kinou-dop.github.io/site/live (simple renvoi `live/index.html`
   → `../?live`, garde le `#slug`) = le même site avec toutes les vignettes qui jouent leur extrait en boucle (`LIVE`,
   `liveThumb` dans app.js, seulement les vignettes à l'écran). Un seul site : ne rien dupliquer, ne pas modifier `live/`.
+  **Sur téléphone (≤ 700px), c'est toujours le cas** (24/10, `liveOn()` = `?live` ou téléphone) ; l'ordinateur garde les
+  vignettes fixes (extrait au survol).
 
 ## Branches et mise en ligne
 
