@@ -703,7 +703,8 @@
       // Même chose en bas : en approchant de la fin, le repère descend vers le dernier film (choisi tout en bas),
       // ce qui évite un grand espace vide sous la liste.
       var fl = feed.querySelectorAll(".card .still"), ln = fl[fl.length - 1];
-      if (ln && ln !== f1) { var bl = ln.getBoundingClientRect(), left = work.scrollHeight - work.clientHeight - work.scrollTop; line = Math.max(line, (bl.top + bl.bottom) / 2 - 2 * left); }
+      // (seulement dans la 2e moitié du défilement : en haut, c'est toujours le 1er film, même avec 2 films.)
+      if (ln && ln !== f1) { var bl = ln.getBoundingClientRect(), left = work.scrollHeight - work.clientHeight - work.scrollTop; if (left < work.scrollTop) line = Math.max(line, (bl.top + bl.bottom) / 2 - 2 * left); }
       var cards = feed.querySelectorAll(".card"), sizes = [];
       cards.forEach(function (c) {
         var b = c.querySelector(".still").getBoundingClientRect(), d = Math.abs((b.top + b.bottom) / 2 - line);
