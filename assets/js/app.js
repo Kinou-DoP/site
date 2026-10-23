@@ -649,6 +649,12 @@
     phone.addEventListener && phone.addEventListener("change", function () {
       if (view && WORK[view.o.slug] && !work.classList.contains("about-mode")) { mode = defMode(); render(view.o.slug, curCat, 0); }
     });
+    // Onglets en boucle (téléphone) : recalculés quand la largeur change (rotation, fenêtre redimensionnée).
+    var marqueeT = 0;
+    window.addEventListener("resize", function () {
+      if (!tabSet || !document.body.classList.contains("viewing")) return;
+      clearTimeout(marqueeT); marqueeT = setTimeout(marquee, 200);
+    });
     // Au survol d'un projet : la vignette joue un extrait video muet ; le fond plein ecran reste l'image fixe
     var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     // Version « live » (adresse …/site/live ou ?live) : chaque vignette joue son extrait en boucle (sans son), seulement
@@ -777,6 +783,10 @@
     var tabsLoop = 0;
     function marquee() {
       var run = ++tabsLoop;
+      // Retire la copie d'un passage précédent (écran tourné, fenêtre élargie, page réaffichée) : jamais deux copies,
+      // ni de copie restée visible en mise en page ordinateur.
+      cats.querySelectorAll('button[aria-hidden="true"]').forEach(function (x) { x.remove(); });
+      cats.ontouchstart = cats.onscroll = null;
       cats.scrollLeft = 0;
       if (!phone.matches || reduceMotion || cats.scrollWidth <= cats.clientWidth + 2) return;
       var first = cats.firstElementChild, n = cats.children.length;

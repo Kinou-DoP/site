@@ -178,7 +178,8 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    supprimer la ligne `.hero { left: 0; right: 0; text-align: center; }` (marquée « ESSAI ») dans `main.css` ;
    accueil : glisser gauche/droite ou haut/bas = projet suivant/précédent ; page d'un chef op : la zone qui défile
    commence sous la bande (`.work { top: var(--kinou-zm) }`), le film au milieu de l'écran (40 %) joue comme au survol,
-   les onglets qui dépassent défilent lentement en boucle.
+   les onglets qui dépassent défilent lentement en boucle (une copie des onglets, `aria-hidden`, ajoutée par `marquee` ;
+   retirée et recalculée à chaque passage et au redimensionnement : sinon onglets en double après rotation de l'écran).
    Petit espace sous le dernier film (6vh) : en bas de page le repère descend vers le dernier film (comme en haut vers le 1er),
    qui peut donc être sélectionné ; voile lumineux sur le film sélectionné ;
    perspective (« roulette ») : les films loin du repère rapetissent (au plus -13 %, propriété `scale` posée par `pickFocus`
