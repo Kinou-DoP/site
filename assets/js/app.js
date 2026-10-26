@@ -349,7 +349,7 @@
         var fc = (f.cats || []).map(up), mine = cats.filter(function (c) { return fc.indexOf(c) > -1; });
         var base = { title: f.title, slate: f.slate };
         ["sub", "video", "full", "img", "images", "ratios"].forEach(function (k) { if (f[k]) base[k] = f[k]; });
-        if (f.artists && f.artists.length) base.sub = (base.sub ? base.sub + "\n" : "") + "DoP " + f.artists.join(" & ");
+        if (f.artists && f.artists.length) base.dps = f.artists.map(dpByName); // « DoP Nom » sous les crédits, liens vers leur page
         (mine.length ? mine : [""]).forEach(function (c, k) {
           var e = Object.assign({}, base, { cat: c });
           if (!k) { e.featured = true; e.featuredOrder = i + 1; }
@@ -357,6 +357,34 @@
         });
       });
       return { slug: SPOT, name: "Spotlight", hue: 30, categories: ["FEATURED"].concat(cats), clips: clips, overrides: s.overrides || {} };
+    }
+    // Chef op crédité sur Slate → sa page (nom comparé sans accents ni « , AFC… »).
+    function plainName(t) { return split(t).main.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim(); }
+    function dpByName(n) {
+      var k = plainName(n), d = DPS.filter(function (x) { return plainName(x.name) === k; })[0];
+      return d ? { name: d.name, slug: d.slug } : { name: n };
+    }
+    // Ligne « DoP Nom & Nom » (spotlight) : noms en blanc cassé, liens vers la page du chef op.
+    function dpLine(p, cls, fromPlayer) {
+      var who = document.createElement("p"); who.className = cls;
+      who.appendChild(document.createTextNode("DoP "));
+      p.dps.forEach(function (d, k) {
+        if (k) who.appendChild(document.createTextNode(" & "));
+        var a = document.createElement(d.slug ? "a" : "span"); a.textContent = split(d.name).main;
+        if (d.slug) {
+          a.href = "#" + d.slug;
+          a.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); toDP(d, a, fromPlayer); });
+        }
+        who.appendChild(a);
+      });
+      return who;
+    }
+    // Depuis une page ouverte (spotlight) : on la quitte pour la page du chef op (le bouton retour y revient).
+    function toDP(d, a, fromPlayer) {
+      if (fromPlayer) { closePlayer(true); if (pushed > 0) pushed--; }
+      var home = document.body.classList.contains("is-home"), li = document.querySelector('li a[data-view="' + d.slug + '"]');
+      if (view) closeView(true);
+      openView({ text: li ? li.textContent : d.name, slug: d.slug, from: home ? "home" : "list", a: li, rect: a.getBoundingClientRect(), replaceHistory: fromPlayer });
     }
     function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : c; }
     // Ouverture depuis l'en-tête (ou le menu du téléphone) : le mot « spotlight » devient le titre de la page.
@@ -452,6 +480,14 @@
       else if (modes.parentNode !== modesHome) modesHome.insertBefore(modes, modesHome.firstChild);
     }
     placeModes(); modesWide.addEventListener && modesWide.addEventListener("change", placeModes);
+    // Ordinateur : la molette sur le bandeau (nom, onglets, en-tête) fait quand même défiler les films.
+    document.addEventListener("wheel", function (e) {
+      if (!view || phone.matches || !document.body.classList.contains("has-work") || player.classList.contains("on")) return;
+      if (e.ctrlKey || !e.target.closest || e.target.closest(".work, #player, .drawer")) return;
+      if (e.target.closest(".cats") && cats.scrollHeight > cats.clientHeight + 1) return; // onglets qui défilent eux-mêmes
+      var k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? work.clientHeight : 1;
+      work.scrollBy(0, e.deltaY * k);
+    }, { passive: true });
     // ABOUT par technicien : bio (un paragraphe par ligne) + liens CV, Instagram, Website. Rempli par register().
     var ABOUT = {};
     var about = document.getElementById("about"), aboutbg = document.getElementById("aboutbg");
@@ -570,8 +606,9 @@
         var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
       }
       ptitle.textContent = p.title;
-      // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page.
-      if (p.dps && p.dps.length) {
+      // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page (spotlight : dernière ligne, « DoP Nom »).
+      if (p.dps && p.dps.length && view && view.o.slug === SPOT) { var spotDps = true; }
+      else if (p.dps && p.dps.length) {
         var who = document.createElement("div"); who.className = "pdps";
         p.dps.forEach(function (d, k) {
           if (k) who.appendChild(document.createTextNode(" & "));
@@ -582,6 +619,7 @@
         pcap.appendChild(who);
       }
       var s = document.createElement("p"); s.textContent = p.sub || p.cat; pcap.appendChild(s);
+      if (spotDps) pcap.appendChild(dpLine(p, "pdop", true));
       buildStills(p, src);
       player.scrollTop = 0;
       player.classList.add("on"); pglass.classList.add("on");
@@ -833,6 +871,7 @@
         var h = document.createElement("h3"); h.textContent = p.title;
         var s = document.createElement("p"); s.textContent = p.sub || p.cat;
         meta.appendChild(h); meta.appendChild(s);
+        if (p.dps && p.dps.length && slug === SPOT) meta.appendChild(dpLine(p, "cdop"));
         if (p.cat && cat === "FEATURED") { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
         liveThumb(st, p);

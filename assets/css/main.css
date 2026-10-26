@@ -314,7 +314,7 @@ body.menu-on .burger { opacity: 0; }
   .logo.img img { height: calc(var(--logo-h, 36px) * .56); }
   #bgvid, #home .slide video { object-position: var(--pp, 50%) 50%; } /* fond de la liste et accueil : partie de l'extrait choisie dans l'admin (phoneX) */
   .logo:not(.img) { font-size: 28px; top: calc(env(safe-area-inset-top, 0px) + 28px); } /* texte « kinou » (sans logo image) : à l'échelle de « DOP » */
-  .nav-btn { font-size: 19px; font-weight: 400; letter-spacing: .02em; top: calc(env(safe-area-inset-top, 0px) + 35px); }
+  .nav-btn { font-size: 19px; font-weight: 700; letter-spacing: .02em; top: calc(env(safe-area-inset-top, 0px) + 35px); }
   .nav-btn .long { display: none; }
   .nav-btn .short { display: inline; }
   /* Accueil : nom du chef op plus petit (taille de « Nom & Nom ») ; glisser haut/bas sans faire défiler la page */
@@ -426,4 +426,8 @@ body.spot .modes { display: none; }
   body.spot .cats { top: var(--kinou-tabs-top); left: 32px; right: 32px; flex-direction: row; gap: 28px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
   body.spot .cats::-webkit-scrollbar { display: none; }
   body.spot .work { padding-left: 32px; }
+  body.spot .hero { left: 32px; right: auto; text-align: left; } /* titre « Spotlight » à gauche (demande de Gus 26/10) */
 }
+/* Spotlight : « DoP Nom » en dernière ligne des crédits, noms en blanc cassé, liens vers la page du chef op. */
+.meta .cdop a, #player .pdop a { color: var(--kinou-fg); padding: 0; font: inherit; transition: opacity .2s; }
+.meta .cdop a:hover, #player .pdop a:hover { opacity: .7; }

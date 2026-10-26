@@ -166,10 +166,11 @@ cats` = types de contenu Slate, `artists`, et pour un projet en images `images` 
 lisent que 10, sans catégories. Le site (`spotToDP` dans app.js) en fait une page comme celle d'un chef op (`slug` « spotlight ») :
 onglet ALL (= FEATURED interne, libellé par `catLabel`, tous les films dans l'ordre de la bande, arrivée par défaut) puis un
 onglet par catégorie (un film va dans chaque catégorie dont le nom figure dans ses types de contenu Slate ; sans catégorie
-reconnue : seulement dans ALL) ; chefs op crédités en dernière ligne des crédits (« DoP Nom ») ; pas d'onglet ABOUT ;
+reconnue : seulement dans ALL) ; chefs op crédités en dernière ligne des crédits (« DoP Nom », noms en blanc cassé = liens vers leur page, reliés par le nom à la liste
+sans accents ni « , AFC », `dpByName` / `dpLine` / `toDP` ; vignette et lecteur ; le bouton retour revient au spotlight) ; pas d'onglet ABOUT ;
 `overrides` de l'admin comme une fiche (titres, masquer, recadrage, stills et vidéos sous le film…).
 Ouverture : lien « spotlight » de l'en-tête et du menu du téléphone (`openSpot`, le mot devient le titre) ou `#spotlight[/cat]`.
-`body.spot` : sur ordinateur, onglets **en ligne au-dessus** des films (grille sur toute la largeur), pas de choix grille /
+`body.spot` : sur ordinateur, titre « Spotlight » **à gauche** (pages de chef op : à droite), onglets **en ligne au-dessus** des films (grille sur toute la largeur), pas de choix grille /
 colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur téléphone.
 
 ## Règles visuelles — à respecter absolument
@@ -198,7 +199,7 @@ colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur t
    déplacé dans l'admin → `--zp` = transform-origin / background-position) ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
    jamais dans le lecteur.
 13. **Téléphone** (≤ 700px) : en-tête = burger à gauche (volet flou sur la moitié de l'écran : spotlight, fiction, instagram,
-   contact), logo réduit (texte « kinou » sans logo image : 28px), « DOP » à droite (au lieu de « cinematographers », même hauteur que le logo), les trois centrés sur la même ligne ;
+   contact), logo réduit (texte « kinou » sans logo image : 28px), « DOP » en gras à droite (au lieu de « cinematographers », même hauteur que le logo), les trois centrés sur la même ligne ;
    écart identique (≈ 15px depuis le 23/10, avant ≈ 10–14px) entre nom, onglets et bande ;
    **ESSAI en cours (22/10)** : nom du chef op (`.hero`) **centré** sur téléphone. Ancienne position, à remettre si Gus revient
    en arrière : collé à droite comme sur ordinateur (`right: 32px`, 24px sous 560px, `text-align: right`) — il suffit de
@@ -317,6 +318,7 @@ Sur ordinateur (> 900px), `placeModes` les sort de `.work` (dans `body`) : le ha
 `mask-image`, demande de Gus 26/10 : l'ombre des vignettes n'est plus coupée net) qui les effacerait sinon.
 Affichage (ordinateur) dans l'adresse : `/feed` à la fin = une colonne (`#<slug>/feed`, `#<slug>/fashion/feed`) ; rien
 (ou `/grid`) = grille. Les boutons grille / colonne mettent l'adresse à jour ; sur téléphone, toujours une colonne (`wantMode`).
+Ordinateur : la molette au-dessus du bandeau (nom, en-tête, onglets qui ne défilent pas) fait défiler les films (`wheel` → `work.scrollBy`).
 Pour tester en local, servir le dossier (fetch ne marche pas en `file://`) :
 `python3 -m http.server` puis http://localhost:8000.
 
