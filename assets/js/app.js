@@ -803,24 +803,50 @@
     function photosOf(p) { return p.images && p.images.length ? p.images : p.stills || []; }
     function renderPhotos(list) {
       feed.className = "feed photos";
-      var all = [], k = 0;
-      list.forEach(function (p) {
-        if (list.length > 1) { // plusieurs séries : leur titre au-dessus de chacune
-          var h = document.createElement("div"); h.className = "phead";
-          var t = document.createElement("h3"); t.textContent = p.title; h.appendChild(t);
-          if (p.sub) { var sb = document.createElement("p"); sb.textContent = p.sub; h.appendChild(sb); }
-          feed.appendChild(h);
-        }
-        var col = document.createElement("div"); col.className = "pcols"; feed.appendChild(col);
-        photosOf(p).forEach(function (u) {
-          var i = all.push(u) - 1, b = document.createElement("button");
-          b.className = "ph"; b.style.setProperty("--i", k++ % 6); b.setAttribute("aria-label", "Photo " + (i + 1));
-          var im = document.createElement("img"); im.alt = p.title; im.loading = "lazy"; im.decoding = "async";
-          im.onload = function () { b.classList.add("shown"); };
-          im.src = u; b.appendChild(im); col.appendChild(b);
-          b.addEventListener("click", function () { openPhoto(all, i, p.title); });
-        });
+      // Colonnes remplies en JS, dans l'ordre (chaque photo dans la colonne la moins haute), chaque case ayant déjà la
+      // forme de sa photo (proportions notées par le robot, `ratios`) : rien ne bouge quand les photos arrivent.
+      var all = [], k = 0, run = renderRun, n = phone.matches ? 2 : 3, probes = [];
+      var groups = list.map(function (p) {
+        var urls = photosOf(p), g = { p: p, urls: urls, ratios: p.ratios && p.ratios.length === urls.length ? p.ratios : null };
+        // Proportions pas encore connues (robot pas encore passé) : on lit la taille de chaque photo avant de les placer.
+        if (!g.ratios) g.probe = urls.map(function (u) { var im = new Image(); im.src = u; probes.push(im); return im; });
+        return g;
       });
+      var t0 = Date.now();
+      (function wait() {
+        if (run !== renderRun) return;
+        if (probes.some(function (im) { return !im.naturalWidth && !im.complete; }) && Date.now() - t0 < 4000) { setTimeout(wait, 60); return; }
+        layout();
+      })();
+      function layout() {
+        groups.forEach(function (g) {
+          var p = g.p;
+          if (groups.length > 1) { // plusieurs séries : leur titre au-dessus de chacune
+            var h = document.createElement("div"); h.className = "phead";
+            var t = document.createElement("h3"); t.textContent = p.title; h.appendChild(t);
+            if (p.sub) { var sb = document.createElement("p"); sb.textContent = p.sub; h.appendChild(sb); }
+            feed.appendChild(h);
+          }
+          var box = document.createElement("div"); box.className = "pcols"; feed.appendChild(box);
+          var cols = [], hs = [];
+          for (var c = 0; c < n; c++) { cols.push(box.appendChild(document.createElement("div"))); cols[c].className = "pcol"; hs.push(0); }
+          g.urls.forEach(function (u, j) {
+            var im = g.probe ? g.probe[j] : new Image();
+            var r = g.ratios ? g.ratios[j] : im.naturalWidth ? im.naturalWidth / im.naturalHeight : 0;
+            if (!r) r = 1.5;
+            var i = all.push(u) - 1, b = document.createElement("button");
+            b.className = "ph"; b.style.aspectRatio = r; b.style.setProperty("--i", k++ % 6); b.setAttribute("aria-label", "Photo " + (i + 1));
+            im.alt = p.title;
+            var show = function () { b.classList.add("shown"); };
+            if (g.probe) { if (im.complete) show(); else im.onload = im.onerror = show; }
+            else { im.loading = "lazy"; im.decoding = "async"; im.onload = im.onerror = show; im.src = u; }
+            b.appendChild(im);
+            var best = 0; for (var c2 = 1; c2 < n; c2++) if (hs[c2] < hs[best] - 1e-6) best = c2;
+            cols[best].appendChild(b); hs[best] += 1 / r;
+            b.addEventListener("click", function () { openPhoto(all, i, p.title); });
+          });
+        });
+      }
     }
     // Photo en grand, sans passer par le lecteur : la fermer revient directement à la page.
     function openPhoto(all, i, title) {

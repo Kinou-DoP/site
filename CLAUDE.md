@@ -122,7 +122,10 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   `kinou.slateapp.com/work/<…>-photography`) : quand tous les projets d'un onglet (hors FEATURED) sont en images seulement,
   `renderPhotos` les affiche en colonnes (3, 2 sur téléphone), chaque photo à son ratio d'origine (jamais recadrée), montée en
   fondu, clic = photo en grand (`openPhoto`, sans le lecteur ; flèches = toutes les photos de l'onglet). Plusieurs séries :
-  titre au-dessus de chacune. Images : `overrides[<id>].images` (robot, après « Relire le bundle » + Publier).
+  titre au-dessus de chacune. Images : `overrides[<id>].images` (robot, après « Relire le bundle » + Publier), proportions
+  `overrides[<id>].ratios` (largeur/hauteur, robot) : colonnes remplies en JS dans l'ordre (colonne la moins haute), chaque case
+  a déjà la forme de sa photo → rien ne bouge au chargement (avant, colonnes CSS = photos qui sautaient). Sans `ratios` : le site
+  lit la taille des photos avant de les placer (≤ 4 s).
 - `about.img` : chemin relatif au dossier `data/dps/`.
 - Exception de mise en page = ajouter `"template": "special"` dans le JSON.
 
