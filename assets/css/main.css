@@ -42,6 +42,8 @@ body.viewing.about-on #aboutbg { opacity: 1; }
 .work.about-mode .feed, .work.about-mode .modes { display: none; }
 .work.about-mode .about { display: block; }
 .modes { display: flex; gap: 16px; height: 22px; margin-bottom: 24px; }
+/* Ordinateur : boutons grille / colonne dans le bandeau (au-dessus de la coupe, alignés sur la grille) : les films commencent plus haut. */
+@media (min-width: 901px) { .modes { position: fixed; z-index: 3; top: calc(var(--kinou-zm) - 34px); left: 240px; margin: 0; } .cats { top: calc(var(--kinou-zm) + 16px); } } /* catégories alignées sur le haut des films */
 .modes button { padding: 0; border: 0; background: none; color: var(--kinou-fg); line-height: 0; opacity: .4; cursor: pointer; transition: opacity .2s; }
 .modes button:hover { opacity: .8; }
 .modes button.on { opacity: 1; }
