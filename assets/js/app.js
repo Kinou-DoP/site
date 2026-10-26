@@ -198,7 +198,8 @@
     window.HomeAPI = {
       pause: function () { active = false; clearTimeout(timer); var v = slides[cur].querySelector("video"); if (v) v.pause(); },
       resume: function () { if (active) return; active = true; var v = slides[cur].querySelector("video"); if (v && v.src) { var pr = v.play(); if (pr && pr.catch) pr.catch(later); v.onended = next; } else later(); },
-      videoEl: function () { return slides[cur].querySelector("video"); }
+      videoEl: function () { return slides[cur].querySelector("video"); },
+      current: function () { return PROJECTS[cur]; }
     };
     go(Math.floor(Math.random() * PROJECTS.length)); // on arrive sur un film au hasard, puis l'ordre de la bande
   }
@@ -314,7 +315,7 @@
       if (o.from === "list" && roul.active()) o.a = roul.center(o.slug);
       var rect = o.from === "home" ? homeNameRect() : o.a ? nameRect(o.a, view.main) : null;
       if (!rect || !rect.width) instant = true; // spotlight ouvert par l'adresse, ou lien caché (menu du téléphone)
-      view = null; document.body.classList.remove("spot", "cpage"); clearInterval(clockT); cats.style.transitionDelay = "";
+      view = null; document.body.classList.remove("spot", "cpage"); cats.style.transitionDelay = "";
       var f = hero.querySelector(".n").getBoundingClientRect();
       hero.classList.remove("ready");
       document.body.classList.remove("viewing");
@@ -1105,8 +1106,8 @@
     function openWork(slug, film) { if (slug === CONTACT) return showContact(); (TEMPLATES[TEMPLATE[slug]] || TEMPLATES["default"])(slug, film); }
     // ---------- Contact (data/contact.json, page « contact » de l'admin) ----------
     // Présenté comme un générique de fin : rôle à gauche, nom à droite, de part et d'autre d'un axe ; même rôle que la ligne
-    // précédente = rôle non répété. Fond : un film de l'accueil au hasard, flouté. Heure de Paris en direct.
-    var contactData = null, cbox = null, clockT = 0;
+    // précédente = rôle non répété. Fond : le film de l'accueil en cours (ou un au hasard), flouté.
+    var contactData = null, cbox = null;
     function cel(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
     function showContact() {
       document.body.classList.remove("has-work"); cats.textContent = "";
@@ -1142,11 +1143,6 @@
         addr.forEach(function (l, i) { if (i) ad.appendChild(document.createElement("br")); ad.appendChild(document.createTextNode(l)); });
         end.appendChild(ad);
       }
-      var clock = cel("p", "cclock"); end.appendChild(clock);
-      function tick() {
-        try { clock.textContent = "Paris " + new Date().toLocaleTimeString("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }); } catch (e) { clock.textContent = ""; }
-      }
-      tick(); clearInterval(clockT); clockT = setInterval(tick, 15000);
       if (c.newsletter) { var nl = cel("a", "cnews", "Subscribe to the newsletter"); nl.href = c.newsletter; nl.target = "_blank"; nl.rel = "noopener"; end.appendChild(nl); }
       var so = c.social || {}, links = cel("nav", "csocial");
       [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"], ["facebook", "Facebook"]].forEach(function (x) {
@@ -1160,9 +1156,14 @@
         end.appendChild(lb); end.appendChild(lt);
       }
       cbox.appendChild(end);
-      // Fond : un film de l'accueil au hasard, très flouté (comme le fond d'une page de chef op).
-      var bgs = (HOME || []).filter(function (h) { return h.video || h.img; });
-      if (bgs.length) { var b = bgs[Math.floor(Math.random() * bgs.length)]; showProj({ video: b.video, img: b.img }, 0); }
+      // Fond : très flouté (comme le fond d'une page de chef op). Depuis l'accueil : le film en cours, là où il en était
+      // (passage HD compris) ; sinon un film de l'accueil au hasard.
+      var hv = document.body.classList.contains("is-home") && HomeAPI.videoEl(), hp = hv && HomeAPI.current();
+      if (hp) showProj({ video: hv.currentSrc || hp.video, img: hp.img }, hv.currentTime || 0.01);
+      else {
+        var bgs = (HOME || []).filter(function (h) { return h.video || h.img; });
+        if (bgs.length) { var b = bgs[Math.floor(Math.random() * bgs.length)]; showProj({ video: b.video, img: b.img }, 0); }
+      }
       cats.style.transitionDelay = view ? Math.max(0, view.t0 + ANIM - Date.now()) + "ms" : "";
       document.body.classList.add("has-work");
     }

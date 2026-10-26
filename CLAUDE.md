@@ -179,10 +179,11 @@ Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « conta
 ordinateur ; `body.cpage`, pas d'onglets, `--kinou-zm` plus court). `showContact` / `renderContact` dans app.js, dans `.work`
 (`contact-mode` : films, onglets et About cachés ; films de la page d'avant vidés). Présentation « générique de fin » : rôle à
 droite d'un axe central (petites capitales grises, pas répété s'il est identique à la ligne du dessus), prénom en grand à gauche,
-e-mail (`mailto:`) et téléphone (`tel:`) dessous ; lignes qui montent l'une après l'autre (`rise`) ; au survol d'une ligne, les
-autres s'estompent (`:has`). Puis adresse (lien vers Google Maps), heure de Paris en direct, « [ Subscribe to the newsletter ] »
+e-mail (`mailto:`) et téléphone (`tel:`) dessous ; lignes qui montent l'une après l'autre (`rise`) ; noms toujours en blanc
+(pas d'estompage au survol : Gus 27/10). Puis adresse (lien vers Google Maps), « [ Subscribe to the newsletter ] »
 (crochets qui s'écartent au survol), réseaux remplis, « Mentions légales » (texte déplié sur place, si `legal`).
-Fond : un film de l'accueil au hasard, flouté (`showProj`, comme une page de chef op). Téléphone : une colonne centrée.
+Fond flouté (`showProj`, comme une page de chef op) : depuis l'accueil, le film en cours, là où il en était (`HomeAPI.current`,
+passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une colonne centrée.
 
 ## Règles visuelles — à respecter absolument
 

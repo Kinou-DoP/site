@@ -433,8 +433,8 @@ body.spot .modes, body.cpage .modes { display: none; }
 .meta .cdop a:hover, #player .pdop a:hover { opacity: .7; }
 
 /* Contact (body.cpage, data/contact.json) : un générique de fin. Rôle à droite d'un axe central, nom à gauche, e-mail et
-   téléphone dessous ; un même rôle n'est pas répété. Lignes qui montent l'une après l'autre à l'arrivée ; au survol d'une
-   ligne, les autres s'estompent. Fond : un film de l'accueil, flouté. Pas d'onglets : la page commence sous le titre. */
+   téléphone dessous ; un même rôle n'est pas répété. Lignes qui montent l'une après l'autre à l'arrivée.
+   Fond : le film de l'accueil en cours (ou un au hasard), flouté. Pas d'onglets : la page commence sous le titre. */
 body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px); }
 .contact { display: none; }
 .work.contact-mode { padding-left: 32px; }
@@ -443,9 +443,6 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .contact { max-width: 1000px; margin: 0 auto; padding: 5vh 0 4vh; font-family: var(--kinou-sans); color: var(--kinou-fg); }
 .crew { display: grid; gap: 38px; }
 .crow { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; align-items: baseline; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
-.crow > * { transition: opacity .35s ease; }
-.crew:has(.crow:hover) .crow > * { opacity: .3; }
-.crew .crow:hover > * { opacity: 1; }
 .crole { text-align: right; font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.5); }
 .crole.same { visibility: hidden; }
 .cwho { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
@@ -455,7 +452,6 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .cend { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 15vh; text-align: center; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
 .caddr { padding: 0; font-weight: 600; font-size: 13px; letter-spacing: .14em; line-height: 2; text-transform: uppercase; text-shadow: none; transition: opacity .2s; }
 .caddr:hover { opacity: .6; }
-.cclock { margin: -8px 0 0; font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.45); font-variant-numeric: tabular-nums; }
 .cnews { margin-top: 18px; padding: 0; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; text-shadow: none; }
 .cnews::before, .cnews::after { display: inline-block; font-weight: 300; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
 .cnews::before { content: "["; margin-right: .5em; }
@@ -480,6 +476,5 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
   .cwho { align-items: center; }
   .cname { margin-bottom: 6px; font-size: 28px; }
   .cwho a { padding: 3px 0; font-size: 15px; }
-  .crew:has(.crow:hover) .crow > * { opacity: 1; }
   .cend { margin-top: 10vh; }
 }
