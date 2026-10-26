@@ -212,7 +212,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 14. **Lecteur** : flèches ‹ › tout en bas de l'écran (films de l'onglet affiché, aussi au clavier) ; images agrandies : flèches en bas, glisser,
    pavé tactile ; le bouton retour du téléphone ferme l'image puis le lecteur (`history.pushState`).
 9. **Fonds** : liste → nom survolé en blanc et en gras (700), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
-   film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé).
+   film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé ; sur ordinateur, juste un fondu de 8px depuis le 26/10).
    Sur ordinateur, en arrivant sur un onglet (page d'un chef op ou changement d'onglet), le 1er film est déjà « survolé »
    (extrait + fond flou, `autoFirst`) ; dès qu'on survole un film, fonctionnement normal (`dropAuto`). Pas si on arrive
    de l'accueil sur un film présélectionné (`selCard`).
@@ -300,6 +300,8 @@ Les pages DP ne sont pas des fichiers séparés : `index.html#<slug>` ouvre la p
 `…/music-video`, `…/about`) ; changer d'onglet met l'adresse à jour (`replaceState`, sans étape de plus pour le bouton retour).
 Boutons grille / colonne (`.modes`) : sur ordinateur (> 900px) dans le bandeau, au-dessus de la coupe, alignés sur la grille
 (les films commencent juste sous le bandeau ; catégories de gauche alignées sur le haut des films) ; 701–900px : au-dessus des films.
+Sur ordinateur (> 900px), `placeModes` les sort de `.work` (dans `body`) : le haut de `.work` a un fondu très court (8px,
+`mask-image`, demande de Gus 26/10 : l'ombre des vignettes n'est plus coupée net) qui les effacerait sinon.
 Affichage (ordinateur) dans l'adresse : `/feed` à la fin = une colonne (`#<slug>/feed`, `#<slug>/fashion/feed`) ; rien
 (ou `/grid`) = grille. Les boutons grille / colonne mettent l'adresse à jour ; sur téléphone, toujours une colonne (`wantMode`).
 Pour tester en local, servir le dossier (fetch ne marche pas en `file://`) :

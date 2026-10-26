@@ -402,6 +402,14 @@
       return d;
     }
     var work = document.getElementById("work"), feed = document.getElementById("feed"), cats = document.getElementById("cats"), modes = document.getElementById("modes");
+    // Ordinateur (> 900px) : les boutons grille / colonne vont dans le bandeau, hors de la zone qui défile (dont le haut a un
+    // fondu qui les effacerait) ; plus étroit : à leur place, au-dessus des films.
+    var modesHome = modes.parentNode, modesWide = window.matchMedia("(min-width: 901px)");
+    function placeModes() {
+      if (modesWide.matches) { if (modes.parentNode !== document.body) document.body.appendChild(modes); }
+      else if (modes.parentNode !== modesHome) modesHome.insertBefore(modes, modesHome.firstChild);
+    }
+    placeModes(); modesWide.addEventListener && modesWide.addEventListener("change", placeModes);
     // ABOUT par technicien : bio (un paragraphe par ligne) + liens CV, Instagram, Website. Rempli par register().
     var ABOUT = {};
     var about = document.getElementById("about"), aboutbg = document.getElementById("aboutbg");
@@ -766,7 +774,7 @@
       feed.textContent = "";
       var shown = WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
       var isPhotos = cat !== "FEATURED" && shown.length && shown.every(function (p) { return !p.full && (p.nosnip || !p.video) && photosOf(p).length; });
-      work.classList.toggle("photos-on", !!isPhotos); // pas de choix grille / colonne pour les photos
+      work.classList.toggle("photos-on", !!isPhotos); document.body.classList.toggle("photos-on", !!isPhotos); // pas de choix grille / colonne pour les photos
       if (isPhotos) { renderPhotos(shown); return; }
       shown.forEach(function (p, i) {
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
