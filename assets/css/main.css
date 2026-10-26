@@ -458,7 +458,7 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .cnews::after { content: "]"; margin-left: .5em; }
 .cnews:hover::before { transform: translateX(-6px); }
 .cnews:hover::after { transform: translateX(6px); }
-.csocial { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 28px; }
+.csocial { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 28px; margin-top: 34px; }
 .csocial a { padding: 0; font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; text-shadow: none; transition: opacity .2s; }
 .csocial a:hover { opacity: .55; }
 .clegalbtn { margin-top: 10vh; padding: 0; border: 0; background: none; font-family: var(--kinou-sans); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.4); cursor: pointer; transition: color .2s; }
