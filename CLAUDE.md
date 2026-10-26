@@ -165,7 +165,7 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
 cats` = types de contenu Slate, `artists`, et pour un projet en images `images` + `ratios`) — les fonctions Netlify figées n'en
 lisent que 10, sans catégories. Le site (`spotToDP` dans app.js) en fait une page comme celle d'un chef op (`slug` « spotlight ») :
 onglet ALL (= FEATURED interne, libellé par `catLabel`, tous les films dans l'ordre de la bande, arrivée par défaut) puis un
-onglet par catégorie (un film va dans chaque catégorie dont le nom figure dans ses types de contenu Slate ; sans catégorie
+onglet par catégorie (un film va dans chaque catégorie dont le nom figure dans ses types de contenu Slate, « Art Film » comptant comme ART VIDEO ; sans catégorie
 reconnue : seulement dans ALL) ; chefs op crédités en dernière ligne des crédits (« DoP Nom », noms en blanc cassé = liens vers leur page, reliés par le nom à la liste
 sans accents ni « , AFC », `dpByName` / `dpLine` / `toDP` ; vignette et lecteur ; le bouton retour revient au spotlight) ; pas d'onglet ABOUT ;
 `overrides` de l'admin comme une fiche (titres, masquer, recadrage, stills et vidéos sous le film…).

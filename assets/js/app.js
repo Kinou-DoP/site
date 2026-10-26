@@ -349,7 +349,7 @@
       var up = function (x) { return String(x).trim().toUpperCase(); };
       var cats = (s.categories || ["COMMERCIAL", "MUSIC VIDEO", "ART VIDEO"]).map(up), clips = [];
       (s.films || []).forEach(function (f, i) {
-        var fc = (f.cats || []).map(up), mine = cats.filter(function (c) { return fc.indexOf(c) > -1; });
+        var fc = (f.cats || []).map(up).map(function (c) { return c === "ART FILM" ? "ART VIDEO" : c; }), mine // « Art Film » sur Slate = ART VIDEO = cats.filter(function (c) { return fc.indexOf(c) > -1; });
         var base = { title: f.title, slate: f.slate };
         ["sub", "video", "full", "img", "images", "ratios"].forEach(function (k) { if (f[k]) base[k] = f[k]; });
         if (f.artists && f.artists.length) base.dps = f.artists.map(dpByName); // « DoP Nom » sous les crédits, liens vers leur page
