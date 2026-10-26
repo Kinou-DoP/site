@@ -47,7 +47,13 @@ Contournements en place (à retirer ou simplifier au retour sur Netlify) :
    `thumb()` passe par `/.netlify/images` (WebP réduit) ; l'admin « chauffe » déjà ces vignettes (`warmThumbs`).
 4. Décider où vit le site : GitHub Pages (actuel) ou Netlify ; mettre à jour `DATA_BASE`, `IMG_CDN` (app.js) et `SITE`
    (admin.js) en conséquence ; le contournement `/api/reel` de l'admin (`importStills`) peut rester (sans effet).
-5. Puis seulement, après validation de Gus : fusion `beta` → `main` (production kinou.fr, ≈ 15 crédits par mise en ligne).
+5. **Photos (catégorie de photos, projets en images)** : rien d'obligatoire. Le robot GitHub tourne indépendamment de Netlify
+   et continue d'écrire `overrides[<id>].images` + `ratios` ; le site les préfère (`photosOf`) aux `stills` que `/api/dp`
+   renverra à nouveau. Option (pour ne plus dépendre du robot) : faire calculer les proportions par `readBundle`
+   (`slate.mjs`, même lecture des 64 premiers Ko que `ratiosOf` dans `admin/tools/fill-home.mjs`) → `ratios` sur le clip,
+   et faire préférer `stills` + `ratios` du bundle (toujours à jour) aux `images` du robot. Sans `ratios`, le site mesure
+   les photos lui-même avant de les placer (≤ 4 s, toutes les photos de l'onglet chargées d'un coup) : ça marche, en plus lent.
+6. Puis seulement, après validation de Gus : fusion `beta` → `main` (production kinou.fr, ≈ 15 crédits par mise en ligne).
 
 ## Architecture des données
 
