@@ -118,6 +118,11 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   dans l'ordre de l'admin : `[{ link, title, stills: [...] } | { link, title, full, video, img }]` — galeries (3 colonnes, 2 sur
   téléphone) et vidéos à la taille du film (montée en fondu comme les stills ; une seule vidéo joue à la fois).
   Remplace l'ancien `stills` + `stillsLink` des overrides (toujours lu s'il n'y a pas d'`extras`).
+- **Catégorie de photos** (ex. showreel `#photography` du bundle contenant la page Slate « illustration » des photos,
+  `kinou.slateapp.com/work/<…>-photography`) : quand tous les projets d'un onglet (hors FEATURED) sont en images seulement,
+  `renderPhotos` les affiche en colonnes (3, 2 sur téléphone), chaque photo à son ratio d'origine (jamais recadrée), montée en
+  fondu, clic = photo en grand (`openPhoto`, sans le lecteur ; flèches = toutes les photos de l'onglet). Plusieurs séries :
+  titre au-dessus de chacune. Images : `overrides[<id>].images` (robot, après « Relire le bundle » + Publier).
 - `about.img` : chemin relatif au dossier `data/dps/`.
 - Exception de mise en page = ajouter `"template": "special"` dans le JSON.
 

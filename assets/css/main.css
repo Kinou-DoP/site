@@ -391,3 +391,17 @@ html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: h
   .card.focus .still::after { animation: glow 1.25s ease-out; }
   .card { transform-origin: 50% 50%; will-change: transform, scale; }
 }
+
+/* Catégorie de photos : colonnes (3, 2 sur téléphone), chaque photo à son ratio d'origine (jamais recadrée). */
+.feed.photos { display: block; max-width: none; }
+.feed.photos .pcols { column-count: 3; column-gap: 6px; }
+.feed.photos .pcols + .phead { margin-top: 56px; }
+.feed.photos .phead h3 { margin: 0 0 4px; }
+.feed.photos .phead p { margin: 0 0 16px; white-space: pre-line; font-size: 11px; line-height: 1.7; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.55); }
+.feed.photos .ph { display: block; width: 100%; margin: 0 0 6px; padding: 0; border: 0; background: #070707; cursor: zoom-in; break-inside: avoid; opacity: 0; box-shadow: 0 0 36px 10px rgba(0,0,0,.3); }
+.feed.photos .ph.shown { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 60ms); }
+.feed.photos .ph img { display: block; width: 100%; height: auto; transition: filter .35s ease; }
+.feed.photos .ph:hover img { filter: brightness(1.1); }
+@media (max-width: 700px) { .feed.photos .pcols { column-count: 2; column-gap: 4px; } .feed.photos .ph { margin-bottom: 4px; } }
+.work.photos-on .modes { visibility: hidden; }
+#player.photo-only .pin, #player.photo-only .pgal, #player.photo-only .pfade, #player.photo-only .pclose, #player.photo-only .pnav { display: none; }

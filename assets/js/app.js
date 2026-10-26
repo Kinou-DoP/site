@@ -348,6 +348,9 @@
       var cat = curCat, top = work.scrollTop;
       buildTabs(slug);
       if ((CATS_BY[slug] || CATS).indexOf(cat) < 0) cat = "FEATURED";
+      // Onglet demandé dans l'adresse qui n'existait pas encore dans la copie de la fiche (ajouté sur Slate) : on l'ouvre.
+      var want = parseHash().cat, c0 = cat === "FEATURED" && want && (CATS_BY[slug] || CATS).filter(function (c) { return catSlug(c) === want; })[0];
+      if (c0) { cat = c0; top = 0; }
       cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === cat); });
       render(slug, cat, 0); work.scrollTop = top;
     }
@@ -597,7 +600,10 @@
       plight.classList.toggle("multi", n > 1);
       stillsIdx = i; plight.classList.add("on");
     }
-    function closeStill(fromBack) { plight.classList.remove("on"); if (!fromBack) popStep(); }
+    function closeStill(fromBack) {
+      plight.classList.remove("on"); if (!fromBack) popStep();
+      if (player.classList.contains("photo-only")) player.classList.remove("on", "photo-only"); // photo d'une catégorie de photos
+    }
     plight.addEventListener("click", function (e) {
       var a = e.target.closest(".parrow");
       if (a) { showStill(stillsIdx + (a.id === "plnext" ? 1 : -1)); return; }
@@ -758,7 +764,11 @@
       feed.style.setProperty("--d", delay + "ms");
       clearProj();
       feed.textContent = "";
-      WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; }).forEach(function (p, i) {
+      var shown = WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
+      var isPhotos = cat !== "FEATURED" && shown.length && shown.every(function (p) { return !p.full && (p.nosnip || !p.video) && photosOf(p).length; });
+      work.classList.toggle("photos-on", !!isPhotos); // pas de choix grille / colonne pour les photos
+      if (isPhotos) { renderPhotos(shown); return; }
+      shown.forEach(function (p, i) {
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
         // Recadrage (admin, position du cadre = --zp) : l'extrait au survol ; la vignette aussi si « zoomThumb » est coché.
@@ -786,6 +796,38 @@
         for (var n = feed.children.length; n > 0; n--) shade.appendChild(document.createElement("i"));
         feed.insertBefore(shade, feed.firstChild);
       }
+    }
+    // Catégorie de photos (ex. « PHOTOGRAPHY ») : tous ses projets sont en images seulement (page Slate « illustration »,
+    // images ajoutées par le robot de l'admin) → les photos en colonnes, chacune avec son ratio d'origine (jamais
+    // recadrées), qui montent en fondu ; clic = photo en grand (flèches : toutes les photos de la catégorie).
+    function photosOf(p) { return p.images && p.images.length ? p.images : p.stills || []; }
+    function renderPhotos(list) {
+      feed.className = "feed photos";
+      var all = [], k = 0;
+      list.forEach(function (p) {
+        if (list.length > 1) { // plusieurs séries : leur titre au-dessus de chacune
+          var h = document.createElement("div"); h.className = "phead";
+          var t = document.createElement("h3"); t.textContent = p.title; h.appendChild(t);
+          if (p.sub) { var sb = document.createElement("p"); sb.textContent = p.sub; h.appendChild(sb); }
+          feed.appendChild(h);
+        }
+        var col = document.createElement("div"); col.className = "pcols"; feed.appendChild(col);
+        photosOf(p).forEach(function (u) {
+          var i = all.push(u) - 1, b = document.createElement("button");
+          b.className = "ph"; b.style.setProperty("--i", k++ % 6); b.setAttribute("aria-label", "Photo " + (i + 1));
+          var im = document.createElement("img"); im.alt = p.title; im.loading = "lazy"; im.decoding = "async";
+          im.onload = function () { b.classList.add("shown"); };
+          im.src = u; b.appendChild(im); col.appendChild(b);
+          b.addEventListener("click", function () { openPhoto(all, i, p.title); });
+        });
+      });
+    }
+    // Photo en grand, sans passer par le lecteur : la fermer revient directement à la page.
+    function openPhoto(all, i, title) {
+      pgal.textContent = ""; pstage.textContent = "";
+      stillsP = { title: title, stills: all };
+      player.classList.add("on", "photo-only");
+      showStill(i);
     }
     // Sur téléphone, si les onglets dépassent, ils défilent lentement vers la gauche, en boucle (une 2e copie suit
     // la 1re) ; un doigt sur les onglets met le défilement en pause quelques secondes.
