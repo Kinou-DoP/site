@@ -25,7 +25,7 @@ html { scrollbar-gutter: stable; }
 .cats .sep { margin-top: 18px; }
 .about { display: none; padding-top: 46px; max-width: 560px; font-family: var(--kinou-sans); font-weight: 400; font-size: 18px; line-height: 1.55; color: rgba(255,252,235,.85); animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
 .about p { margin: 0 0 1em; }
-.still video.snip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s ease; pointer-events: none; }
+.still video.snip { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); object-fit: cover; opacity: 0; transition: opacity .5s ease; pointer-events: none; }
 .still video.snip.on { opacity: 1; }
 .about .lang { display: flex; gap: 16px; margin: -2px 0 22px; }
 .about .lang button { padding: 0; border: 0; background: none; color: var(--kinou-fg); font-family: var(--kinou-sans); font-weight: 600; font-size: 13px; letter-spacing: .14em; opacity: .4; cursor: pointer; transition: opacity .2s; }

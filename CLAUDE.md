@@ -183,7 +183,8 @@ colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur t
 4. **Grille clips** : galerie 3 colonnes 16:9 à toutes les tailles (gap 6px, 4px mobile) ; mode feed en 1 colonne.
 5. **Overlay** : plein écran, fermeture sur Escape, croix ou clic hors zone ; lecteur sur fond « verre dépoli »
    (page floutée 36px, voile noir 62 %), image agrandie sur fond noir 98 %.
-6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms, etc.) + le voile
+6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms — les onglets apparaissent juste
+   après, `view.t0` + `ANIM` → `transitionDelay` de `.cats`, etc.) + le voile
    lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » (page Spotlight) et « fiction » (à venir),
    masqués sous 700px (dans le menu du téléphone) ; à droite « cinematographers ».
@@ -226,7 +227,7 @@ colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur t
 14. **Lecteur** : flèches ‹ › tout en bas de l'écran (films de l'onglet affiché, aussi au clavier) ; images agrandies : flèches en bas, glisser,
    pavé tactile ; le bouton retour du téléphone ferme l'image puis le lecteur (`history.pushState`).
 9. **Fonds** : liste → nom survolé en blanc et en gras (700), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
-   film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette ; sous le nom, coupe nette sur toute la largeur (pas de dégradé ; sur ordinateur, juste un fondu de 4px depuis le 26/10).
+   film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette (extrait des vignettes débordant de 1px : sinon liseré clair de la vignette sur le bord) ; sous le nom, coupe nette sur toute la largeur (pas de dégradé ; sur ordinateur, juste un fondu de 4px depuis le 26/10).
    Sur ordinateur, en arrivant sur un onglet (page d'un chef op ou changement d'onglet), le 1er film est déjà « survolé »
    (extrait + fond flou, `autoFirst`) ; dès qu'on survole un film, fonctionnement normal (`dropAuto`). Pas si on arrive
    de l'accueil sur un film présélectionné (`selCard`).

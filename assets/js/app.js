@@ -282,7 +282,7 @@
     function openView(o) {
       if (view) return;
       var parts = split(o.text);
-      view = { o: o, main: parts.main };
+      view = { o: o, main: parts.main, t0: o.instant ? 0 : Date.now() };
       document.body.classList.toggle("spot", o.slug === SPOT); // spotlight : onglets en ligne au-dessus (ordinateur), extraits en boucle
       var r = o.rect;
       hero.textContent = ""; hero.classList.remove("ready");
@@ -310,7 +310,7 @@
       if (o.from === "list" && roul.active()) o.a = roul.center(o.slug);
       var rect = o.from === "home" ? homeNameRect() : o.a ? nameRect(o.a, view.main) : null;
       if (!rect || !rect.width) instant = true; // spotlight ouvert par l'adresse, ou lien caché (menu du téléphone)
-      view = null; document.body.classList.remove("spot");
+      view = null; document.body.classList.remove("spot"); cats.style.transitionDelay = "";
       var f = hero.querySelector(".n").getBoundingClientRect();
       hero.classList.remove("ready");
       document.body.classList.remove("viewing");
@@ -1070,6 +1070,8 @@
         loadDP(slug).then(function (d) { if (d && view && view.o.slug === slug) openWork(slug, film); });
         return;
       }
+      // Onglets : juste après la fin de l'arrivée du nom (animation de ANIM ms), même si les films sont déjà prêts.
+      if (view) cats.style.transitionDelay = Math.max(0, view.t0 + ANIM - Date.now()) + "ms";
       document.body.classList.add("has-work");
       setTimeout(function () { warmAll(slug); }, 1200); // apres FEATURED : les autres categories
       work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = wantMode(); buildTabs(slug);
