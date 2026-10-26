@@ -417,3 +417,13 @@ html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: h
   .cats { top: calc(var(--kinou-zm) + 16px); }
   .work { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 4px); mask-image: linear-gradient(to bottom, transparent, #000 4px); }
 }
+
+/* Spotlight (body.spot) : sur ordinateur, onglets en ligne au-dessus des films (au lieu de la colonne de gauche) : la grille
+   prend toute la largeur ; pas de choix grille / colonne. Téléphone : comme une page de chef op. */
+body.spot .modes { display: none; }
+@media (min-width: 701px) {
+  body.spot { --kinou-zm: calc(var(--kinou-tabs-top) + 40px); }
+  body.spot .cats { top: var(--kinou-tabs-top); left: 32px; right: 32px; flex-direction: row; gap: 28px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  body.spot .cats::-webkit-scrollbar { display: none; }
+  body.spot .work { padding-left: 32px; }
+}

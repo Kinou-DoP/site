@@ -159,6 +159,19 @@ Le nom de l'onglet est le texte après `#`, en majuscules (`#clips` → CLIPS).
 Plusieurs chefs op crédités sur un film : la page est celle du chef op crédité sur le plus de films du bundle
 (chaque film compté une fois) ; les autres sont ajoutés en dernière ligne des crédits (« co-DoP Nom »).
 
+### Spotlight (`data/spotlight.json`, rubrique « spotlight » de l'admin, adresse `#spotlight`)
+`{ reel, categories: ["COMMERCIAL", "MUSIC VIDEO", "ART VIDEO"], overrides, films, readAt, readError? }`. Une bande Slate
+(films de plusieurs chefs op) lue **en entier par le robot GitHub de l'admin** (`films` : `slate, title, sub, video, full, img,
+cats` = types de contenu Slate, `artists`, et pour un projet en images `images` + `ratios`) — les fonctions Netlify figées n'en
+lisent que 10, sans catégories. Le site (`spotToDP` dans app.js) en fait une page comme celle d'un chef op (`slug` « spotlight ») :
+onglet ALL (= FEATURED interne, libellé par `catLabel`, tous les films dans l'ordre de la bande, arrivée par défaut) puis un
+onglet par catégorie (un film va dans chaque catégorie dont le nom figure dans ses types de contenu Slate ; sans catégorie
+reconnue : seulement dans ALL) ; chefs op crédités en dernière ligne des crédits (« DoP Nom ») ; pas d'onglet ABOUT ;
+`overrides` de l'admin comme une fiche (titres, masquer, recadrage, stills et vidéos sous le film…).
+Ouverture : lien « spotlight » de l'en-tête et du menu du téléphone (`openSpot`, le mot devient le titre) ou `#spotlight[/cat]`.
+`body.spot` : sur ordinateur, onglets **en ligne au-dessus** des films (grille sur toute la largeur), pas de choix grille /
+colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur téléphone.
+
 ## Règles visuelles — à respecter absolument
 
 1. **Pas de framework CSS** — tout en CSS vanilla ; les tokens de design globaux sont des variables `--kinou-*`
@@ -171,8 +184,8 @@ Plusieurs chefs op crédités sur un film : la page est celle du chef op crédit
    (page floutée 36px, voile noir 62 %), image agrandie sur fond noir 98 %.
 6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms, etc.) + le voile
    lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
-8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » et « fiction » (à venir,
-   masqués sous 700px) ; à droite « cinematographers ».
+8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » (page Spotlight) et « fiction » (à venir),
+   masqués sous 700px (dans le menu du téléphone) ; à droite « cinematographers ».
 10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
    toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.
 11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit ; plusieurs chefs op = noms plus petits) ; pas de fond coloré de remplacement (noir) ;

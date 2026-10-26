@@ -283,6 +283,7 @@
       if (view) return;
       var parts = split(o.text);
       view = { o: o, main: parts.main };
+      document.body.classList.toggle("spot", o.slug === SPOT); // spotlight : onglets en ligne au-dessus (ordinateur), extraits en boucle
       var r = o.rect;
       hero.textContent = ""; hero.classList.remove("ready");
       var n = document.createElement("span"); n.className = "n"; n.textContent = parts.main; hero.appendChild(n);
@@ -307,8 +308,9 @@
       if (!view) return;
       var o = view.o;
       if (o.from === "list" && roul.active()) o.a = roul.center(o.slug);
-      var rect = o.from === "home" ? homeNameRect() : nameRect(o.a, view.main);
-      view = null;
+      var rect = o.from === "home" ? homeNameRect() : o.a ? nameRect(o.a, view.main) : null;
+      if (!rect || !rect.width) instant = true; // spotlight ouvert par l'adresse, ou lien caché (menu du téléphone)
+      view = null; document.body.classList.remove("spot");
       var f = hero.querySelector(".n").getBoundingClientRect();
       hero.classList.remove("ready");
       document.body.classList.remove("viewing");
@@ -317,7 +319,7 @@
         document.body.classList.remove("closing");
         document.documentElement.style.overflow = document.body.classList.contains("is-home") ? "hidden" : "";
       }
-      if (o.from === "home") HomeAPI.resume();
+      if (o.from === "home" || (o.from === "spot" && document.body.classList.contains("is-home"))) HomeAPI.resume();
       if (instant) { hero.style.transition = "opacity .2s"; hero.style.opacity = 0; done(); return; }
       document.body.classList.add("closing");
       hero.style.transition = "transform " + ANIM + "ms " + EASE + ", opacity .3s .7s";
@@ -330,9 +332,49 @@
     var CATS = ["FEATURED", "BEAUTY", "TEXTURES", "FOOD", "COMEDY", "LIFESTYLE", "AUTOMOTIVE"];
     var WORK = {}, CATS_BY = {}, TEMPLATE = {}, loading = {};
     function loadDP(slug) {
-      if (!loading[slug]) loading[slug] = getJSON("dps/" + slug + ".json").then(function (d) { register(d); live(d); return d; }, function () { return null; });
+      if (!loading[slug]) loading[slug] = (slug === SPOT ? getJSON("spotlight.json").then(spotToDP) : getJSON("dps/" + slug + ".json"))
+        .then(function (d) { register(d); if (slug !== SPOT) live(d); return d; }, function () { return null; });
       return loading[slug];
     }
+    // ---------- Spotlight (data/spotlight.json, rubrique « spotlight » de l'admin) ----------
+    // Une bande Slate de films de tous les chefs op, lue en entier par le robot GitHub de l'admin (`films`), affichée comme une
+    // page de chef op : onglet ALL (= FEATURED : tous les films, dans l'ordre de la bande) puis une catégorie par onglet
+    // (`categories`, d'après les types de contenu Slate de chaque film : Commercial, Music Video, Art Video…).
+    // Corrections de l'admin dans `overrides` (comme une fiche). Chefs op crédités : dernière ligne des crédits.
+    var SPOT = "spotlight";
+    function spotToDP(s) {
+      var up = function (x) { return String(x).trim().toUpperCase(); };
+      var cats = (s.categories || ["COMMERCIAL", "MUSIC VIDEO", "ART VIDEO"]).map(up), clips = [];
+      (s.films || []).forEach(function (f, i) {
+        var fc = (f.cats || []).map(up), mine = cats.filter(function (c) { return fc.indexOf(c) > -1; });
+        var base = { title: f.title, slate: f.slate };
+        ["sub", "video", "full", "img", "images", "ratios"].forEach(function (k) { if (f[k]) base[k] = f[k]; });
+        if (f.artists && f.artists.length) base.sub = (base.sub ? base.sub + "\n" : "") + "DoP " + f.artists.join(" & ");
+        (mine.length ? mine : [""]).forEach(function (c, k) {
+          var e = Object.assign({}, base, { cat: c });
+          if (!k) { e.featured = true; e.featuredOrder = i + 1; }
+          clips.push(e);
+        });
+      });
+      return { slug: SPOT, name: "Spotlight", hue: 30, categories: ["FEATURED"].concat(cats), clips: clips, overrides: s.overrides || {} };
+    }
+    function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : c; }
+    // Ouverture depuis l'en-tête (ou le menu du téléphone) : le mot « spotlight » devient le titre de la page.
+    function openSpot(a, opts) {
+      if (view && view.o.slug === SPOT) return;
+      if (view) closeView(true);
+      var o = { text: "Spotlight", slug: SPOT, from: "spot", a: a, rect: a ? a.getBoundingClientRect() : null, instant: !a };
+      for (var k in opts || {}) o[k] = opts[k];
+      if (document.body.classList.contains("is-home")) HomeAPI.pause();
+      openView(o);
+    }
+    document.querySelectorAll("[data-spot]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (document.body.classList.contains("menu-on")) menu(false);
+        openSpot(a);
+      });
+    });
     // Fiche avec bundle Slate : la page s'affiche tout de suite avec la copie enregistree dans la fiche,
     // puis se met a jour sans bruit quand /api/dp/<slug> (lu sur Slate, cache 10 min) repond, si quelque chose a change.
     function live(d) {
@@ -495,6 +537,7 @@
           return;
         }
         if (view) closeView(true);
+        if (st.slug === SPOT) { openSpot(null, { noHistory: true, cat: st.cat, mode: st.mode }); return; }
         var a = document.querySelector('li a[data-view="' + st.slug + '"]');
         if (!a) return;
         if (document.body.classList.contains("is-home")) show("list");
@@ -682,7 +725,7 @@
     // quand elle est à l'écran. Même site, même code : seul cet interrupteur change ; l'adresse normale reste en vignettes fixes.
     // Sur téléphone (≤ 700px), toujours : les extraits tournent tout le temps (demande de Gus, 24/10) ; ordinateur inchangé.
     var LIVE = /[?&]live\b/.test(location.search);
-    function liveOn() { return LIVE || phone.matches; }
+    function liveOn() { return LIVE || phone.matches || !!(view && view.o.slug === SPOT); } // spotlight : toujours en boucle
     var liveSeen = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         var v = e.target.querySelector("video.live"); if (!v) return;
@@ -890,10 +933,10 @@
     var tabSet = null;
     function buildTabs(slug) {
       cats.textContent = ""; curCat = "FEATURED";
-      tabSet = function (copy) { (CATS_BY[slug] || CATS).forEach(function (c) { tabButton(c, copy); }); aboutButton(copy); };
+      tabSet = function (copy) { (CATS_BY[slug] || CATS).forEach(function (c) { tabButton(c, copy); }); if (slug !== SPOT) aboutButton(copy); };
       function tabButton(c, copy) {
         var b = document.createElement("button");
-        b.textContent = c; b.dataset.cat = c; if (c === curCat) b.className = "on";
+        b.textContent = catLabel(slug, c); b.dataset.cat = c; if (c === curCat) b.className = "on";
         if (copy) b.setAttribute("aria-hidden", "true");
         b.addEventListener("click", function () {
           cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === c); });
@@ -1177,6 +1220,7 @@
     // Liens directs : page-du-site#slug-du-chef-op ouvre directement sa page.
     function routeFromHash() {
       var h = parseHash(), slug = h.slug;
+      if (slug === SPOT && !view) { openSpot(null, { noHistory: true, cat: h.cat, mode: h.mode }); undeep(700); return; }
       var a = slug && document.querySelector('li a[data-view="' + slug + '"]');
       if (!a || view) { undeep(); return; }
       show("list");
