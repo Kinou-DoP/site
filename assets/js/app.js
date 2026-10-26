@@ -283,6 +283,9 @@
       if (view) return;
       var parts = split(o.text);
       view = { o: o, main: parts.main, t0: o.instant ? 0 : Date.now() };
+      // D'une page à l'autre (chef op → spotlight) : les onglets étaient encore affichés ; on les cache tout de suite
+      // pour qu'ils reviennent à la fin de l'animation du nouveau titre.
+      cats.style.transition = "none"; cats.style.opacity = "0"; void cats.offsetWidth; cats.style.transition = cats.style.opacity = "";
       document.body.classList.toggle("spot", o.slug === SPOT); // spotlight : onglets en ligne au-dessus (ordinateur), extraits en boucle
       var r = o.rect;
       hero.textContent = ""; hero.classList.remove("ready");
