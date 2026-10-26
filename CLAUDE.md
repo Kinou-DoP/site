@@ -173,6 +173,17 @@ Ouverture : lien « spotlight » de l'en-tête et du menu du téléphone (`openS
 `body.spot` : sur ordinateur, titre « Spotlight » **à gauche** (pages de chef op : à droite), onglets **en ligne au-dessus** des films (grille sur toute la largeur), pas de choix grille /
 colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur téléphone.
 
+### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
+`{ team: [{ role, name, email, phone }], address: [lignes], newsletter, social: { instagram, vimeo, imdb, facebook }, legal }`.
+Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « contact » de l'en-tête devient le titre, à gauche sur
+ordinateur ; `body.cpage`, pas d'onglets, `--kinou-zm` plus court). `showContact` / `renderContact` dans app.js, dans `.work`
+(`contact-mode` : films, onglets et About cachés ; films de la page d'avant vidés). Présentation « générique de fin » : rôle à
+droite d'un axe central (petites capitales grises, pas répété s'il est identique à la ligne du dessus), prénom en grand à gauche,
+e-mail (`mailto:`) et téléphone (`tel:`) dessous ; lignes qui montent l'une après l'autre (`rise`) ; au survol d'une ligne, les
+autres s'estompent (`:has`). Puis adresse (lien vers Google Maps), heure de Paris en direct, « [ Subscribe to the newsletter ] »
+(crochets qui s'écartent au survol), réseaux remplis, « Mentions légales » (texte déplié sur place, si `legal`).
+Fond : un film de l'accueil au hasard, flouté (`showProj`, comme une page de chef op). Téléphone : une colonne centrée.
+
 ## Règles visuelles — à respecter absolument
 
 1. **Pas de framework CSS** — tout en CSS vanilla ; les tokens de design globaux sont des variables `--kinou-*`
@@ -186,7 +197,7 @@ colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur t
 6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms — les onglets apparaissent juste
    après, `view.t0` + `ANIM` → `transitionDelay` de `.cats`, etc.) + le voile
    lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
-8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » (page Spotlight) et « fiction » (à venir),
+8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » (page Spotlight), « fiction » et « press » (à venir), « contact »,
    masqués sous 700px (dans le menu du téléphone) ; à droite « cinematographers ».
 10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
    toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.

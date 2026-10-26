@@ -420,14 +420,66 @@ html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: h
 
 /* Spotlight (body.spot) : sur ordinateur, onglets en ligne au-dessus des films (au lieu de la colonne de gauche) : la grille
    prend toute la largeur ; pas de choix grille / colonne. Téléphone : comme une page de chef op. */
-body.spot .modes { display: none; }
+body.spot .modes, body.cpage .modes { display: none; }
 @media (min-width: 701px) {
   body.spot { --kinou-zm: calc(var(--kinou-tabs-top) + 40px); }
   body.spot .cats { top: var(--kinou-tabs-top); left: 32px; right: 32px; flex-direction: row; gap: 28px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
   body.spot .cats::-webkit-scrollbar { display: none; }
   body.spot .work { padding-left: 32px; }
-  body.spot .hero { left: 32px; right: auto; text-align: left; } /* titre « Spotlight » à gauche (demande de Gus 26/10) */
+  body.spot .hero, body.cpage .hero { left: 32px; right: auto; text-align: left; } /* titre « Spotlight » à gauche (demande de Gus 26/10) */
 }
 /* Spotlight : « DoP Nom » en dernière ligne des crédits, noms en blanc cassé, liens vers la page du chef op. */
 .meta .cdop a, #player .pdop a { color: var(--kinou-fg); padding: 0; font: inherit; transition: opacity .2s; }
 .meta .cdop a:hover, #player .pdop a:hover { opacity: .7; }
+
+/* Contact (body.cpage, data/contact.json) : un générique de fin. Rôle à droite d'un axe central, nom à gauche, e-mail et
+   téléphone dessous ; un même rôle n'est pas répété. Lignes qui montent l'une après l'autre à l'arrivée ; au survol d'une
+   ligne, les autres s'estompent. Fond : un film de l'accueil, flouté. Pas d'onglets : la page commence sous le titre. */
+body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px); }
+.contact { display: none; }
+.work.contact-mode { padding-left: 32px; }
+.work.contact-mode .feed, .work.contact-mode .modes, .work.contact-mode .about { display: none; }
+.work.contact-mode .contact { display: block; }
+.contact { max-width: 1000px; margin: 0 auto; padding: 5vh 0 4vh; font-family: var(--kinou-sans); color: var(--kinou-fg); }
+.crew { display: grid; gap: 38px; }
+.crow { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; align-items: baseline; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
+.crow > * { transition: opacity .35s ease; }
+.crew:has(.crow:hover) .crow > * { opacity: .3; }
+.crew .crow:hover > * { opacity: 1; }
+.crole { text-align: right; font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.5); }
+.crole.same { visibility: hidden; }
+.cwho { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.cname { margin-bottom: 8px; font-weight: 600; font-size: clamp(28px, 2.8vw, 40px); letter-spacing: -0.035em; line-height: 1; }
+.cwho a { padding: 0; font-weight: 400; font-size: 15px; letter-spacing: .01em; color: rgba(255,252,235,.68); font-variant-numeric: tabular-nums; text-shadow: none; transition: color .2s; }
+.cwho a:hover { color: var(--kinou-fg); }
+.cend { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 15vh; text-align: center; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
+.caddr { padding: 0; font-weight: 600; font-size: 13px; letter-spacing: .14em; line-height: 2; text-transform: uppercase; text-shadow: none; transition: opacity .2s; }
+.caddr:hover { opacity: .6; }
+.cclock { margin: -8px 0 0; font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.45); font-variant-numeric: tabular-nums; }
+.cnews { margin-top: 18px; padding: 0; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; text-shadow: none; }
+.cnews::before, .cnews::after { display: inline-block; font-weight: 300; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
+.cnews::before { content: "["; margin-right: .5em; }
+.cnews::after { content: "]"; margin-left: .5em; }
+.cnews:hover::before { transform: translateX(-6px); }
+.cnews:hover::after { transform: translateX(6px); }
+.csocial { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 28px; }
+.csocial a { padding: 0; font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; text-shadow: none; transition: opacity .2s; }
+.csocial a:hover { opacity: .55; }
+.clegalbtn { margin-top: 10vh; padding: 0; border: 0; background: none; font-family: var(--kinou-sans); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.4); cursor: pointer; transition: color .2s; }
+.clegalbtn:hover { color: var(--kinou-fg); }
+.clegal { display: none; max-width: 620px; text-align: left; font-size: 13px; line-height: 1.65; color: rgba(255,252,235,.65); }
+.clegal.on { display: block; }
+.clegal p { margin: 0 0 1em; white-space: pre-line; }
+@media (max-width: 700px) {
+  .work.contact-mode { padding-left: 24px; padding-right: 24px; }
+  .contact { padding-top: 3vh; }
+  .crew { gap: 34px; }
+  .crow { grid-template-columns: 1fr; row-gap: 8px; justify-items: center; text-align: center; }
+  .crole { text-align: center; }
+  .crole.same { display: none; }
+  .cwho { align-items: center; }
+  .cname { margin-bottom: 6px; font-size: 28px; }
+  .cwho a { padding: 3px 0; font-size: 15px; }
+  .crew:has(.crow:hover) .crow > * { opacity: 1; }
+  .cend { margin-top: 10vh; }
+}

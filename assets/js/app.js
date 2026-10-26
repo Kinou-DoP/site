@@ -204,7 +204,7 @@
   }
 
   // ---------- Liste des DPs + page DP (template unique) ----------
-  function initSite(DPS) {
+  function initSite(DPS, HOME) {
     // Liste des DPs (data/dps/index.json), meme balisage que le prototype.
     var ul = document.querySelector("main ul");
     DPS.forEach(function (d) {
@@ -287,6 +287,7 @@
       // pour qu'ils reviennent à la fin de l'animation du nouveau titre.
       cats.style.transition = "none"; cats.style.opacity = "0"; void cats.offsetWidth; cats.style.transition = cats.style.opacity = "";
       document.body.classList.toggle("spot", o.slug === SPOT); // spotlight : onglets en ligne au-dessus (ordinateur), extraits en boucle
+      document.body.classList.toggle("cpage", o.slug === CONTACT); // page contact (pas d'onglets)
       var r = o.rect;
       hero.textContent = ""; hero.classList.remove("ready");
       var n = document.createElement("span"); n.className = "n"; n.textContent = parts.main; hero.appendChild(n);
@@ -313,7 +314,7 @@
       if (o.from === "list" && roul.active()) o.a = roul.center(o.slug);
       var rect = o.from === "home" ? homeNameRect() : o.a ? nameRect(o.a, view.main) : null;
       if (!rect || !rect.width) instant = true; // spotlight ouvert par l'adresse, ou lien caché (menu du téléphone)
-      view = null; document.body.classList.remove("spot"); cats.style.transitionDelay = "";
+      view = null; document.body.classList.remove("spot", "cpage"); clearInterval(clockT); cats.style.transitionDelay = "";
       var f = hero.querySelector(".n").getBoundingClientRect();
       hero.classList.remove("ready");
       document.body.classList.remove("viewing");
@@ -390,20 +391,22 @@
       openView({ text: li ? li.textContent : d.name, slug: d.slug, from: home ? "home" : "list", a: li, rect: a.getBoundingClientRect(), replaceHistory: fromPlayer });
     }
     function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : c; }
-    // Ouverture depuis l'en-tête (ou le menu du téléphone) : le mot « spotlight » devient le titre de la page.
-    function openSpot(a, opts) {
-      if (view && view.o.slug === SPOT) return;
+    // Pages de l'en-tête (spotlight, contact), ouvertes depuis l'en-tête ou le menu du téléphone : le mot devient le titre.
+    var CONTACT = "contact", PAGES = { spotlight: "Spotlight", contact: "Contact" };
+    function openSpot(a, opts) { openPage(SPOT, a, opts); }
+    function openPage(slug, a, opts) {
+      if (view && view.o.slug === slug) return;
       if (view) closeView(true);
-      var o = { text: "Spotlight", slug: SPOT, from: "spot", a: a, rect: a ? a.getBoundingClientRect() : null, instant: !a };
+      var o = { text: PAGES[slug], slug: slug, from: "spot", a: a, rect: a ? a.getBoundingClientRect() : null, instant: !a };
       for (var k in opts || {}) o[k] = opts[k];
       if (document.body.classList.contains("is-home")) HomeAPI.pause();
       openView(o);
     }
-    document.querySelectorAll("[data-spot]").forEach(function (a) {
+    document.querySelectorAll("[data-spot], [data-contact]").forEach(function (a) {
       a.addEventListener("click", function (e) {
         e.preventDefault();
         if (document.body.classList.contains("menu-on")) menu(false);
-        openSpot(a);
+        openPage(a.hasAttribute("data-contact") ? CONTACT : SPOT, a);
       });
     });
     // Fiche avec bundle Slate : la page s'affiche tout de suite avec la copie enregistree dans la fiche,
@@ -576,7 +579,7 @@
           return;
         }
         if (view) closeView(true);
-        if (st.slug === SPOT) { openSpot(null, { noHistory: true, cat: st.cat, mode: st.mode }); return; }
+        if (PAGES[st.slug]) { openPage(st.slug, null, { noHistory: true, cat: st.cat, mode: st.mode }); return; }
         var a = document.querySelector('li a[data-view="' + st.slug + '"]');
         if (!a) return;
         if (document.body.classList.contains("is-home")) show("list");
@@ -1077,7 +1080,7 @@
       if (view) cats.style.transitionDelay = Math.max(0, view.t0 + ANIM - Date.now()) + "ms";
       document.body.classList.add("has-work");
       setTimeout(function () { warmAll(slug); }, 1200); // apres FEATURED : les autres categories
-      work.classList.remove("about-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = wantMode(); buildTabs(slug);
+      work.classList.remove("about-mode", "contact-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = wantMode(); buildTabs(slug);
       // Onglet demandé dans l'adresse (#slug/fashion) : ouvert directement, sinon FEATURED.
       var want = view && view.o.cat, c0 = want && (CATS_BY[slug] || CATS).filter(function (c) { return catSlug(c) === want; })[0];
       if (want === "about") { var abt = cats.querySelector('button[data-cat="ABOUT"]'); if (abt) { render(slug, "FEATURED", 0); abt.click(); return; } }
@@ -1099,7 +1102,70 @@
     // Template des pages DP : un seul ("default") pour tous les DPs. Une fiche peut demander
     // "template": "special" ; tant qu'aucun template special n'existe, default s'applique.
     var TEMPLATES = { "default": showWork };
-    function openWork(slug, film) { (TEMPLATES[TEMPLATE[slug]] || TEMPLATES["default"])(slug, film); }
+    function openWork(slug, film) { if (slug === CONTACT) return showContact(); (TEMPLATES[TEMPLATE[slug]] || TEMPLATES["default"])(slug, film); }
+    // ---------- Contact (data/contact.json, page « contact » de l'admin) ----------
+    // Présenté comme un générique de fin : rôle à gauche, nom à droite, de part et d'autre d'un axe ; même rôle que la ligne
+    // précédente = rôle non répété. Fond : un film de l'accueil au hasard, flouté. Heure de Paris en direct.
+    var contactData = null, cbox = null, clockT = 0;
+    function cel(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
+    function showContact() {
+      document.body.classList.remove("has-work"); cats.textContent = "";
+      (contactData ? Promise.resolve(contactData) : getJSON("contact.json")).then(function (c) {
+        if (!view || view.o.slug !== CONTACT) return;
+        contactData = c || {}; renderContact(contactData);
+      }, function () { if (view && view.o.slug === CONTACT) renderContact({}); });
+    }
+    function renderContact(c) {
+      clearProj(); work.classList.remove("about-mode"); document.body.classList.remove("about-on");
+      renderRun++; if (liveSeen) liveSeen.disconnect(); feed.querySelectorAll("video").forEach(function (v) { v.pause(); }); feed.textContent = ""; // films de la page d'avant
+      work.classList.add("contact-mode"); work.scrollTop = 0;
+      if (!cbox) { cbox = cel("div", "contact"); work.appendChild(cbox); }
+      cbox.textContent = "";
+      var crew = cel("div", "crew"), prev = null, k = 0;
+      (c.team || []).forEach(function (t) {
+        if (!t || !(t.name || t.email)) return;
+        var row = cel("div", "crow"), role = String(t.role || "").trim();
+        row.style.setProperty("--i", k++);
+        row.appendChild(cel("span", "crole" + (role && role === prev ? " same" : ""), role)); prev = role;
+        var who = cel("div", "cwho");
+        who.appendChild(cel("span", "cname", t.name));
+        if (t.email) { var m = cel("a", "", t.email); m.href = "mailto:" + t.email; who.appendChild(m); }
+        if (t.phone) { var ph = cel("a", "", t.phone); ph.href = "tel:" + t.phone.replace(/[^+\d]/g, ""); who.appendChild(ph); }
+        row.appendChild(who); crew.appendChild(row);
+      });
+      cbox.appendChild(crew);
+      var end = cel("div", "cend"); end.style.setProperty("--i", k + 1);
+      var addr = (c.address || []).filter(Boolean);
+      if (addr.length) {
+        var ad = cel("a", "caddr"); ad.target = "_blank"; ad.rel = "noopener";
+        ad.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(addr.join(", "));
+        addr.forEach(function (l, i) { if (i) ad.appendChild(document.createElement("br")); ad.appendChild(document.createTextNode(l)); });
+        end.appendChild(ad);
+      }
+      var clock = cel("p", "cclock"); end.appendChild(clock);
+      function tick() {
+        try { clock.textContent = "Paris " + new Date().toLocaleTimeString("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }); } catch (e) { clock.textContent = ""; }
+      }
+      tick(); clearInterval(clockT); clockT = setInterval(tick, 15000);
+      if (c.newsletter) { var nl = cel("a", "cnews", "Subscribe to the newsletter"); nl.href = c.newsletter; nl.target = "_blank"; nl.rel = "noopener"; end.appendChild(nl); }
+      var so = c.social || {}, links = cel("nav", "csocial");
+      [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"], ["facebook", "Facebook"]].forEach(function (x) {
+        if (!so[x[0]]) return; var a = cel("a", "", x[1]); a.href = so[x[0]]; a.target = "_blank"; a.rel = "noopener"; links.appendChild(a);
+      });
+      if (links.children.length) end.appendChild(links);
+      if (c.legal && String(c.legal).trim()) {
+        var lb = cel("button", "clegalbtn", "Mentions légales"), lt = cel("div", "clegal");
+        String(c.legal).trim().split(/\n\s*\n/).forEach(function (para) { lt.appendChild(cel("p", "", para.trim())); });
+        lb.addEventListener("click", function () { var on = !lt.classList.contains("on"); lt.classList.toggle("on", on); if (on) setTimeout(function () { lt.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, 50); });
+        end.appendChild(lb); end.appendChild(lt);
+      }
+      cbox.appendChild(end);
+      // Fond : un film de l'accueil au hasard, très flouté (comme le fond d'une page de chef op).
+      var bgs = (HOME || []).filter(function (h) { return h.video || h.img; });
+      if (bgs.length) { var b = bgs[Math.floor(Math.random() * bgs.length)]; showProj({ video: b.video, img: b.img }, 0); }
+      cats.style.transitionDelay = view ? Math.max(0, view.t0 + ANIM - Date.now()) + "ms" : "";
+      document.body.classList.add("has-work");
+    }
     document.querySelectorAll("li a[data-view]").forEach(function (a) {
       a.addEventListener("click", function (e) {
         e.preventDefault();
@@ -1243,7 +1309,7 @@
     burger.addEventListener("click", function () { menu(true); });
     drawer.addEventListener("click", function (e) { if (e.target === drawer || e.target.closest(".dclose")) menu(false); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && drawer.classList.contains("on")) { e.stopImmediatePropagation(); menu(false); } }, true);
-    // Liens de l'en-tete pas encore actifs (spotlight, fiction).
+    // Liens de l'en-tete pas encore actifs (fiction, press).
     document.querySelectorAll("[data-soon]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); }); });
     window.Site = { prefetch: warmThumbs, playHome: playHome, fromHome: function (p, a) { openView({ text: a.dataset.name, slug: a.dataset.slug, from: "home", rect: homeNameRect(a), film: p }); } };
     document.querySelector(".logo").addEventListener("click", function (e) {
@@ -1264,7 +1330,7 @@
     // Liens directs : page-du-site#slug-du-chef-op ouvre directement sa page.
     function routeFromHash() {
       var h = parseHash(), slug = h.slug;
-      if (slug === SPOT && !view) { openSpot(null, { noHistory: true, cat: h.cat, mode: h.mode }); undeep(700); return; }
+      if (PAGES[slug] && !view) { openPage(slug, null, { noHistory: true, cat: h.cat, mode: h.mode }); undeep(700); return; }
       var a = slug && document.querySelector('li a[data-view="' + slug + '"]');
       if (!a || view) { undeep(); return; }
       show("list");
@@ -1323,6 +1389,6 @@
     // Ancien format : { dp, slug } ; nouveau (admin, bande Slate) : dps: [{ name, slug }].
     var slides = r[0].slides.map(function (p) { if (!p.dps) p.dps = [{ name: p.dp, slug: p.slug }]; return p; });
     initHome(slides, r[0].duration);
-    initSite(r[1].dps);
+    initSite(r[1].dps, slides);
   }).catch(function (e) { undeep(); console.error("kinou : chargement des donnees impossible", e); });
 })();
