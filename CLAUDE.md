@@ -339,9 +339,21 @@ site/
 À chaque modification de `main.css` ou `app.js`, mettre à jour le numéro `?v=` dans `index.html` (date-heure) :
 sinon les navigateurs (cache de 10 min de GitHub Pages, Safari surtout) gardent l'ancienne version.
 
-Les pages DP ne sont pas des fichiers séparés : `index.html#<slug>` ouvre la page du DP.
-`#<slug>/<categorie>` ouvre directement un onglet (ex. `#lara-perrotte-boucard-cinematographer/fashion`,
-`…/music-video`, `…/about`) ; changer d'onglet met l'adresse à jour (`replaceState`, sans étape de plus pour le bouton retour).
+**Adresses des pages (27/10)** : `<racine>/<slug>/` (comme kinou.fr), `<racine>/<slug>/<categorie>` ouvre directement un onglet
+(ex. `…/lara-perrotte-boucard-cinematographer/fashion`, `…/music-video`, `…/about`), `/feed` à la fin = une colonne ; idem
+`spotlight/`, `fiction/`, `contact/`. Écrites par `pageURL` (app.js, `ROOT` = dossier de app.js), lues par `route()` ; changer
+d'onglet met l'adresse à jour (`replaceState`, sans étape de plus pour le bouton retour). Les anciennes adresses `#<slug>…`
+marchent toujours et sont réécrites. Le site reste une seule page : `<slug>/index.html` est une **page d'aperçu de lien**
+(nom + photo du chef op en balises Open Graph, pour WhatsApp, iMessage, Slack… qui ne lisent ni le JavaScript ni le « # »),
+qui renvoie en JavaScript vers `../#<slug>` ; fabriquée par `tools/share-pages.mjs` (photo = portrait About, sinon vignette du
+1er film FEATURED ; spotlight / fiction / contact : leur nom), lancé par `.github/workflows/share-pages.yml` à chaque push sur
+`beta` (ou à la main, onglet Actions) — un chef op ajouté dans l'admin n'a son aperçu qu'au prochain passage (en attendant, son
+adresse marche quand même, sans aperçu). Ne pas modifier ces dossiers à la main. Adresse sans page (onglet, chef op pas encore
+généré) : `404.html` renvoie vers `<racine>/#<chemin>` (sur `*.github.io`, la racine = 1er dossier). Accueil : titre « kinou »
+(`<title>` + og:title) ; titre de l'onglet du navigateur = « Nom — kinou » sur une page.
+Au retour sur Netlify : `SITE_URL` du générateur (adresse publique, ex. https://kinou.fr/), et la règle de racine de `404.html`
+(sur Netlify, `_redirects` peut remplacer 404.html). Les portraits sont en WebP (og:image) : bien lu par iMessage, WhatsApp
+récent, Facebook ; si un service ne l'affiche pas, faire produire un JPEG au générateur.
 Boutons grille / colonne (`.modes`) : sur ordinateur (> 900px) dans le bandeau, au-dessus de la coupe, alignés sur la grille
 (les films commencent juste sous le bandeau ; catégories de gauche alignées sur le haut des films) ; 701–900px : au-dessus des films.
 Sur ordinateur (> 900px), `placeModes` les sort de `.work` (dans `body`) : le haut de `.work` a un fondu très court (4px,

@@ -1,0 +1,11 @@
+<!doctype html>
+<!-- Adresse d'une page du site sans page d'aperçu (ex. /site/<slug>/fashion, ou chef op ajouté depuis le dernier passage du
+     robot) : renvoi vers le site avec #<chemin>, que le site ouvre puis réécrit en adresse normale. -->
+<meta charset="utf-8">
+<title>kinou</title>
+<script>
+  var p = location.pathname.split("/").filter(Boolean);
+  // GitHub Pages d'un dépôt (kinou-dop.github.io/site/…) : le 1er segment est le dossier du site.
+  var root = /\.github\.io$/.test(location.hostname) && p.length ? "/" + p.shift() + "/" : "/";
+  location.replace(root + location.search + (p.length ? "#" + p.join("/") : ""));
+</script>

@@ -1,0 +1,29 @@
+# Pages d'aperçu des liens partagés (nom et photo du chef op) : tools/share-pages.mjs, à chaque mise à jour de la beta
+# (et à la demande : onglet Actions → « Pages d'aperçu des liens » → Run workflow). Gratuit (Actions).
+name: Pages d'aperçu des liens
+on:
+  push:
+    branches: [beta]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: share-pages
+jobs:
+  pages:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tools/share-pages.mjs
+      - name: Enregistrer
+        run: |
+          git add -A
+          if ! git diff --cached --quiet; then
+            git config user.name "kinou-robot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Pages d'aperçu des liens (nom et photo des chefs op)"
+            git pull --rebase origin beta && git push
+          fi

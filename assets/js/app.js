@@ -1,8 +1,20 @@
 // kinou — logique du site. Les donnees viennent des fichiers JSON de DATA_BASE.
 (function () {
+  // Adresses des pages : ROOT + <slug>/ (+ <catégorie> + /feed), comme sur kinou.fr, pour que les aperçus de lien (WhatsApp,
+  // iMessage…) puissent montrer le chef op : un robot GitHub (tools/share-pages.mjs) fabrique <slug>/index.html avec son nom et
+  // sa photo, qui renvoie ici avec #<slug>. Les anciennes adresses en « #<slug> » marchent toujours (puis sont réécrites).
+  var ROOT = ((document.currentScript && document.currentScript.src) || location.href).replace(/assets\/js\/app\.js.*$/, "").replace(/[?#].*$/, "");
+  var ROOT_PATH = new URL(ROOT, location.href).pathname;
+  // Chemin de la page demandée : « #slug/cat/feed » ou, sans #, la fin de l'adresse après ROOT.
+  function route() {
+    if (location.hash.length > 1) return location.hash.slice(1);
+    var p = location.pathname;
+    return p.indexOf(ROOT_PATH) === 0 ? p.slice(ROOT_PATH.length).replace(/index\.html$/, "").replace(/^\/+|\/+$/g, "") : "";
+  }
+  function pageURL(r) { return ROOT + (r ? r.replace(/^\/+/, "") + (r.indexOf("/") < 0 ? "/" : "") : "") + location.search; }
   // Arrivée directe sur la page d'un chef op (lien, rechargement) : accueil et liste masqués le temps qu'elle s'ouvre
   // (sinon on les voit passer une fraction de seconde).
-  if (location.hash.length > 1) document.documentElement.classList.add("deep");
+  if (route()) document.documentElement.classList.add("deep");
   function undeep(ms) { setTimeout(function () { document.documentElement.classList.remove("deep"); }, ms || 0); }
   // Donnees JSON : publiees par l'admin (repo Kinou-DoP/admin), lues ici par le site officiel et la beta.
   // (via /api/data du site, qui les lit dans GitHub ; en local, on passe par la beta)
@@ -100,7 +112,7 @@
         p.dps.forEach(function (d, k) {
           if (k) { var amp = document.createElement("span"); amp.className = "amp"; amp.textContent = " & "; ns.appendChild(amp); }
           var parts = d.name.split(","), main = parts[0].trim(), tags = parts.slice(1).join(", ").trim();
-          var a = document.createElement("a"); a.href = "#" + d.slug; a.dataset.slug = d.slug; a.dataset.name = d.name;
+          var a = document.createElement("a"); a.href = pageURL(d.slug); a.dataset.slug = d.slug; a.dataset.name = d.name;
           var nm = document.createElement("span"); nm.className = "n"; nm.textContent = main; a.appendChild(nm);
           if (tags) { var tg = document.createElement("span"); tg.className = "tags"; tg.textContent = tags; a.appendChild(tg); }
           if (!d.slug) a.removeAttribute("href");
@@ -210,7 +222,7 @@
     var ul = document.querySelector("main ul");
     DPS.forEach(function (d) {
       var li = document.createElement("li"), a = document.createElement("a");
-      a.setAttribute("href", "#" + d.slug); a.dataset.view = d.slug; a.dataset.img = d.img || "images/" + d.slug + ".jpg";
+      a.setAttribute("href", pageURL(d.slug)); a.dataset.view = d.slug; a.dataset.img = d.img || "images/" + d.slug + ".jpg";
       a.textContent = d.name;
       a.addEventListener("mouseenter", function () { loadDP(d.slug); }); // precharge la fiche
       li.appendChild(a); ul.appendChild(li);
@@ -284,6 +296,7 @@
       if (view) return;
       var parts = split(o.text);
       view = { o: o, main: parts.main, t0: o.instant ? 0 : Date.now() };
+      document.title = parts.main + " — kinou";
       // D'une page à l'autre (chef op → spotlight) : les onglets étaient encore affichés ; on les cache tout de suite
       // pour qu'ils reviennent à la fin de l'animation du nouveau titre.
       cats.style.transition = "none"; cats.style.opacity = "0"; void cats.offsetWidth; cats.style.transition = cats.style.opacity = "";
@@ -304,7 +317,7 @@
       document.body.classList.add("viewing");
       hero.style.transition = o.instant ? "none" : "transform " + ANIM + "ms " + EASE + ", opacity .25s";
       hero.style.transform = "none"; hero.style.opacity = 1;
-      if (o.replaceHistory) { try { history.replaceState({ k: "dp", slug: o.slug }, "", "#" + o.slug); } catch (e) {} }
+      if (o.replaceHistory) { try { history.replaceState({ k: "dp", slug: o.slug }, "", pageURL(o.slug)); } catch (e) {} }
       else if (!o.noHistory) pushPage({ k: "dp", slug: o.slug });
       hero.classList.add("ready");
       if (o.from === "home") HomeAPI.pause();
@@ -316,7 +329,7 @@
       if (o.from === "list" && roul.active()) o.a = roul.center(o.slug);
       var rect = o.from === "home" ? homeNameRect() : o.a ? nameRect(o.a, view.main) : null;
       if (!rect || !rect.width) instant = true; // spotlight ouvert par l'adresse, ou lien caché (menu du téléphone)
-      view = null; document.body.classList.remove("spot", "fic", "cpage"); cats.style.transitionDelay = "";
+      view = null; document.body.classList.remove("spot", "fic", "cpage"); document.title = "kinou"; cats.style.transitionDelay = "";
       var f = hero.querySelector(".n").getBoundingClientRect();
       hero.classList.remove("ready");
       document.body.classList.remove("viewing");
@@ -378,7 +391,7 @@
         if (k) who.appendChild(document.createTextNode(" & "));
         var a = document.createElement(d.slug ? "a" : "span"); a.textContent = split(d.name).main;
         if (d.slug) {
-          a.href = "#" + d.slug;
+          a.href = pageURL(d.slug);
           a.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); toDP(d, a, fromPlayer); });
         }
         who.appendChild(a);
@@ -583,23 +596,23 @@
     // Sur téléphone, toujours une colonne (le mot est ignoré).
     function catSlug(c) { return c.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
     function parseHash() {
-      var h = location.hash.slice(1).split("/"), m = null, last = (h[h.length - 1] || "").toLowerCase();
+      var h = route().split("/"), m = null, last = (h[h.length - 1] || "").toLowerCase();
       if (h.length > 1 && /^(feed|grid|grille|colonne)$/.test(last)) { m = /^(feed|colonne)$/.test(last) ? "feed" : "gallery"; h.pop(); }
       return { slug: decodeURIComponent(h[0] || ""), cat: (h[1] || "").toLowerCase(), mode: m };
     }
     function tabUrl(slug, c) {
       var feedUrl = view && view.o.mode === "feed";
-      try { history.replaceState({ k: "dp", slug: slug }, "", "#" + slug + (c && c !== "FEATURED" ? "/" + catSlug(c) : "") + (feedUrl ? "/feed" : "")); } catch (e) {}
+      try { history.replaceState({ k: "dp", slug: slug }, "", pageURL(slug + (c && c !== "FEATURED" ? "/" + catSlug(c) : "") + (feedUrl ? "/feed" : ""))); } catch (e) {}
     }
     // Affichage voulu : une colonne sur téléphone ; sinon celui de l'adresse ou du bouton choisi (grille par défaut).
     function wantMode() { return phone.matches ? "feed" : (view && view.o.mode) || "gallery"; }
     // Pages du site dans l'historique (accueil, liste, page d'un chef op) : le bouton retour revient à la précédente.
     function pushPage(st) {
-      try { history.pushState(st, "", st.k === "dp" ? "#" + st.slug : location.pathname + location.search); } catch (e) {}
+      try { history.pushState(st, "", pageURL(st.k === "dp" ? st.slug : "")); } catch (e) {}
     }
     function restorePage(st) {
       if (st && st.kinou) return; // entrée du lecteur (bouton « suivant » du navigateur) : rien à faire
-      if (!st || !st.k) st = location.hash.length > 1 ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat, mode: parseHash().mode } : { k: "home" };
+      if (!st || !st.k) st = route() ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat, mode: parseHash().mode } : { k: "home" };
       if (st.k === "dp") {
         if (view && view.o.slug === st.slug) { // même page, autre onglet ou autre affichage (adresse modifiée à la main)
           var tb = st.cat && [].filter.call(cats.querySelectorAll("button"), function (x) { return catSlug(x.dataset.cat) === st.cat; })[0];
@@ -656,7 +669,7 @@
         p.dps.forEach(function (d, k) {
           if (k) who.appendChild(document.createTextNode(" & "));
           var a = document.createElement(d.slug ? "a" : "span"); a.textContent = split(d.name).main;
-          if (d.slug) { a.href = "#" + d.slug; a.addEventListener("click", function (e) { e.preventDefault(); dpFromPlayer(d, a, p); }); }
+          if (d.slug) { a.href = pageURL(d.slug); a.addEventListener("click", function (e) { e.preventDefault(); dpFromPlayer(d, a, p); }); }
           who.appendChild(a);
         });
         pcap.appendChild(who);
@@ -1383,8 +1396,10 @@
       openView({ text: a.textContent, slug: slug, from: "list", a: a, instant: true, noHistory: true, cat: h.cat, mode: h.mode });
       undeep(700); // la liste a fini de s'effacer derrière la page
     }
-    if (location.hash.length > 1) routeFromHash(); else undeep();
-    try { history.replaceState(view ? { k: "dp", slug: view.o.slug } : { k: "home" }, ""); } catch (e) {}
+    var r0 = route();
+    if (r0) routeFromHash(); else undeep();
+    // Adresse réécrite sous sa forme définitive (ancienne adresse en #… ou arrivée par une page d'aperçu) : c'est elle qu'on partage.
+    try { history.replaceState(view ? { k: "dp", slug: view.o.slug } : { k: "home" }, "", view ? pageURL(r0) : pageURL("")); } catch (e) {}
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (plight.classList.contains("on")) closeStill(); else if (player.classList.contains("on")) closePlayer(); else closeView(); } });
   }
 
