@@ -176,6 +176,19 @@ Ouverture : lien « spotlight » de l'en-tête et du menu du téléphone (`openS
 `body.spot` : sur ordinateur, titre « Spotlight » **à gauche** (pages de chef op : à droite), onglets **en ligne au-dessus** des films (grille sur toute la largeur), pas de choix grille /
 colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur téléphone.
 
+### Fiction (`data/fiction.json`, rubrique « fiction » de l'admin, adresse `#fiction`)
+`{ reel, overrides, films, readAt, readAsk }` : comme le spotlight (bande Slate lue en entier par le robot GitHub, `films`), mais
+les onglets se règlent **à la main** dans l'admin, film par film (`overrides[<id>]`) : `status` `new` | `soon` | `past` (défaut past),
+`genre` (FEATURE FILM, SERIES, DOCUMENTARY, SHORT FILM ; films sortis), `date` (AAAA-MM-JJ), `poster` (affiche déposée dans l'admin →
+`data/fiction/<id>-<horodatage>.webp`, lue via `DATA_BASE`). `ficToDP` (app.js) : NEW RELEASES = FEATURED interne (`catLabel`),
+COMING SOON, PAST RELEASES (tous les films sortis) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
+quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. Date de sortie : carré blanc « 16 oct. » sur la
+vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement dans NEW RELEASES et COMING SOON. Chefs op crédités :
+« DoP Nom » cliquable comme au spotlight (`MULTI` = pages de plusieurs chefs op). Pas d'extraits en boucle (comportement normal).
+Lecteur : avec affiche (`#player.has-poster`), affiche à gauche du film à la même hauteur (6fr / 16fr), stills dessous ; sans
+affiche, comme ailleurs ; téléphone : affiche en petit (92px) à gauche des crédits (`.pposter-s`). Première version calquée sur
+l'ancien site Squarespace (Gus 27/10) ; idées à essayer ensuite : affiches en vignettes, petite affiche au survol.
+
 ### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
 `{ team: [{ role, name, email, phone }], address: [lignes], newsletter, newsletterLabel, social: { instagram, vimeo, imdb, facebook }, legal }`.
 Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « contact » de l'en-tête devient le titre, à gauche sur
@@ -202,7 +215,7 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms — les onglets apparaissent juste
    après, `view.t0` + `ANIM` → `transitionDelay` de `.cats`, etc.) + le voile
    lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
-8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight » (page Spotlight), « fiction » et « press » (à venir), « contact »,
+8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight », « fiction », « press » (à venir), « contact »,
    masqués sous 700px (dans le menu du téléphone) ; à droite « cinematographers ».
 10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
    toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.

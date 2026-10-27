@@ -287,7 +287,8 @@
       // D'une page à l'autre (chef op → spotlight) : les onglets étaient encore affichés ; on les cache tout de suite
       // pour qu'ils reviennent à la fin de l'animation du nouveau titre.
       cats.style.transition = "none"; cats.style.opacity = "0"; void cats.offsetWidth; cats.style.transition = cats.style.opacity = "";
-      document.body.classList.toggle("spot", o.slug === SPOT); // spotlight : onglets en ligne au-dessus (ordinateur), extraits en boucle
+      document.body.classList.toggle("spot", o.slug === SPOT || o.slug === FIC); // spotlight, fiction : onglets en ligne au-dessus (ordinateur)
+      document.body.classList.toggle("fic", o.slug === FIC);
       document.body.classList.toggle("cpage", o.slug === CONTACT); // page contact (pas d'onglets)
       var r = o.rect;
       hero.textContent = ""; hero.classList.remove("ready");
@@ -315,7 +316,7 @@
       if (o.from === "list" && roul.active()) o.a = roul.center(o.slug);
       var rect = o.from === "home" ? homeNameRect() : o.a ? nameRect(o.a, view.main) : null;
       if (!rect || !rect.width) instant = true; // spotlight ouvert par l'adresse, ou lien caché (menu du téléphone)
-      view = null; document.body.classList.remove("spot", "cpage"); cats.style.transitionDelay = "";
+      view = null; document.body.classList.remove("spot", "fic", "cpage"); cats.style.transitionDelay = "";
       var f = hero.querySelector(".n").getBoundingClientRect();
       hero.classList.remove("ready");
       document.body.classList.remove("viewing");
@@ -337,8 +338,8 @@
     var CATS = ["FEATURED", "BEAUTY", "TEXTURES", "FOOD", "COMEDY", "LIFESTYLE", "AUTOMOTIVE"];
     var WORK = {}, CATS_BY = {}, TEMPLATE = {}, loading = {};
     function loadDP(slug) {
-      if (!loading[slug]) loading[slug] = (slug === SPOT ? getJSON("spotlight.json").then(spotToDP) : getJSON("dps/" + slug + ".json"))
-        .then(function (d) { register(d); if (slug !== SPOT) live(d); return d; }, function () { return null; });
+      if (!loading[slug]) loading[slug] = (slug === SPOT ? getJSON("spotlight.json").then(spotToDP) : slug === FIC ? getJSON("fiction.json").then(ficToDP) : getJSON("dps/" + slug + ".json"))
+        .then(function (d) { register(d); if (!MULTI[slug]) live(d); return d; }, function () { return null; });
       return loading[slug];
     }
     // ---------- Spotlight (data/spotlight.json, rubrique « spotlight » de l'admin) ----------
@@ -391,9 +392,37 @@
       if (view) closeView(true);
       openView({ text: li ? li.textContent : d.name, slug: d.slug, from: home ? "home" : "list", a: li, rect: a.getBoundingClientRect(), replaceHistory: fromPlayer });
     }
-    function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : c; }
+    // ---------- Fiction (data/fiction.json, rubrique « fiction » de l'admin) ----------
+    // Comme le spotlight (bande Slate lue par le robot, `films`), mais les onglets sont réglés à la main dans l'admin, film par
+    // film (`overrides[id]`) : `status` new | soon | past (défaut past), `genre` (films sortis), `date` (AAAA-MM-JJ), `poster`.
+    // NEW RELEASES = FEATURED interne ; PAST RELEASES montre tous les films sortis, et ses genres apparaissent alors à côté.
+    var FIC = "fiction", FIC_GENRES = ["FEATURE FILM", "SERIES", "DOCUMENTARY", "SHORT FILM"], PAST = ["PAST RELEASES"].concat(FIC_GENRES);
+    var MULTI = { spotlight: true, fiction: true }; // pages de plusieurs chefs op (« DoP Nom » cliquable, pas d'About)
+    function ficToDP(s) {
+      var ov = s.overrides || {}, clips = [];
+      (s.films || []).forEach(function (f, i) {
+        var o = ov[f.slate] || {}, st = o.status || "past";
+        var base = { title: f.title, slate: f.slate };
+        ["sub", "video", "full", "img", "images", "ratios"].forEach(function (k) { if (f[k]) base[k] = f[k]; });
+        if (f.artists && f.artists.length) base.dps = f.artists.map(dpByName);
+        function add(c, extra) { clips.push(Object.assign({}, base, { cat: c }, extra || {})); }
+        if (st === "new") add("", { featured: true, featuredOrder: i + 1 });
+        else if (st === "soon") add("COMING SOON");
+        else { add("PAST RELEASES"); if (o.genre) add(String(o.genre).toUpperCase()); }
+      });
+      var used = {}; clips.forEach(function (c) { used[c.cat] = true; });
+      var cats = ["FEATURED", "COMING SOON", "PAST RELEASES"].concat(FIC_GENRES.filter(function (g) { return used[g]; }));
+      return { slug: FIC, name: "Fiction", hue: 30, categories: cats, clips: clips, overrides: ov };
+    }
+    // Date de sortie sur la vignette (NEW RELEASES et COMING SOON) : « 16 oct. ».
+    function ficDate(d) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || ""); if (!m) return "";
+      try { return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }); } catch (e) { return ""; }
+    }
+    function dataURL(u) { return /^(https?:|data:)/.test(u) ? u : DATA_BASE + u; }
+    function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : slug === FIC && c === "FEATURED" ? "NEW RELEASES" : c; }
     // Pages de l'en-tête (spotlight, contact), ouvertes depuis l'en-tête ou le menu du téléphone : le mot devient le titre.
-    var CONTACT = "contact", PAGES = { spotlight: "Spotlight", contact: "Contact" };
+    var CONTACT = "contact", PAGES = { spotlight: "Spotlight", fiction: "Fiction", contact: "Contact" };
     function openSpot(a, opts) { openPage(SPOT, a, opts); }
     function openPage(slug, a, opts) {
       if (view && view.o.slug === slug) return;
@@ -403,11 +432,11 @@
       if (document.body.classList.contains("is-home")) HomeAPI.pause();
       openView(o);
     }
-    document.querySelectorAll("[data-spot], [data-contact]").forEach(function (a) {
+    document.querySelectorAll("[data-spot], [data-contact], [data-fiction]").forEach(function (a) {
       a.addEventListener("click", function (e) {
         e.preventDefault();
         if (document.body.classList.contains("menu-on")) menu(false);
-        openPage(a.hasAttribute("data-contact") ? CONTACT : SPOT, a);
+        openPage(a.hasAttribute("data-contact") ? CONTACT : a.hasAttribute("data-fiction") ? FIC : SPOT, a);
       });
     });
     // Fiche avec bundle Slate : la page s'affiche tout de suite avec la copie enregistree dans la fiche,
@@ -601,6 +630,13 @@
       player.classList.toggle("has-nav", playList.length > 1 && playIdx > -1);
       projvid.pause(); pauseSnips();
       pstage.textContent = ""; pcap.textContent = "";
+      // Fiction : l'affiche à gauche du film (à la même hauteur), les stills dessous.
+      player.classList.toggle("has-poster", !!p.poster);
+      // Téléphone : l'affiche en petit, à gauche des crédits (.pposter-s), plutôt qu'au-dessus du film.
+      if (p.poster) {
+        var pp = document.createElement("img"); pp.className = "pposter"; pp.src = dataURL(p.poster); pp.alt = ""; pstage.appendChild(pp);
+        var ps = pp.cloneNode(); ps.className = "pposter-s"; pcap.appendChild(ps);
+      }
       var src = p.full || (p.nosnip ? "" : p.video); // film complet (avec son) ; l'extrait seulement hors accueil
       pstage.style.backgroundImage = src ? "none" : bgFor(p); // vidéo : fond noir (pas la vignette autour du film)
       if (src) {
@@ -614,7 +650,7 @@
       }
       ptitle.textContent = p.title;
       // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page (spotlight : dernière ligne, « DoP Nom »).
-      if (p.dps && p.dps.length && view && view.o.slug === SPOT) { var spotDps = true; }
+      if (p.dps && p.dps.length && view && MULTI[view.o.slug]) { var spotDps = true; }
       else if (p.dps && p.dps.length) {
         var who = document.createElement("div"); who.className = "pdps";
         p.dps.forEach(function (d, k) {
@@ -853,6 +889,7 @@
     }
     function render(slug, cat, delay) {
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
+      cats.classList.toggle("past", slug === FIC && PAST.indexOf(cat) > -1);
       if (liveSeen) { liveSeen.disconnect(); feed.querySelectorAll("video.live").forEach(function (v) { v.pause(); v.removeAttribute("src"); v.load(); }); }
       autoCard = null; var run = ++renderRun; setTimeout(function () { autoFirst(run); }, (delay || 0) + 450);
       requestAnimationFrame(function () { pickFocus(true); }); // tailles (perspective) dès l'affichage des films
@@ -879,8 +916,10 @@
         // Sans crédits : rien sous le titre (la catégorie est déjà l'onglet, ou affichée à part dans FEATURED : .ccat).
         var s = document.createElement("p"); s.textContent = p.sub || "";
         meta.appendChild(h); if (s.textContent) meta.appendChild(s);
-        if (p.dps && p.dps.length && slug === SPOT) meta.appendChild(dpLine(p, "cdop"));
-        if (p.cat && cat === "FEATURED") { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
+        if (p.dps && p.dps.length && MULTI[slug]) meta.appendChild(dpLine(p, "cdop"));
+        // Fiction : date de sortie (carré blanc au survol), seulement dans NEW RELEASES et COMING SOON.
+        if (slug === FIC && (cat === "FEATURED" || cat === "COMING SOON") && ficDate(p.date)) { var dt = document.createElement("span"); dt.className = "cdate"; dt.textContent = ficDate(p.date); st.appendChild(dt); }
+        if (p.cat && cat === "FEATURED" && slug !== FIC) { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
         liveThumb(st, p);
         d._p = p;
@@ -980,10 +1019,11 @@
     var tabSet = null;
     function buildTabs(slug) {
       cats.textContent = ""; curCat = "FEATURED";
-      tabSet = function (copy) { (CATS_BY[slug] || CATS).forEach(function (c) { tabButton(c, copy); }); if (slug !== SPOT) aboutButton(copy); };
+      tabSet = function (copy) { (CATS_BY[slug] || CATS).forEach(function (c) { tabButton(c, copy); }); if (!MULTI[slug]) aboutButton(copy); };
       function tabButton(c, copy) {
         var b = document.createElement("button");
         b.textContent = catLabel(slug, c); b.dataset.cat = c; if (c === curCat) b.className = "on";
+        if (slug === FIC && FIC_GENRES.indexOf(c) > -1) b.classList.add("sub"); // genres : visibles seulement dans PAST RELEASES
         if (copy) b.setAttribute("aria-hidden", "true");
         b.addEventListener("click", function () {
           cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === c); });

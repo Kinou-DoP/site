@@ -478,3 +478,28 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
   .cwho a { padding: 3px 0; font-size: 15px; }
   .cend { margin-top: 10vh; }
 }
+
+/* Fiction (body.fic, data/fiction.json) : comme le spotlight (body.spot). Genres de PAST RELEASES (.sub) : visibles seulement
+   quand PAST RELEASES ou un genre est ouvert (.cats.past), plus petits, à la suite. Date de sortie : carré blanc au survol. */
+.cats .sub { display: none; }
+.cats.past .sub { display: block; font-size: 11px; opacity: .35; }
+.cats.past .sub:hover { opacity: .8; }
+.cats.past .sub.on { opacity: 1; }
+.cats.past button[data-cat="PAST RELEASES"] { opacity: 1; }
+.cdate { position: absolute; z-index: 3; top: 12px; left: 12px; padding: 5px 8px 4px; background: var(--kinou-fg); color: #000; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.card:hover .cdate, .card.focus .cdate { opacity: 1; }
+@media (hover: none) { .cdate { opacity: 1; } }
+/* Lecteur, film avec affiche : affiche (2:3) puis film (16:9), même hauteur. */
+#player.has-poster .pin { --pw: min(100%, 1800px, calc((100vh - 220px) * 22.5 / 9)); }
+#player.has-poster.has-stills .pin { --pw: min(100%, 1800px, calc((100vh - 290px) * 22.5 / 9)); }
+#player.has-poster .pstage { display: grid; grid-template-columns: 6fr 16fr; gap: 12px; aspect-ratio: 22.5 / 9; background: none !important; }
+#player.has-poster .pstage video, #player.has-poster .pstage > img:not(.pposter) { background: var(--kinou-bg); }
+#player .pstage img.pposter { object-fit: cover; }
+.pposter-s { display: none; }
+@media (max-width: 700px) {
+  #player.has-poster .pin { --pw: 100%; }
+  #player.has-poster .pstage { display: block; aspect-ratio: 16 / 9; }
+  #player .pstage img.pposter { display: none; }
+  #player.has-poster .pcap { display: flow-root; }
+  .pposter-s { display: block; float: left; width: 92px; aspect-ratio: 2 / 3; margin: 2px 14px 6px 0; object-fit: cover; }
+}
