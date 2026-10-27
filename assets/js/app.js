@@ -302,10 +302,10 @@
     function startTransform(r, f) {
       return "translate(" + (r.left - f.left) + "px," + (r.top - f.top) + "px) scale(" + (r.width / f.width) + ")";
     }
-    // Pendant son déplacement, le nom se floute d'un coup puis redevient net en arrivant (Gus 28/10, comme l'arrivée des onglets).
+    // Pendant son déplacement, le nom se floute d'un coup (léger) puis redevient net vers 60 % du trajet (Gus 28/10, comme l'arrivée des onglets).
     function heroBlur() {
       if (!hero.animate || reduceMotion) return;
-      hero.animate([{ filter: "blur(0)" }, { filter: "blur(.16em)", offset: .08 }, { filter: "blur(.1em)", offset: .5 }, { filter: "blur(.03em)", offset: .85 }, { filter: "blur(0)" }], { duration: ANIM });
+      hero.animate([{ filter: "blur(0)" }, { filter: "blur(.09em)", offset: .08 }, { filter: "blur(.04em)", offset: .35 }, { filter: "blur(0)", offset: .58 }, { filter: "blur(0)" }], { duration: ANIM });
     }
     function homeNameRect(a) { return (a ? a.querySelector(".n") : document.querySelector("#home .name .n")).getBoundingClientRect(); }
     // o = { text, slug, rect (position de depart du nom), from: "home" | "list", a (lien de la liste), film (projet de l'accueil) }
