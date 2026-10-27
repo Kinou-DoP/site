@@ -347,8 +347,9 @@ marchent toujours et sont réécrites. Le site reste une seule page : `<slug>/in
 (nom + photo du chef op en balises Open Graph, pour WhatsApp, iMessage, Slack… qui ne lisent ni le JavaScript ni le « # »),
 qui renvoie en JavaScript vers `../#<slug>` ; fabriquée par `tools/share-pages.mjs` (photo = portrait About, sinon vignette du
 1er film FEATURED ; spotlight / fiction / contact : leur nom), lancé par `.github/workflows/share-pages.yml` à chaque push sur
-`beta` (ou à la main, onglet Actions) — un chef op ajouté dans l'admin n'a son aperçu qu'au prochain passage (en attendant, son
-adresse marche quand même, sans aperçu). Ne pas modifier ces dossiers à la main. Adresse sans page (onglet, chef op pas encore
+`beta` (ou à la main, onglet Actions) ; **et écrite par l'admin à chaque publication d'une fiche** (`sharePage` dans admin.js, même
+contenu : garder les deux identiques ; clé GitHub de la personne avec accès en écriture au dépôt site). Pas de passage régulier
+(il faudrait le workflow sur `main` : écarté, Gus 27/10). En attendant un aperçu, l'adresse d'un chef op marche quand même. Ne pas modifier ces dossiers à la main. Adresse sans page (onglet, chef op pas encore
 généré) : `404.html` renvoie vers `<racine>/#<chemin>` (sur `*.github.io`, la racine = 1er dossier). Accueil : titre « kinou »
 (`<title>` + og:title) ; titre de l'onglet du navigateur = « Nom — kinou » sur une page.
 Au retour sur Netlify : `SITE_URL` du générateur (adresse publique, ex. https://kinou.fr/), et la règle de racine de `404.html`
