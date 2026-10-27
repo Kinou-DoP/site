@@ -137,10 +137,15 @@
         preloadNext(i);
       } else { later(); }
     }
-    // Passage HD fini (durée d'un projet) : projet suivant.
+    // Passage HD fini (durée d'un projet) : projet suivant. Accueil en pause ou projet qui n'est plus affiché : la vidéo
+    // s'arrête et revient au début du passage (jamais la suite du film : générique, cartons…).
     slides.forEach(function (s, i) {
       var v = s.querySelector("video");
-      if (v) v.addEventListener("timeupdate", function () { if (v._hd && i === cur && active && v.currentTime >= v._start + DURATION / 1000) next(); });
+      if (v) v.addEventListener("timeupdate", function () {
+        if (!v._hd || v.currentTime < v._start + DURATION / 1000) return;
+        if (i === cur && active) next();
+        else { v.pause(); try { v.currentTime = v._start; } catch (e) {} }
+      });
     });
     // Film complet illisible : retour à l'extrait Slate pour ce projet.
     function snippetOf(v, i) {
@@ -209,7 +214,14 @@
     });
     window.HomeAPI = {
       pause: function () { active = false; clearTimeout(timer); var v = slides[cur].querySelector("video"); if (v) v.pause(); },
-      resume: function () { if (active) return; active = true; var v = slides[cur].querySelector("video"); if (v && v.src) { var pr = v.play(); if (pr && pr.catch) pr.catch(later); v.onended = next; } else later(); },
+      resume: function () {
+        if (active) return; active = true; var v = slides[cur].querySelector("video");
+        // Passage HD : on reprend dans le passage (sinon au début du passage).
+        if (v && v._hd && (v.currentTime < v._start - 0.5 || v.currentTime >= v._start + DURATION / 1000 - 0.3)) { try { v.currentTime = v._start; } catch (e) {} }
+        if (v && v.src) { var pr = v.play(); if (pr && pr.catch) pr.catch(later); v.onended = next; } else later();
+      },
+      // Passage HD en cours [début, fin] en secondes (fond de la page contact : le même passage, en boucle).
+      segment: function () { var v = slides[cur].querySelector("video"); return v && v._hd ? [v._start, v._start + DURATION / 1000] : null; },
       videoEl: function () { return slides[cur].querySelector("video"); },
       current: function () { return PROJECTS[cur]; }
     };
@@ -427,10 +439,10 @@
       var cats = ["FEATURED", "COMING SOON", "PAST RELEASES"].concat(FIC_GENRES.filter(function (g) { return used[g]; }));
       return { slug: FIC, name: "Fiction", hue: 30, categories: cats, clips: clips, overrides: ov };
     }
-    // Date de sortie sur la vignette (NEW RELEASES et COMING SOON) : « 16 oct. ».
+    // Date de sortie sur la vignette (NEW RELEASES et COMING SOON) : « 16 Oct » (en anglais, comme le reste du site).
     function ficDate(d) {
       var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || ""); if (!m) return "";
-      try { return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }); } catch (e) { return ""; }
+      return +m[3] + " " + ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][+m[2] - 1];
     }
     function dataURL(u) { return /^(https?:|data:)/.test(u) ? u : DATA_BASE + u; }
     function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : slug === FIC && c === "FEATURED" ? "NEW RELEASES" : c; }
@@ -790,7 +802,10 @@
       if (homePlay) { homePlay = false; if (!view && document.body.classList.contains("is-home")) HomeAPI.resume(); }
     }
     player.addEventListener("click", function (e) { if (e.target === player || e.target === pgal || e.target.classList.contains("pin") || e.target.closest(".pclose")) closePlayer(); });
+    // Fond qui joue un passage HD de l'accueil (p.seg = [début, fin]) : en boucle sur ce passage, jamais au-delà.
+    projvid.addEventListener("timeupdate", function () { var g = projvid._seg; if (g && (projvid.currentTime >= g[1] || projvid.currentTime < g[0] - 1)) { try { projvid.currentTime = g[0]; } catch (e) {} } });
     function showProj(p, t) {
+      projvid._seg = p.seg || null;
       projbg.style.backgroundImage = bgFor(p, 64); // fond flou : une toute petite image agrandie (leger a afficher)
       if (p.video && t !== undefined) {
         if (projvid.dataset.src !== p.video) { projvid.src = p.video; projvid.dataset.src = p.video; }
@@ -1218,7 +1233,7 @@
       // Fond : très flouté (comme le fond d'une page de chef op). Depuis l'accueil : le film en cours, là où il en était
       // (passage HD compris) ; sinon un film de l'accueil au hasard.
       var hv = document.body.classList.contains("is-home") && HomeAPI.videoEl(), hp = hv && HomeAPI.current();
-      if (hp) showProj({ video: hv.currentSrc || hp.video, img: hp.img }, hv.currentTime || 0.01);
+      if (hp) showProj({ video: hv.currentSrc || hp.video, img: hp.img, seg: HomeAPI.segment() }, hv.currentTime || 0.01);
       else {
         var bgs = (HOME || []).filter(function (h) { return h.video || h.img; });
         if (bgs.length) { var b = bgs[Math.floor(Math.random() * bgs.length)]; showProj({ video: b.video, img: b.img }, 0); }

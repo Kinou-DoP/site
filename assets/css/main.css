@@ -504,3 +504,7 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
   #player.has-poster .pcap { display: flow-root; }
   .pposter-s { display: block; float: left; width: 92px; aspect-ratio: 2 / 3; margin: 2px 14px 6px 0; object-fit: cover; }
 }
+/* ESSAI (28/10, demande de Gus) : vignettes de la page fiction au format cinémascope (2,39:1) au lieu de 16:9.
+   Pour revenir au 16:9 : supprimer les 3 lignes suivantes. */
+body.fic .still { aspect-ratio: 2.39 / 1; }
+body.fic .feed.gallery .card, body.fic .feed.gallery .shade i { aspect-ratio: 2.39 / 1; }

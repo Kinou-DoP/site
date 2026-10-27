@@ -182,13 +182,15 @@ les onglets se règlent **à la main** dans l'admin, film par film (`overrides[<
 `genre` (FEATURE FILM, SERIES, DOCUMENTARY, SHORT FILM ; films sortis), `date` (AAAA-MM-JJ), `poster` (affiche déposée dans l'admin →
 `data/fiction/<id>-<horodatage>.webp`, lue via `DATA_BASE`). `ficToDP` (app.js) : NEW RELEASES = FEATURED interne (`catLabel`),
 COMING SOON, PAST RELEASES (tous les films sortis) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
-quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. Date de sortie : carré blanc « 16 oct. » sur la
+quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. Date de sortie : carré blanc « 16 Oct » (mois en anglais) sur la
 vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement dans NEW RELEASES et COMING SOON
 (posée sur la carte, pas sur la vignette qui s'agrandit au survol). COMING SOON : films dans l'ordre inverse de la bande (prochaine sortie en premier). Chefs op crédités :
 « DoP Nom » cliquable comme au spotlight (`MULTI` = pages de plusieurs chefs op). Pas d'extraits en boucle (comportement normal).
 Lecteur : avec affiche (`#player.has-poster`), affiche à gauche du film à la même hauteur (6fr / 16fr), stills dessous ; sans
 affiche, comme ailleurs ; téléphone : affiche en petit (92px) à gauche des crédits (`.pposter-s`). Première version calquée sur
 l'ancien site Squarespace (Gus 27/10) ; idées à essayer ensuite : affiches en vignettes, petite affiche au survol.
+**ESSAI (28/10)** : vignettes de la fiction en cinémascope 2,39:1 (`body.fic .still`, `.card`, `.shade i`, fin de main.css) ;
+pour revenir au 16:9, supprimer ces lignes (marquées « ESSAI »).
 
 ### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
 `{ team: [{ role, name, email, phone }], address: [lignes], newsletter, newsletterLabel, social: { instagram, vimeo, imdb, facebook }, legal }`.
@@ -225,6 +227,8 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
    Extrait HD (admin) : si la slide a `start` (secondes) et `full`, l'accueil lit le film complet de `start` pendant
    `duration` (sans le son), au lieu de l'extrait Slate ; le suivant se précharge ; film illisible → extrait Slate.
    `phoneX` de la slide = cadrage horizontal sur téléphone (`--pp`, object-position), comme le fond de la liste.
+   Le passage HD ne dépasse jamais `start` + `duration` : accueil en pause ou slide cachée → la vidéo s'arrête et revient au
+   début du passage ; reprise (`HomeAPI.resume`) dans le passage ; fond de la page contact = ce passage en boucle (`projvid._seg`).
 12. **Recadrage** : `zoom` (1 à 2,5, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
    agrandit l'extrait pour enlever les bandes noires, vers la position `zoomPos` ("X% Y%", absent = centre ; cadre rouge
    déplacé dans l'admin → `--zp` = transform-origin / background-position) ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
