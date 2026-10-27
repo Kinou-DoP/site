@@ -540,7 +540,7 @@ body.fic .still video.snip { inset: auto; left: calc(var(--cx, 0%) - 1px); top: 
 body.fic .feed.gallery .card, body.fic .feed.gallery .shade i { aspect-ratio: 2.39 / 1; }
 /* Spotlight et fiction (body.spot) : titre toujours affiché sur la vignette ; au survol, il remonte pour laisser la place
    aux crédits (réalisateur, production, DoP). Écran tactile : tout est affiché. */
-body.spot .feed.gallery .meta { opacity: 1; padding: 30px 17px 17px; left: -1px; right: -1px; bottom: -3px; } /* dégradé qui déborde (caché par la carte) : sinon un liseré clair d'un pixel sur les côtés et en bas (page zoomée) */
+body.spot .feed.gallery .meta { opacity: 1; padding: 30px 19px 19px; left: -3px; right: -3px; bottom: -5px; } /* dégradé qui déborde de 3px (caché par la carte) : sinon un liseré clair d'un pixel sur les côtés et en bas (page zoomée) */
 /* Vignette toujours sur son propre calque : sinon, à la fin du zoom de survol, le navigateur la recale au pixel près et elle
    « descend » d'un ou deux pixels (visible avec la page zoomée, Gus 28/10). */
 body.spot .feed.gallery .still { will-change: transform; }
