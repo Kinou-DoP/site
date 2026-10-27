@@ -27,6 +27,7 @@ html { scrollbar-gutter: stable; }
 .about p { margin: 0 0 1em; }
 .still video.snip { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); object-fit: cover; opacity: 0; transition: opacity .2s ease; pointer-events: none; } /* fondu court (avant .5s) : l'image fixe et l'extrait ne se mélangent presque plus (Gus 28/10) */
 .still video.snip.on { opacity: 1; }
+.still.vidon { background-image: none !important; } /* extrait affiché : plus d'image fixe dessous (liseré clair, page zoomée) */
 .about .lang { display: flex; gap: 16px; margin: -2px 0 22px; }
 .about .lang button { padding: 0; border: 0; background: none; color: var(--kinou-fg); font-family: var(--kinou-sans); font-weight: 600; font-size: 13px; letter-spacing: .14em; opacity: .4; cursor: pointer; transition: opacity .2s; }
 .about .lang button:hover { opacity: .8; }

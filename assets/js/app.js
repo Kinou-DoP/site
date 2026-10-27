@@ -872,7 +872,7 @@
       var v = st.querySelector("video.snip");
       if (!on) {
         if (v) {
-          v.pause(); v.classList.remove("on");
+          v.pause(); v.classList.remove("on"); clearTimeout(st._vt); st.classList.remove("vidon");
           // Libere la video (memoire, decodeur) une fois le fondu termine, si on n'est pas revenu dessus.
           v._free = setTimeout(function () { v.removeAttribute("src"); v.load(); v.remove(); }, 600);
         }
@@ -885,7 +885,10 @@
         // Extrait Slate en entier et en boucle (il est monté pour boucler ; ne pas le couper).
         v = document.createElement("video"); v.className = "snip"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
         // Affichée seulement quand sa première image est vraiment peinte (sinon l'image fixe et l'extrait se mélangent un instant).
-        v.addEventListener("playing", function () { if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(function () { v.classList.add("on"); }); else v.classList.add("on"); });
+        // Une fois l'extrait entièrement apparu, l'image fixe dessous est retirée (.vidon) : sinon, page zoomée, son bord clair
+        // se voit autour de l'extrait (les deux ne s'arrondissent pas au même pixel).
+        var shown = function () { v.classList.add("on"); clearTimeout(st._vt); st._vt = setTimeout(function () { if (v.classList.contains("on")) st.classList.add("vidon"); }, 250); };
+        v.addEventListener("playing", function () { if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(shown); else shown(); });
         v.src = vsrc; st.appendChild(v);
       }
       var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});

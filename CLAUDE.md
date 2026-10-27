@@ -199,6 +199,8 @@ pour revenir au 16:9, supprimer ces lignes (marquées « ESSAI »). Cadrage rég
 centre) ; `scopeCrop` (app.js) : vignette = background-size z × 100 % + background-position x % y % ; extrait = vidéo 16:9 de
 largeur z × 100 %, décalée (`--cw`, `--cx`, `--cy`). Le `zoom` / `zoomPos` ordinaire n'est pas utilisé sur la fiction (le cadre
 2,39 enlève déjà les bandes noires des bandes-annonces en scope).
+Extrait affiché (toutes les pages) : l'image fixe dessous est retirée 0,25 s après (`.still.vidon`, `snip`) : sinon liseré clair
+autour de l'extrait quand la page est zoomée. Dégradé des titres (spotlight, fiction) qui déborde de 3px.
 Extrait de la fiction : 1px de plus de chaque côté (sinon bord de l'image fixe visible derrière, page zoomée). Vignettes du
 spotlight et de la fiction en `will-change: transform` (sinon elles « descendent » d'un pixel à la fin du zoom de survol).
 Spotlight et fiction (`body.spot`, ordinateur, grille) : titre toujours affiché sur la vignette ; au survol il remonte et les
