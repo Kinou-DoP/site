@@ -444,6 +444,17 @@
       var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || ""); if (!m) return "";
       return +m[3] + " " + ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][+m[2] - 1];
     }
+    // Cadrage cinémascope (2,39:1) d'un film en 16:9 : thumbCrop (vignette) et snipCrop (extrait) = { z, x, y } réglés dans l'admin
+    // (z ≥ 1 = agrandissement ; x, y = 0–100, position de la partie gardée ; absent = centre, sans agrandissement).
+    var SCOPE = 2.39, VID_A = 16 / 9;
+    function scopeCrop(st, p) {
+      var t = p.thumbCrop || {}, s = p.snipCrop || {}, n = function (v) { return v === undefined ? 50 : v; };
+      st.style.backgroundSize = (t.z || 1) * 100 + "% auto"; st.style.backgroundPosition = n(t.x) + "% " + n(t.y) + "%";
+      var z = s.z || 1;
+      st.style.setProperty("--cw", z * 100 + "%");
+      st.style.setProperty("--cx", -n(s.x) * (z - 1) + "%");
+      st.style.setProperty("--cy", -n(s.y) * (z * SCOPE / VID_A - 1) + "%");
+    }
     function dataURL(u) { return /^(https?:|data:)/.test(u) ? u : DATA_BASE + u; }
     function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : slug === FIC && c === "FEATURED" ? "NEW RELEASES" : c; }
     // Pages de l'en-tête (spotlight, contact), ouvertes depuis l'en-tête ou le menu du téléphone : le mot devient le titre.
@@ -934,7 +945,8 @@
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
         var st = document.createElement("div"); st.className = "still"; st.style.setProperty("--h", p.h);
         // Recadrage (admin, position du cadre = --zp) : l'extrait au survol ; la vignette aussi si « zoomThumb » est coché.
-        if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); if (p.zoomPos) st.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) st.classList.add("zoomed"); }
+        if (slug === FIC) scopeCrop(st, p); // fiction : cadrage cinémascope (vignette et extrait réglés à part dans l'admin)
+        else if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); if (p.zoomPos) st.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) st.classList.add("zoomed"); }
         if (p.img) {
           var url = thumb(p.img, mode === "gallery" ? GW : FW), im = new Image();
           im.onload = im.onerror = (function (st, url) { return function () { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st, url);

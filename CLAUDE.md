@@ -190,7 +190,13 @@ Lecteur : avec affiche (`#player.has-poster`), affiche à gauche du film à la m
 affiche, comme ailleurs ; téléphone : affiche en petit (92px) à gauche des crédits (`.pposter-s`). Première version calquée sur
 l'ancien site Squarespace (Gus 27/10) ; idées à essayer ensuite : affiches en vignettes, petite affiche au survol.
 **ESSAI (28/10)** : vignettes de la fiction en cinémascope 2,39:1 (`body.fic .still`, `.card`, `.shade i`, fin de main.css) ;
-pour revenir au 16:9, supprimer ces lignes (marquées « ESSAI »).
+pour revenir au 16:9, supprimer ces lignes (marquées « ESSAI »). Cadrage réglé dans l'admin, **séparément** pour la vignette
+(`overrides[<id>].thumbCrop`) et l'extrait (`snipCrop`) = `{ z, x, y }` (z ≥ 1 agrandissement, x / y 0–100 position, absent =
+centre) ; `scopeCrop` (app.js) : vignette = background-size z × 100 % + background-position x % y % ; extrait = vidéo 16:9 de
+largeur z × 100 %, décalée (`--cw`, `--cx`, `--cy`). Le `zoom` / `zoomPos` ordinaire n'est pas utilisé sur la fiction (le cadre
+2,39 enlève déjà les bandes noires des bandes-annonces en scope).
+Spotlight et fiction (`body.spot`, ordinateur, grille) : titre toujours affiché sur la vignette ; au survol il remonte et les
+crédits apparaissent (Gus 28/10).
 
 ### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
 `{ team: [{ role, name, email, phone }], address: [lignes], newsletter, newsletterLabel, social: { instagram, vimeo, imdb, facebook }, legal }`.

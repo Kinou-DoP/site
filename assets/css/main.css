@@ -505,6 +505,16 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
   .pposter-s { display: block; float: left; width: 92px; aspect-ratio: 2 / 3; margin: 2px 14px 6px 0; object-fit: cover; }
 }
 /* ESSAI (28/10, demande de Gus) : vignettes de la page fiction au format cinémascope (2,39:1) au lieu de 16:9.
-   Pour revenir au 16:9 : supprimer les 3 lignes suivantes. */
+   Pour revenir au 16:9 : supprimer les 4 règles suivantes (jusqu'à `body.fic .still video.snip`). */
 body.fic .still { aspect-ratio: 2.39 / 1; }
+/* Extrait dans le cadre cinémascope : vidéo 16:9 agrandie et placée selon snipCrop (--cw, --cx, --cy posés par scopeCrop). */
+body.fic .still video.snip { inset: auto; left: var(--cx, 0); top: var(--cy, -17.2%); width: var(--cw, 100%); height: auto; aspect-ratio: 16 / 9; object-fit: cover; transform: none; }
 body.fic .feed.gallery .card, body.fic .feed.gallery .shade i { aspect-ratio: 2.39 / 1; }
+/* Spotlight et fiction (body.spot) : titre toujours affiché sur la vignette ; au survol, il remonte pour laisser la place
+   aux crédits (réalisateur, production, DoP). Écran tactile : tout est affiché. */
+body.spot .feed.gallery .meta { opacity: 1; padding-top: 30px; }
+body.spot .feed.gallery .meta h3 { margin-bottom: 0; transition: margin .4s ease; }
+body.spot .feed.gallery .meta > p { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .45s ease, opacity .3s ease; }
+body.spot .feed.gallery .card:hover .meta h3 { margin-bottom: 4px; }
+body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
+@media (hover: none) { body.spot .feed.gallery .meta > p { max-height: none; opacity: 1; } }
