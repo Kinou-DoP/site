@@ -876,8 +876,9 @@
         }
         var meta = document.createElement("div"); meta.className = "meta";
         var h = document.createElement("h3"); h.textContent = p.title;
-        var s = document.createElement("p"); s.textContent = p.sub || p.cat;
-        meta.appendChild(h); meta.appendChild(s);
+        // Sans crédits : la catégorie à la place, sauf dans FEATURED où elle est déjà affichée à part (.ccat).
+        var s = document.createElement("p"); s.textContent = p.sub || (cat === "FEATURED" ? "" : p.cat);
+        meta.appendChild(h); if (s.textContent) meta.appendChild(s);
         if (p.dps && p.dps.length && slug === SPOT) meta.appendChild(dpLine(p, "cdop"));
         if (p.cat && cat === "FEATURED") { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
