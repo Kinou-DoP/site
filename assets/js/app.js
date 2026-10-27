@@ -321,7 +321,7 @@
       document.body.classList.toggle("fic", o.slug === FIC);
       document.body.classList.toggle("cpage", o.slug === CONTACT); // page contact (pas d'onglets)
       var r = o.rect;
-      hero.textContent = ""; hero.classList.remove("ready");
+      hero.textContent = ""; hero.classList.remove("ready"); hero.style.left = hero.style.right = hero.style.width = ""; // place figée par closeView
       var n = document.createElement("span"); n.className = "n"; n.textContent = parts.main; hero.appendChild(n);
       if (parts.tags) { var tg = document.createElement("div"); tg.className = "tags"; tg.textContent = parts.tags; hero.appendChild(tg); }
       document.body.classList.toggle("hero-tags", !!parts.tags); // place pour « AFC… » sous le nom (téléphone)
@@ -346,6 +346,8 @@
       if (o.from === "list" && roul.active()) o.a = roul.center(o.slug);
       var rect = o.from === "home" ? homeNameRect() : o.a ? nameRect(o.a, view.main) : null;
       if (!rect || !rect.width) instant = true; // spotlight ouvert par l'adresse, ou lien caché (menu du téléphone)
+      // Le titre garde sa place pendant qu'il s'efface (spotlight, fiction, contact : à gauche ; sinon il sautait à droite).
+      var hr = hero.getBoundingClientRect(); hero.style.left = hr.left + "px"; hero.style.width = hr.width + "px"; hero.style.right = "auto";
       view = null; document.body.classList.remove("spot", "fic", "cpage"); document.title = "kinou"; cats.style.transitionDelay = "";
       var f = hero.querySelector(".n").getBoundingClientRect();
       hero.classList.remove("ready");

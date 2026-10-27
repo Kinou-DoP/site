@@ -187,7 +187,7 @@ vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement da
 (posée sur la carte, pas sur la vignette qui s'agrandit au survol). Téléphone : date seulement sur le film sélectionné (`.card.focus`, Gus 28/10).
 Téléphone, genres de PAST RELEASES : 2e ligne sous les onglets (`#subcats`, boutons relais remplis par `subRow`, les vrais genres
 de `.cats` cachés), qui descendent un à un en sortant du flou (`subIn`) ; la bande s'abaisse (`body.subs-on` → `--kinou-zm`). Ordinateur : genres qui arrivent de côté, comme sortant de PAST RELEASES (`subSide`).
-Arrivée des onglets en cascade (`subIn`, Gus 28/10) : sur téléphone toutes les pages, sur ordinateur spotlight et fiction seulement
+Arrivée des onglets en cascade (`subIn`, Gus 28/10) : partout, téléphone et ordinateur (chefs op, spotlight, fiction)
 (`--i` rang posé par `buildTabs`, `--td` délai d'apparition posé par `tabsIn`). Date sur téléphone : petit fondu (0,6 s). COMING SOON : films dans l'ordre inverse de la bande (prochaine sortie en premier). Chefs op crédités :
 « DoP Nom » cliquable comme au spotlight (`MULTI` = pages de plusieurs chefs op). Pas d'extraits en boucle (comportement normal).
 Lecteur : avec affiche (`#player.has-poster`), affiche à gauche du film à la même hauteur (6fr / 16fr), stills dessous ; sans
@@ -208,7 +208,7 @@ Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « conta
 ordinateur ; `body.cpage`, pas d'onglets, `--kinou-zm` plus court). `showContact` / `renderContact` dans app.js, dans `.work`
 (`contact-mode` : films, onglets et About cachés ; films de la page d'avant vidés). Présentation « générique de fin » : rôle à
 droite d'un axe central (petites capitales grises, écrit sur chaque ligne, même identique à celui du dessus : Gus 27/10), prénom en grand à gauche,
-e-mail (`mailto:`) et téléphone (`tel:`) dessous ; lignes qui montent l'une après l'autre (`rise`) ; noms toujours en blanc
+e-mail (`mailto:`) et téléphone (`tel:`) dessous ; lignes qui montent l'une après l'autre en sortant d'un léger flou (`riseBlur`) ; noms toujours en blanc
 (pas d'estompage au survol : Gus 27/10). Puis adresse (lien vers Google Maps), « [ Subscribe to the newsletter ] »
 (texte `newsletterLabel` ; crochets qui s'écartent au survol), réseaux remplis, « Mentions légales » tout en bas en tout petit (9px ;
 texte déplié sur place, si `legal` ; paragraphes séparés par une ligne vide, une ligne seule courte sans « : », point ni chiffre = titre).

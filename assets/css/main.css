@@ -50,6 +50,7 @@ body.viewing.has-work .work, body.viewing.has-work .cats { opacity: 1; pointer-e
 .feed { display: grid; grid-template-columns: 1fr; gap: 64px; max-width: 1400px; }
 .card { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 70ms + var(--d, 0ms)); }
 @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes riseBlur { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } } /* lignes du contact : montée + flou (Gus 28/10) */
 .still { aspect-ratio: 16 / 9; background: var(--img, none), radial-gradient(circle at 30% 35%, hsl(var(--h), 70%, 38%), transparent 55%), radial-gradient(circle at 75% 70%, hsl(calc(var(--h) + 50), 65%, 30%), transparent 50%), linear-gradient(135deg, hsl(var(--h), 45%, 14%), #050505); background-size: cover; background-position: center; filter: brightness(.85); transition: filter .35s ease; }
 .card:hover .still { filter: brightness(1.1); }
 .card h3 { margin: 12px 0 3px; font-family: var(--kinou-sans); font-weight: 600; font-size: 16px; letter-spacing: -0.01em; line-height: 1.2; }
@@ -442,13 +443,13 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .work.contact-mode .contact { display: block; }
 .contact { max-width: 1000px; margin: 0 auto; padding: 5vh 0 4vh; font-family: var(--kinou-sans); color: var(--kinou-fg); }
 .crew { display: grid; gap: 38px; }
-.crow { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; align-items: baseline; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
+.crow { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; align-items: baseline; animation: riseBlur .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
 .crole { text-align: right; font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.5); }
 .cwho { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 .cname { margin-bottom: 8px; font-weight: 600; font-size: clamp(28px, 2.8vw, 40px); letter-spacing: -0.035em; line-height: 1; }
 .cwho a { padding: 0; font-weight: 400; font-size: 15px; letter-spacing: .01em; color: rgba(255,252,235,.68); font-variant-numeric: tabular-nums; text-shadow: none; transition: color .2s; }
 .cwho a:hover { color: var(--kinou-fg); }
-.cend { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 15vh; text-align: center; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
+.cend { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 15vh; text-align: center; animation: riseBlur .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
 .caddr { padding: 0; font-weight: 600; font-size: 13px; letter-spacing: .14em; line-height: 2; text-transform: uppercase; text-shadow: none; transition: opacity .2s; }
 .caddr:hover { opacity: .6; }
 .cnews { margin-top: 18px; padding: 0; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; text-shadow: none; }
@@ -504,17 +505,16 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 }
 @keyframes subIn { from { opacity: 0; transform: translateY(-12px); filter: blur(6px); } }
 @keyframes subSide { from { opacity: 0; transform: translateX(-18px); filter: blur(6px); } }
-/* Arrivée des onglets en cascade (Gus 28/10) : sur téléphone partout, sur ordinateur au spotlight et à la fiction seulement ;
+/* Arrivée des onglets en cascade (Gus 28/10) : partout (téléphone et ordinateur, chefs op, spotlight, fiction) ;
    --i = rang (app.js), --td = délai d'apparition des onglets (tabsIn). Copies du défilement (aria-hidden) : pas d'animation.
    Ordinateur, genres de PAST RELEASES : arrivent de côté, comme s'ils sortaient de PAST RELEASES (--j = rang du genre). */
+.cats button:not([aria-hidden]) { animation: subIn .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 70ms); }
 @media (max-width: 700px) {
-  .cats button:not([aria-hidden]) { animation: subIn .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 70ms); }
   .subcats button { animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 80ms + 60ms); }
   .cdate { transform: translateY(-3px); transition: opacity .6s ease, transform .6s ease; } /* date : mini fondu sur le film sélectionné */
   .card.focus .cdate { transform: none; }
 }
 @media (min-width: 701px) {
-  body.spot .cats button { animation: subIn .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 70ms); }
   body.fic .cats.past .sub { animation: subSide .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--j, 0) * 80ms + 60ms); }
 }
 /* Lecteur, film avec affiche : affiche (2:3) puis film (16:9), même hauteur. */
