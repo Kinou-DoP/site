@@ -280,6 +280,10 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
 ## À faire (noté par Gus)
+- **Clés GitHub de l'admin à modifier** (Gus, pas encore fait au 28/10) : sur github.com → Settings → Developer settings →
+  Fine-grained tokens, ajouter le dépôt **Kinou-DoP/site** (Contents : Read and write) à la clé de chaque personne qui publie.
+  Sans ça, `sharePage` (admin) ne peut pas écrire `<slug>/index.html` : les liens partagés d'un chef op n'affichent pas sa
+  photo / son nom à jour (la fiche est publiée quand même). Le workflow `share-pages.yml` (push sur `beta`) les refait aussi.
 - **Extrait qui se mélange à la vignette au survol** (mis de côté, Gus 28/10) : l'extrait apparaît encore un instant par-dessus
   l'image fixe (ex. fiction, COMING SOON, Ghost Soldier : vignette sombre, extrait clair, cadrages différents). Déjà essayé :
   fondu raccourci 0,5 s → 0,2 s, extrait affiché à sa première image peinte (`requestVideoFrameCallback` dans `snip`) : pas suffisant.
