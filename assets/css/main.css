@@ -503,6 +503,20 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
   .subcats button.on { opacity: 1; }
 }
 @keyframes subIn { from { opacity: 0; transform: translateY(-12px); filter: blur(6px); } }
+@keyframes subSide { from { opacity: 0; transform: translateX(-18px); filter: blur(6px); } }
+/* Arrivée des onglets en cascade (Gus 28/10) : sur téléphone partout, sur ordinateur au spotlight et à la fiction seulement ;
+   --i = rang (app.js), --td = délai d'apparition des onglets (tabsIn). Copies du défilement (aria-hidden) : pas d'animation.
+   Ordinateur, genres de PAST RELEASES : arrivent de côté, comme s'ils sortaient de PAST RELEASES (--j = rang du genre). */
+@media (max-width: 700px) {
+  .cats button:not([aria-hidden]) { animation: subIn .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 70ms); }
+  .subcats button { animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 80ms + 60ms); }
+  .cdate { transform: translateY(-3px); transition: opacity .6s ease, transform .6s ease; } /* date : mini fondu sur le film sélectionné */
+  .card.focus .cdate { transform: none; }
+}
+@media (min-width: 701px) {
+  body.spot .cats button { animation: subIn .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 70ms); }
+  body.fic .cats.past .sub { animation: subSide .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--j, 0) * 80ms + 60ms); }
+}
 /* Lecteur, film avec affiche : affiche (2:3) puis film (16:9), même hauteur. */
 #player.has-poster .pin { --pw: min(100%, 1800px, calc((100vh - 220px) * 22.5 / 9)); }
 #player.has-poster.has-stills .pin { --pw: min(100%, 1800px, calc((100vh - 290px) * 22.5 / 9)); }

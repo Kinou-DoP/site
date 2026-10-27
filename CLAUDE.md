@@ -186,7 +186,9 @@ quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film abs
 vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement dans NEW RELEASES et COMING SOON
 (posée sur la carte, pas sur la vignette qui s'agrandit au survol). Téléphone : date seulement sur le film sélectionné (`.card.focus`, Gus 28/10).
 Téléphone, genres de PAST RELEASES : 2e ligne sous les onglets (`#subcats`, boutons relais remplis par `subRow`, les vrais genres
-de `.cats` cachés), qui descendent un à un en sortant du flou (`subIn`) ; la bande s'abaisse (`body.subs-on` → `--kinou-zm`). COMING SOON : films dans l'ordre inverse de la bande (prochaine sortie en premier). Chefs op crédités :
+de `.cats` cachés), qui descendent un à un en sortant du flou (`subIn`) ; la bande s'abaisse (`body.subs-on` → `--kinou-zm`). Ordinateur : genres qui arrivent de côté, comme sortant de PAST RELEASES (`subSide`).
+Arrivée des onglets en cascade (`subIn`, Gus 28/10) : sur téléphone toutes les pages, sur ordinateur spotlight et fiction seulement
+(`--i` rang posé par `buildTabs`, `--td` délai d'apparition posé par `tabsIn`). Date sur téléphone : petit fondu (0,6 s). COMING SOON : films dans l'ordre inverse de la bande (prochaine sortie en premier). Chefs op crédités :
 « DoP Nom » cliquable comme au spotlight (`MULTI` = pages de plusieurs chefs op). Pas d'extraits en boucle (comportement normal).
 Lecteur : avec affiche (`#player.has-poster`), affiche à gauche du film à la même hauteur (6fr / 16fr), stills dessous ; sans
 affiche, comme ailleurs ; téléphone : affiche en petit (92px) à gauche des crédits (`.pposter-s`). Première version calquée sur

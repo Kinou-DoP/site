@@ -1081,6 +1081,7 @@
         b.textContent = catLabel(slug, c); b.dataset.cat = c; if (c === curCat) b.className = "on";
         if (slug === FIC && FIC_GENRES.indexOf(c) > -1) b.classList.add("sub"); // genres : visibles seulement dans PAST RELEASES
         if (copy) b.setAttribute("aria-hidden", "true");
+        else { b.style.setProperty("--i", cats.children.length); if (b.classList.contains("sub")) b.style.setProperty("--j", FIC_GENRES.indexOf(c)); } // rang dans l'arrivée en cascade (CSS)
         b.addEventListener("click", function () {
           cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === c); });
           work.classList.remove("about-mode"); document.body.classList.remove("about-on");
@@ -1091,7 +1092,7 @@
       function aboutButton(copy) {
       var ab = document.createElement("button");
       ab.textContent = "ABOUT"; ab.className = "sep"; ab.dataset.cat = "ABOUT";
-      if (copy) ab.setAttribute("aria-hidden", "true");
+      if (copy) ab.setAttribute("aria-hidden", "true"); else ab.style.setProperty("--i", cats.children.length);
       ab.addEventListener("click", function () {
         tabUrl(slug, "ABOUT");
         cats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === "ABOUT"); });
@@ -1167,6 +1168,14 @@
         modes.appendChild(b);
       });
     }
+    // Arrivée en cascade des onglets (animation CSS subIn) : elle commence quand les onglets apparaissent (--td, même délai que
+    // .cats), puis --td est remis à 0 pour que les genres de PAST RELEASES ouverts ensuite arrivent tout de suite.
+    var tabsT = 0;
+    function tabsIn() {
+      var d = view ? Math.max(0, view.t0 + ANIM - Date.now()) : 0;
+      document.body.style.setProperty("--td", d + "ms");
+      clearTimeout(tabsT); tabsT = setTimeout(function () { document.body.style.setProperty("--td", "0ms"); }, d + 1500);
+    }
     function showWork(slug, film) {
       if (!WORK[slug]) {
         document.body.classList.remove("has-work");
@@ -1176,6 +1185,7 @@
       }
       // Onglets : juste après la fin de l'arrivée du nom (animation de ANIM ms), même si les films sont déjà prêts.
       if (view) cats.style.transitionDelay = Math.max(0, view.t0 + ANIM - Date.now()) + "ms";
+      tabsIn();
       document.body.classList.add("has-work");
       setTimeout(function () { warmAll(slug); }, 1200); // apres FEATURED : les autres categories
       work.classList.remove("about-mode", "contact-mode"); document.body.classList.remove("about-on"); work.scrollTop = 0; mode = wantMode(); buildTabs(slug);
