@@ -489,7 +489,20 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .cdate { position: absolute; z-index: 3; top: 12px; left: 12px; padding: 5px 8px 4px; background: var(--kinou-fg); color: #000; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: 0; transition: opacity .3s; pointer-events: none; }
 .card { position: relative; }
 .card:hover .cdate, .card.focus .cdate { opacity: 1; }
-@media (hover: none) { .cdate { opacity: 1; } }
+@media (hover: none) and (min-width: 701px) { .cdate { opacity: 1; } } /* téléphone : seulement sur le film sélectionné (.card.focus, Gus 28/10) */
+/* Téléphone, fiction : genres de PAST RELEASES sur une 2e ligne sous les onglets (#subcats, subRow dans app.js), qui descendent
+   un à un en sortant du flou ; la bande (--kinou-zm) s'abaisse en douceur pour leur faire de la place. */
+.subcats { display: none; }
+@media (max-width: 700px) {
+  body.fic .cats .sub, body.fic .cats.past .sub { display: none; }
+  body.fic.subs-on { --kinou-zm: calc(var(--kinou-tabs-top) + 56px); }
+  body.fic.viewing.has-work .work { transition: opacity .5s .6s, top .5s cubic-bezier(.2, .7, .2, 1); }
+  body.fic.subs-on.viewing.has-work .subcats { display: flex; position: fixed; z-index: 2; top: calc(var(--kinou-tabs-top) + 27px); left: 24px; right: 24px; gap: 18px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  .subcats::-webkit-scrollbar { display: none; }
+  .subcats button { flex: 0 0 auto; padding: 0; border: 0; background: none; color: var(--kinou-fg); font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .14em; opacity: .4; cursor: pointer; transition: opacity .2s; animation: subIn .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i, 0) * 80ms + 60ms); }
+  .subcats button.on { opacity: 1; }
+}
+@keyframes subIn { from { opacity: 0; transform: translateY(-12px); filter: blur(6px); } }
 /* Lecteur, film avec affiche : affiche (2:3) puis film (16:9), même hauteur. */
 #player.has-poster .pin { --pw: min(100%, 1800px, calc((100vh - 220px) * 22.5 / 9)); }
 #player.has-poster.has-stills .pin { --pw: min(100%, 1800px, calc((100vh - 290px) * 22.5 / 9)); }

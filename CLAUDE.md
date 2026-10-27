@@ -184,7 +184,9 @@ les onglets se règlent **à la main** dans l'admin, film par film (`overrides[<
 COMING SOON, PAST RELEASES (tous les films sortis) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
 quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. Date de sortie : carré blanc « 16 Oct » (mois en anglais) sur la
 vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement dans NEW RELEASES et COMING SOON
-(posée sur la carte, pas sur la vignette qui s'agrandit au survol). COMING SOON : films dans l'ordre inverse de la bande (prochaine sortie en premier). Chefs op crédités :
+(posée sur la carte, pas sur la vignette qui s'agrandit au survol). Téléphone : date seulement sur le film sélectionné (`.card.focus`, Gus 28/10).
+Téléphone, genres de PAST RELEASES : 2e ligne sous les onglets (`#subcats`, boutons relais remplis par `subRow`, les vrais genres
+de `.cats` cachés), qui descendent un à un en sortant du flou (`subIn`) ; la bande s'abaisse (`body.subs-on` → `--kinou-zm`). COMING SOON : films dans l'ordre inverse de la bande (prochaine sortie en premier). Chefs op crédités :
 « DoP Nom » cliquable comme au spotlight (`MULTI` = pages de plusieurs chefs op). Pas d'extraits en boucle (comportement normal).
 Lecteur : avec affiche (`#player.has-poster`), affiche à gauche du film à la même hauteur (6fr / 16fr), stills dessous ; sans
 affiche, comme ailleurs ; téléphone : affiche en petit (92px) à gauche des crédits (`.pposter-s`). Première version calquée sur
@@ -276,6 +278,10 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
 ## À faire (noté par Gus)
+- **Extrait qui se mélange à la vignette au survol** (mis de côté, Gus 28/10) : l'extrait apparaît encore un instant par-dessus
+  l'image fixe (ex. fiction, COMING SOON, Ghost Soldier : vignette sombre, extrait clair, cadrages différents). Déjà essayé :
+  fondu raccourci 0,5 s → 0,2 s, extrait affiché à sa première image peinte (`requestVideoFrameCallback` dans `snip`) : pas suffisant.
+  Pistes : couper l'image fixe au même moment (fond `.still` retiré quand `.snip.on`), ou image de départ de l'extrait = vignette.
 - **Téléphone en paysage et tablette** : mise en page dédiée à prévoir (aujourd'hui : roulette en portrait seulement,
   sinon la mise en page ordinateur ou téléphone selon la largeur).
 - Vignettes animées (extrait en boucle à la place de l'image) : essayé le 22/10/2026, Gus préfère les vignettes fixes

@@ -922,6 +922,20 @@
       var c = feed.querySelector(".card"); if (!c) return;
       autoCard = c; showProj(c._p); snip(c.querySelector(".still"), c._p, true);
     }
+    // Téléphone, fiction : les genres de PAST RELEASES sur une 2e ligne, sous les onglets (qui défilent). Boutons relais :
+    // un clic = clic sur le vrai genre de .cats (caché sur téléphone) ; apparition animée (CSS, body.subs-on).
+    var subcats = document.getElementById("subcats");
+    function subRow(slug, cat) {
+      if (slug !== FIC || PAST.indexOf(cat) < 0) { subcats.textContent = ""; document.body.classList.remove("subs-on"); return; }
+      if (!subcats.children.length) FIC_GENRES.forEach(function (g) {
+        if (!cats.querySelector('button.sub[data-cat="' + g + '"]')) return; // genre sans film : pas d'onglet
+        var b = document.createElement("button"); b.textContent = g; b.dataset.cat = g; b.style.setProperty("--i", subcats.children.length);
+        b.addEventListener("click", function () { var o = cats.querySelector('button.sub[data-cat="' + g + '"]:not([aria-hidden])'); if (o) o.click(); });
+        subcats.appendChild(b);
+      });
+      subcats.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cat === cat); });
+      document.body.classList.add("subs-on");
+    }
     function dropAuto(keep) {
       if (!autoCard) return;
       if (autoCard !== keep) { snip(autoCard.querySelector(".still"), autoCard._p, false); }
@@ -929,7 +943,7 @@
     }
     function render(slug, cat, delay) {
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
-      cats.classList.toggle("past", slug === FIC && PAST.indexOf(cat) > -1);
+      cats.classList.toggle("past", slug === FIC && PAST.indexOf(cat) > -1); subRow(slug, cat);
       if (liveSeen) { liveSeen.disconnect(); feed.querySelectorAll("video.live").forEach(function (v) { v.pause(); v.removeAttribute("src"); v.load(); }); }
       autoCard = null; var run = ++renderRun; setTimeout(function () { autoFirst(run); }, (delay || 0) + 450);
       requestAnimationFrame(function () { pickFocus(true); }); // tailles (perspective) dès l'affichage des films
