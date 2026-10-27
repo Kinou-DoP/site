@@ -433,7 +433,7 @@ body.spot .modes, body.cpage .modes { display: none; }
 .meta .cdop a:hover, #player .pdop a:hover { opacity: .7; }
 
 /* Contact (body.cpage, data/contact.json) : un générique de fin. Rôle à droite d'un axe central, nom à gauche, e-mail et
-   téléphone dessous ; un même rôle n'est pas répété. Lignes qui montent l'une après l'autre à l'arrivée.
+   téléphone dessous. Lignes qui montent l'une après l'autre à l'arrivée.
    Fond : le film de l'accueil en cours (ou un au hasard), flouté. Pas d'onglets : la page commence sous le titre. */
 body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px); }
 .contact { display: none; }
@@ -444,7 +444,6 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .crew { display: grid; gap: 38px; }
 .crow { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; align-items: baseline; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.9s + var(--i) * 90ms); }
 .crole { text-align: right; font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.5); }
-.crole.same { visibility: hidden; }
 .cwho { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 .cname { margin-bottom: 8px; font-weight: 600; font-size: clamp(28px, 2.8vw, 40px); letter-spacing: -0.035em; line-height: 1; }
 .cwho a { padding: 0; font-weight: 400; font-size: 15px; letter-spacing: .01em; color: rgba(255,252,235,.68); font-variant-numeric: tabular-nums; text-shadow: none; transition: color .2s; }
@@ -474,7 +473,6 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
   .crew { gap: 34px; }
   .crow { grid-template-columns: 1fr; row-gap: 8px; justify-items: center; text-align: center; }
   .crole { text-align: center; }
-  .crole.same { display: none; }
   .cwho { align-items: center; }
   .cname { margin-bottom: 6px; font-size: 28px; }
   .cwho a { padding: 3px 0; font-size: 15px; }

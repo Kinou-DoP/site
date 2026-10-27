@@ -1106,8 +1106,8 @@
     var TEMPLATES = { "default": showWork };
     function openWork(slug, film) { if (slug === CONTACT) return showContact(); (TEMPLATES[TEMPLATE[slug]] || TEMPLATES["default"])(slug, film); }
     // ---------- Contact (data/contact.json, page « contact » de l'admin) ----------
-    // Présenté comme un générique de fin : rôle à gauche, nom à droite, de part et d'autre d'un axe ; même rôle que la ligne
-    // précédente = rôle non répété. Fond : le film de l'accueil en cours (ou un au hasard), flouté.
+    // Présenté comme un générique de fin : rôle à gauche, nom à droite, de part et d'autre d'un axe ; rôle écrit sur
+    // chaque ligne (même s'il est identique à celui du dessus : Gus 27/10). Fond : le film de l'accueil en cours (ou un au hasard), flouté.
     var contactData = null, cbox = null;
     function cel(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
     function showContact() {
@@ -1123,12 +1123,12 @@
       work.classList.add("contact-mode"); work.scrollTop = 0;
       if (!cbox) { cbox = cel("div", "contact"); work.appendChild(cbox); }
       cbox.textContent = "";
-      var crew = cel("div", "crew"), prev = null, k = 0;
+      var crew = cel("div", "crew"), k = 0;
       (c.team || []).forEach(function (t) {
         if (!t || !(t.name || t.email)) return;
         var row = cel("div", "crow"), role = String(t.role || "").trim();
         row.style.setProperty("--i", k++);
-        row.appendChild(cel("span", "crole" + (role && role === prev ? " same" : ""), role)); prev = role;
+        row.appendChild(cel("span", "crole", role));
         var who = cel("div", "cwho");
         who.appendChild(cel("span", "cname", t.name));
         if (t.email) { var m = cel("a", "", t.email); m.href = "mailto:" + t.email; who.appendChild(m); }

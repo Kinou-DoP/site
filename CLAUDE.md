@@ -181,7 +181,7 @@ colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur t
 Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « contact » de l'en-tête devient le titre, à gauche sur
 ordinateur ; `body.cpage`, pas d'onglets, `--kinou-zm` plus court). `showContact` / `renderContact` dans app.js, dans `.work`
 (`contact-mode` : films, onglets et About cachés ; films de la page d'avant vidés). Présentation « générique de fin » : rôle à
-droite d'un axe central (petites capitales grises, pas répété s'il est identique à la ligne du dessus), prénom en grand à gauche,
+droite d'un axe central (petites capitales grises, écrit sur chaque ligne, même identique à celui du dessus : Gus 27/10), prénom en grand à gauche,
 e-mail (`mailto:`) et téléphone (`tel:`) dessous ; lignes qui montent l'une après l'autre (`rise`) ; noms toujours en blanc
 (pas d'estompage au survol : Gus 27/10). Puis adresse (lien vers Google Maps), « [ Subscribe to the newsletter ] »
 (texte `newsletterLabel` ; crochets qui s'écartent au survol), réseaux remplis, « Mentions légales » tout en bas en tout petit (9px ;
