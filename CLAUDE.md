@@ -225,7 +225,7 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 4. **Grille clips** : galerie 3 colonnes 16:9 à toutes les tailles (gap 6px, 4px mobile) ; mode feed en 1 colonne.
 5. **Overlay** : plein écran, fermeture sur Escape, croix ou clic hors zone ; lecteur sur fond « verre dépoli »
    (page floutée 36px, voile noir 62 %), image agrandie sur fond noir 98 %.
-6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms — les onglets apparaissent juste
+6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms (flou pendant le déplacement, net à l'arrivée : `heroBlur`, aller et retour, Gus 28/10) — les onglets apparaissent juste
    après, `view.t0` + `ANIM` → `transitionDelay` de `.cats`, etc.) + le voile
    lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight », « fiction », « press » (à venir), « contact »,

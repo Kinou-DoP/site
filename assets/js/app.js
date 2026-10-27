@@ -302,6 +302,11 @@
     function startTransform(r, f) {
       return "translate(" + (r.left - f.left) + "px," + (r.top - f.top) + "px) scale(" + (r.width / f.width) + ")";
     }
+    // Pendant son déplacement, le nom se floute d'un coup puis redevient net en arrivant (Gus 28/10, comme l'arrivée des onglets).
+    function heroBlur() {
+      if (!hero.animate || reduceMotion) return;
+      hero.animate([{ filter: "blur(0)" }, { filter: "blur(.16em)", offset: .08 }, { filter: "blur(.1em)", offset: .5 }, { filter: "blur(.03em)", offset: .85 }, { filter: "blur(0)" }], { duration: ANIM });
+    }
     function homeNameRect(a) { return (a ? a.querySelector(".n") : document.querySelector("#home .name .n")).getBoundingClientRect(); }
     // o = { text, slug, rect (position de depart du nom), from: "home" | "list", a (lien de la liste), film (projet de l'accueil) }
     function openView(o) {
@@ -328,7 +333,7 @@
       document.body.classList.remove("closing");
       document.body.classList.add("viewing");
       hero.style.transition = o.instant ? "none" : "transform " + ANIM + "ms " + EASE + ", opacity .25s";
-      hero.style.transform = "none"; hero.style.opacity = 1;
+      hero.style.transform = "none"; hero.style.opacity = 1; if (!o.instant) heroBlur();
       if (o.replaceHistory) { try { history.replaceState({ k: "dp", slug: o.slug }, "", pageURL(o.slug)); } catch (e) {} }
       else if (!o.noHistory) pushPage({ k: "dp", slug: o.slug });
       hero.classList.add("ready");
@@ -354,7 +359,7 @@
       if (instant) { hero.style.transition = "opacity .2s"; hero.style.opacity = 0; done(); return; }
       document.body.classList.add("closing");
       hero.style.transition = "transform " + ANIM + "ms " + EASE + ", opacity .3s .7s";
-      hero.style.transform = startTransform(rect, f);
+      hero.style.transform = startTransform(rect, f); heroBlur();
       hero.style.opacity = 0;
       setTimeout(done, ANIM + 100);
     }
