@@ -461,11 +461,13 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .csocial { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 28px; margin-top: 34px; }
 .csocial a { padding: 0; font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; text-shadow: none; transition: opacity .2s; }
 .csocial a:hover { opacity: .55; }
-.clegalbtn { margin-top: 10vh; padding: 0; border: 0; background: none; font-family: var(--kinou-sans); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.4); cursor: pointer; transition: color .2s; }
+.clegalbtn { margin-top: 12vh; padding: 0; border: 0; background: none; font-family: var(--kinou-sans); font-weight: 500; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.32); cursor: pointer; transition: color .2s; }
 .clegalbtn:hover { color: var(--kinou-fg); }
 .clegal { display: none; max-width: 620px; text-align: left; font-size: 13px; line-height: 1.65; color: rgba(255,252,235,.65); }
 .clegal.on { display: block; }
 .clegal p { margin: 0 0 1em; white-space: pre-line; }
+.clegal h4 { margin: 1.8em 0 .6em; font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--kinou-fg); }
+.clegal h4:first-child { margin-top: 0; }
 @media (max-width: 700px) {
   .work.contact-mode { padding-left: 24px; padding-right: 24px; }
   .contact { padding-top: 3vh; }

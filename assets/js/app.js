@@ -1144,7 +1144,7 @@
         addr.forEach(function (l, i) { if (i) ad.appendChild(document.createElement("br")); ad.appendChild(document.createTextNode(l)); });
         end.appendChild(ad);
       }
-      if (c.newsletter) { var nl = cel("a", "cnews", "Subscribe to the newsletter"); nl.href = c.newsletter; nl.target = "_blank"; nl.rel = "noopener"; end.appendChild(nl); }
+      if (c.newsletter) { var nl = cel("a", "cnews", c.newsletterLabel || "Subscribe to the newsletter"); nl.href = c.newsletter; nl.target = "_blank"; nl.rel = "noopener"; end.appendChild(nl); }
       var so = c.social || {}, links = cel("nav", "csocial");
       [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"], ["facebook", "Facebook"]].forEach(function (x) {
         if (!so[x[0]]) return; var a = cel("a", "", x[1]); a.href = so[x[0]]; a.target = "_blank"; a.rel = "noopener"; links.appendChild(a);
@@ -1152,7 +1152,11 @@
       if (links.children.length) end.appendChild(links);
       if (c.legal && String(c.legal).trim()) {
         var lb = cel("button", "clegalbtn", "Mentions légales"), lt = cel("div", "clegal");
-        String(c.legal).trim().split(/\n\s*\n/).forEach(function (para) { lt.appendChild(cel("p", "", para.trim())); });
+        // Une ligne seule, courte, sans « : » ni point final ni chiffre (« Éditeur », « Cookies »…) = titre de rubrique.
+        String(c.legal).trim().split(/\n\s*\n/).forEach(function (para) {
+          para = para.trim(); var title = para.length <= 40 && !/[\n:.\d@]/.test(para);
+          lt.appendChild(cel(title ? "h4" : "p", "", para));
+        });
         lb.addEventListener("click", function () { var on = !lt.classList.contains("on"); lt.classList.toggle("on", on); if (on) setTimeout(function () { lt.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, 50); });
         end.appendChild(lb); end.appendChild(lt);
       }

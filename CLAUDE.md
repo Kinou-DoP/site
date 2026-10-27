@@ -53,7 +53,10 @@ Contournements en place (à retirer ou simplifier au retour sur Netlify) :
    (`slate.mjs`, même lecture des 64 premiers Ko que `ratiosOf` dans `admin/tools/fill-home.mjs`) → `ratios` sur le clip,
    et faire préférer `stills` + `ratios` du bundle (toujours à jour) aux `images` du robot. Sans `ratios`, le site mesure
    les photos lui-même avant de les placer (≤ 4 s, toutes les photos de l'onglet chargées d'un coup) : ça marche, en plus lent.
-6. Puis seulement, après validation de Gus : fusion `beta` → `main` (production kinou.fr, ≈ 15 crédits par mise en ligne).
+6. **Mentions légales** (admin → contact → « Mentions légales », `legal` de `data/contact.json`) : vérifier qu'elles sont à jour,
+   surtout la rubrique « Hébergement » (aujourd'hui GitHub, Inc. / GitHub Pages) → mettre Netlify, Inc. si le site y est servi
+   (et kinou.fr), et la rubrique « Cookies » si on ajoute une mesure d'audience.
+7. Puis seulement, après validation de Gus : fusion `beta` → `main` (production kinou.fr, ≈ 15 crédits par mise en ligne).
 
 ## Architecture des données
 
@@ -174,14 +177,15 @@ Ouverture : lien « spotlight » de l'en-tête et du menu du téléphone (`openS
 colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur téléphone.
 
 ### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
-`{ team: [{ role, name, email, phone }], address: [lignes], newsletter, social: { instagram, vimeo, imdb, facebook }, legal }`.
+`{ team: [{ role, name, email, phone }], address: [lignes], newsletter, newsletterLabel, social: { instagram, vimeo, imdb, facebook }, legal }`.
 Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « contact » de l'en-tête devient le titre, à gauche sur
 ordinateur ; `body.cpage`, pas d'onglets, `--kinou-zm` plus court). `showContact` / `renderContact` dans app.js, dans `.work`
 (`contact-mode` : films, onglets et About cachés ; films de la page d'avant vidés). Présentation « générique de fin » : rôle à
 droite d'un axe central (petites capitales grises, pas répété s'il est identique à la ligne du dessus), prénom en grand à gauche,
 e-mail (`mailto:`) et téléphone (`tel:`) dessous ; lignes qui montent l'une après l'autre (`rise`) ; noms toujours en blanc
 (pas d'estompage au survol : Gus 27/10). Puis adresse (lien vers Google Maps), « [ Subscribe to the newsletter ] »
-(crochets qui s'écartent au survol), réseaux remplis, « Mentions légales » (texte déplié sur place, si `legal`).
+(texte `newsletterLabel` ; crochets qui s'écartent au survol), réseaux remplis, « Mentions légales » tout en bas en tout petit (9px ;
+texte déplié sur place, si `legal` ; paragraphes séparés par une ligne vide, une ligne seule courte sans « : », point ni chiffre = titre).
 Fond flouté (`showProj`, comme une page de chef op) : depuis l'accueil, le film en cours, là où il en était (`HomeAPI.current`,
 passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une colonne centrée.
 
