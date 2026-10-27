@@ -877,7 +877,8 @@
       if (!v) {
         // Extrait Slate en entier et en boucle (il est monté pour boucler ; ne pas le couper).
         v = document.createElement("video"); v.className = "snip"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
-        v.addEventListener("playing", function () { v.classList.add("on"); });
+        // Affichée seulement quand sa première image est vraiment peinte (sinon l'image fixe et l'extrait se mélangent un instant).
+        v.addEventListener("playing", function () { if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(function () { v.classList.add("on"); }); else v.classList.add("on"); });
         v.src = vsrc; st.appendChild(v);
       }
       var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
