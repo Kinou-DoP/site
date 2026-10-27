@@ -911,6 +911,7 @@
       clearProj();
       feed.textContent = "";
       var shown = WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
+      if (slug === FIC && cat === "COMING SOON") shown.reverse(); // fiction : ordre inverse de la bande (prochaine sortie en premier)
       var isPhotos = cat !== "FEATURED" && shown.length && shown.every(function (p) { return !p.full && (p.nosnip || !p.video) && photosOf(p).length; });
       work.classList.toggle("photos-on", !!isPhotos); document.body.classList.toggle("photos-on", !!isPhotos); // pas de choix grille / colonne pour les photos
       if (isPhotos) { renderPhotos(shown); return; }
@@ -931,7 +932,7 @@
         meta.appendChild(h); if (s.textContent) meta.appendChild(s);
         if (p.dps && p.dps.length && MULTI[slug]) meta.appendChild(dpLine(p, "cdop"));
         // Fiction : date de sortie (carré blanc au survol), seulement dans NEW RELEASES et COMING SOON.
-        if (slug === FIC && (cat === "FEATURED" || cat === "COMING SOON") && ficDate(p.date)) { var dt = document.createElement("span"); dt.className = "cdate"; dt.textContent = ficDate(p.date); st.appendChild(dt); }
+        if (slug === FIC && (cat === "FEATURED" || cat === "COMING SOON") && ficDate(p.date)) { var dt = document.createElement("span"); dt.className = "cdate"; dt.textContent = ficDate(p.date); d.appendChild(dt); } // sur la carte, pas la vignette (agrandie au survol)
         if (p.cat && cat === "FEATURED" && slug !== FIC) { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
         liveThumb(st, p);

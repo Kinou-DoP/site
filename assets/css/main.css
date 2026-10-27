@@ -487,6 +487,7 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .cats.past .sub.on { opacity: 1; }
 .cats.past button[data-cat="PAST RELEASES"] { opacity: 1; }
 .cdate { position: absolute; z-index: 3; top: 12px; left: 12px; padding: 5px 8px 4px; background: var(--kinou-fg); color: #000; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.card { position: relative; }
 .card:hover .cdate, .card.focus .cdate { opacity: 1; }
 @media (hover: none) { .cdate { opacity: 1; } }
 /* Lecteur, film avec affiche : affiche (2:3) puis film (16:9), même hauteur. */
