@@ -889,10 +889,23 @@
         // se voit autour de l'extrait (les deux ne s'arrondissent pas au même pixel).
         var shown = function () { v.classList.add("on"); clearTimeout(st._vt); st._vt = setTimeout(function () { if (v.classList.contains("on")) st.classList.add("vidon"); }, 250); };
         v.addEventListener("playing", function () { if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(shown); else shown(); });
+        // Vidéo arrêtée ou vidée (onglet du navigateur en arrière-plan, mémoire libérée…) : l'image fixe revient tout de suite,
+        // sinon la vignette restait noire au retour sur la page.
+        ["pause", "emptied", "waiting", "error"].forEach(function (ev) { v.addEventListener(ev, function () { clearTimeout(st._vt); st.classList.remove("vidon"); }); });
         v.src = vsrc; st.appendChild(v);
       }
       var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
     }
+    // Page cachée (autre onglet, ordinateur en veille) : images fixes remises sous les extraits ; au retour, retirées de nouveau
+    // une fois l'extrait réellement affiché.
+    document.addEventListener("visibilitychange", function () {
+      document.querySelectorAll(".still.vidon").forEach(function (st) { st.classList.remove("vidon"); });
+      if (document.hidden) return;
+      document.querySelectorAll("video.snip.on").forEach(function (v) {
+        if (v.paused || !v.requestVideoFrameCallback) return;
+        var st = v.parentNode; v.requestVideoFrameCallback(function () { if (v.classList.contains("on") && !document.hidden) st.classList.add("vidon"); });
+      });
+    });
     function pauseSnips() { document.querySelectorAll("video.snip").forEach(function (v) { v.pause(); }); }
     var touchOnly = window.matchMedia("(hover: none)"), focusCard = null, focusRaf = 0;
     function pickFocus(sizesOnly) {
