@@ -212,7 +212,7 @@ crédits apparaissent (Gus 28/10).
 ### Présentation « vidéo + stills » d'un onglet (`showcase`, Gus 29/10, d'après l'ancien kinou.fr/vadim-narrative)
 Interrupteur dans l'admin, sur l'onglet ouvert d'une fiche → `showcase: ["NARRATIVE", …]` dans la fiche (`SHOW[slug]` dans app.js).
 `renderShow` : par projet, grille de 4 colonnes — vidéo en grand (2 × 2, `.sc-big.still`, extrait au survol, triangle de lecture),
-titre + crédits à côté (`.sc-info`), 2 stills dessous, puis 4 stills ; un projet sur deux en miroir (`.flip`) ; type de contenu Slate
+titre + crédits à côté (`.sc-info`), 2 stills dessous, puis 4 stills ; vidéo à droite et texte à gauche pour tous les projets (l'alternance gauche / droite n'a pas plu, Gus 30/10) ; type de contenu Slate
 au-dessus (`.sc-type`, `typesOf`) ; trait fin dégradé entre les projets (`.sc-hr`) ; arrivée `riseBlur`. Téléphone : titre, 2 stills,
 la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, puis toutes les galeries `extras`) : les 6 premiers ;
 projet sans vidéo : 1re image en grand + les 6 suivantes ; sans stills (`.bare`) : vidéo + titre seuls. Clic vidéo = lecteur

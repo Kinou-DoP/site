@@ -558,14 +558,11 @@ body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
 @media (hover: none) { body.spot .feed.gallery .meta > p { max-height: none; opacity: 1; } }
 
 /* Présentation « vidéo + stills » d'un onglet (interrupteur de l'admin, `showcase`, renderShow dans app.js, Gus 29/10) :
-   ordinateur = grille de 4 colonnes : vidéo en grand (2 × 2), titre et crédits à côté, 2 stills dessous, puis 4 stills ; un projet
-   sur deux en miroir ; type de contenu au-dessus. Téléphone : titre, 2 stills, la vidéo, 4 stills, type en dessous. */
+   ordinateur = grille de 4 colonnes : titre et crédits à gauche, 2 stills dessous, vidéo en grand (2 × 2) à droite, puis 4 stills ; type de contenu au-dessus. Téléphone : titre, 2 stills, la vidéo, 4 stills, type en dessous. */
 .feed.showcase { display: block; max-width: none; } /* toute la largeur, quel que soit l'écran (Gus 29/10) */
 .sc { animation: riseBlur .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 90ms + var(--d, 0ms)); }
 .sc-type { margin: 0 0 12px; min-height: 13px; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.6); }
-.sc.flip .sc-type { text-align: right; }
-.sc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; grid-template-areas: "v v t t" "v v a b" "c d e f"; }
-.sc.flip .sc-grid { grid-template-areas: "t t v v" "a b v v" "c d e f"; }
+.sc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; grid-template-areas: "t t v v" "a b v v" "c d e f"; } /* vidéo à droite partout */
 .sc-big { grid-area: v; position: relative; cursor: pointer; }
 .feed .sc-big.still { aspect-ratio: auto; height: 100%; }
 .sc-img, .sc-s { padding: 0; border: 0; background: #070707 center / cover no-repeat; cursor: zoom-in; transition: filter .35s ease; }
@@ -577,7 +574,7 @@ body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
 .sc-info p { margin: 0; white-space: pre-line; font-weight: 600; font-size: 11px; line-height: 1.8; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.55); }
 .sc-play { position: absolute; z-index: 2; left: 50%; top: 50%; width: 0; height: 0; margin: -14px 0 0 -9px; border-style: solid; border-width: 14px 0 14px 24px; border-color: transparent transparent transparent rgba(255,252,235,.9); pointer-events: none; transition: opacity .3s; }
 .sc-big:hover .sc-play { opacity: 0; }
-.sc.bare .sc-grid { grid-template-areas: "v v t t"; } .sc.bare.flip .sc-grid { grid-template-areas: "t t v v"; }
+.sc.bare .sc-grid { grid-template-areas: "t t v v"; }
 .sc.bare .sc-info { aspect-ratio: auto; } .feed .sc.bare .sc-big.still { aspect-ratio: 16 / 9; height: auto; }
 .sc-hr { width: 38%; height: 1px; margin: 10vh auto; background: linear-gradient(90deg, transparent, rgba(255,252,235,.28), transparent); }
 #player .pstage img.pbig { cursor: zoom-in; height: auto; max-height: 78vh; }
@@ -585,11 +582,11 @@ body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
 #player .pstage:has(img.pbig) { aspect-ratio: auto; background: none !important; }
 @media (max-width: 700px) {
   .sc { display: flex; flex-direction: column; }
-  .sc-type, .sc.flip .sc-type { order: 2; margin: 14px 0 0; text-align: left; }
-  .sc-grid, .sc.flip .sc-grid { grid-template-columns: 1fr 1fr; gap: 6px; grid-template-areas: "t t" "a b" "v v" "c d" "e f"; }
+  .sc-type { order: 2; margin: 14px 0 0; text-align: left; }
+  .sc-grid { grid-template-columns: 1fr 1fr; gap: 6px; grid-template-areas: "t t" "a b" "v v" "c d" "e f"; }
   .feed .sc-big.still, .sc-img { aspect-ratio: 16 / 9; height: auto; }
   .sc-info { aspect-ratio: auto; padding: 0 8px 14px; }
-  .sc.bare .sc-grid, .sc.bare.flip .sc-grid { grid-template-areas: "t t" "v v"; }
+  .sc.bare .sc-grid { grid-template-areas: "t t" "v v"; }
   .sc-info h3 { font-size: 26px; }
   .sc-hr { width: 60%; margin: 7vh auto; }
 }
