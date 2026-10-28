@@ -209,6 +209,16 @@ spotlight et de la fiction en `will-change: transform` (sinon elles « descenden
 Spotlight et fiction (`body.spot`, ordinateur, grille) : titre toujours affiché sur la vignette ; au survol il remonte et les
 crédits apparaissent (Gus 28/10).
 
+### Présentation « vidéo + stills » d'un onglet (`showcase`, Gus 29/10, d'après l'ancien kinou.fr/vadim-narrative)
+Interrupteur dans l'admin, sur l'onglet ouvert d'une fiche → `showcase: ["NARRATIVE", …]` dans la fiche (`SHOW[slug]` dans app.js).
+`renderShow` : par projet, grille de 4 colonnes — vidéo en grand (2 × 2, `.sc-big.still`, extrait au survol, triangle de lecture),
+titre + crédits à côté (`.sc-info`), 2 stills dessous, puis 4 stills ; un projet sur deux en miroir (`.flip`) ; type de contenu Slate
+au-dessus (`.sc-type`, `typesOf`) ; trait fin dégradé entre les projets (`.sc-hr`) ; arrivée `riseBlur`. Téléphone : titre, 2 stills,
+la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, puis toutes les galeries `extras`) : les 6 premiers ;
+projet sans vidéo : 1re image en grand + les 6 suivantes ; sans stills (`.bare`) : vidéo + titre seuls. Clic vidéo = lecteur
+(flèches : films de l'onglet) ; clic image = `openShowStill` : lecteur avec l'image en grand (`img.pbig`, clic = plein écran,
+flèches = toute la galerie), toute la galerie dessous, sans la vidéo. Pas de choix grille / colonne sur ces onglets.
+
 ### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
 `{ team: [{ role, name, email, phone }], address: [lignes], newsletter, newsletterLabel, social: { instagram, vimeo, imdb, facebook }, legal }`.
 Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « contact » de l'en-tête devient le titre, à gauche sur
@@ -290,11 +300,6 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 ## À faire (noté par Gus)
 - **Vignettes du spotlight / de la fiction qui sautent de quelques pixels** (à la fin du zoom de survol, page zoomée) : `will-change`
   déjà essayé (28/10), pas suffisant d'après Gus (29/10) ; à reprendre plus tard.
-- **Variante des pages Narrative** (idée de Gus 29/10, ancien site kinou.fr/vadim-narrative) : par projet, vidéo en grand (extrait au survol),
-  titre + crédits + type (Short Film, Series…) à côté, 6 stills autour ; téléphone : 2 stills, la vidéo, 4 stills ; séparateur entre
-  projets ; clic vidéo = lecteur + toute la galerie ; clic still = image en grand + galerie entière ; projet en stills seulement : 1re
-  image en grand + les 6 suivantes. Admin : bouton « créer un onglet fiction » sur la fiche, projets ajoutés un par un (vidéo Slate
-  + lien de stills). En discussion, pas commencé.
 - **Clés GitHub de l'admin à modifier** (Gus, pas encore fait au 28/10) : sur github.com → Settings → Developer settings →
   Fine-grained tokens, ajouter le dépôt **Kinou-DoP/site** (Contents : Read and write) à la clé de chaque personne qui publie.
   Sans ça, `sharePage` (admin) ne peut pas écrire `<slug>/index.html` : les liens partagés d'un chef op n'affichent pas sa

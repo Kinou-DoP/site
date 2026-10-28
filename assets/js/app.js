@@ -368,7 +368,7 @@
     // Feed selectif par technicien : fiches data/dps/<slug>.json, chargees a la demande.
     // f: true = fait partie des projets FEATURED (fo = rang) ; img: chemin d'une image de couverture (optionnel).
     var CATS = ["FEATURED", "BEAUTY", "TEXTURES", "FOOD", "COMEDY", "LIFESTYLE", "AUTOMOTIVE"];
-    var WORK = {}, CATS_BY = {}, TEMPLATE = {}, loading = {};
+    var WORK = {}, CATS_BY = {}, TEMPLATE = {}, SHOW = {}, loading = {};
     function loadDP(slug) {
       if (!loading[slug]) loading[slug] = (slug === SPOT ? getJSON("spotlight.json").then(spotToDP) : slug === FIC ? getJSON("fiction.json").then(ficToDP) : getJSON("dps/" + slug + ".json"))
         .then(function (d) { register(d); if (!MULTI[slug]) live(d); return d; }, function () { return null; });
@@ -548,6 +548,7 @@
       ["img", "cv"].forEach(function (k) { if (a[k] && !/^(https?:|data:|\/)/.test(a[k])) a[k] = DATA_BASE + "dps/" + a[k]; });
       ABOUT[d.slug] = a;
       TEMPLATE[d.slug] = d.template || "default";
+      SHOW[d.slug] = d.showcase || []; // onglets en présentation « vidéo + stills » (interrupteur de l'admin)
       return d;
     }
     var work = document.getElementById("work"), feed = document.getElementById("feed"), cats = document.getElementById("cats"), modes = document.getElementById("modes");
@@ -690,6 +691,8 @@
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
       } else if (p.img) {
         var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
+        // Image d'une présentation « vidéo + stills » : clic = en plein écran (flèches : toute la galerie).
+        if (p._big !== undefined) { im.className = "pbig"; im.addEventListener("click", function () { showStill(p._big); }); }
       }
       ptitle.textContent = p.title;
       // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page (spotlight : dernière ligne, « DoP Nom »).
@@ -735,7 +738,7 @@
       stillsP = { title: p.title, stills: all };
       player.classList.toggle("has-stills", blocks.length > 0);
       // Projet sans film qui commence par des stills : pas de grande image, la galerie directement sous le titre.
-      player.classList.toggle("nostage", !src && !!(blocks[0] && blocks[0].stills));
+      player.classList.toggle("nostage", !src && p._big === undefined && !!(blocks[0] && blocks[0].stills));
       blocks.forEach(function (x) {
         if (x.stills && x.stills.length) {
           var g = document.createElement("div"); g.className = "pgrid"; pgal.appendChild(g);
@@ -967,11 +970,11 @@
       if (autoCard !== keep) { snip(autoCard.querySelector(".still"), autoCard._p, false); }
       autoCard = null;
     }
-    function narrTypes(p) {
-      if (!/narrative/i.test(p.cat || "") || !p.types) return [];
+    function typesOf(p) {
       var seen = { narrative: 1, stills: 1, fiction: 1, trailer: 1, "bande annonce": 1, "bande-annonce": 1 }; // jamais affichés (Gus 29/10)
-      return p.types.filter(function (t) { var k = String(t).trim().toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true; });
+      return (p.types || []).filter(function (t) { var k = String(t).trim().toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true; });
     }
+    function narrTypes(p) { return /narrative/i.test(p.cat || "") ? typesOf(p) : []; }
     function render(slug, cat, delay) {
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
       cats.classList.toggle("past", slug === FIC && PAST.indexOf(cat) > -1); subRow(slug, cat);
@@ -984,8 +987,10 @@
       feed.textContent = "";
       var shown = WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
       if (slug === FIC && cat === "COMING SOON") shown.reverse(); // fiction : ordre inverse de la bande (prochaine sortie en premier)
-      var isPhotos = cat !== "FEATURED" && shown.length && shown.every(function (p) { return !p.full && (p.nosnip || !p.video) && photosOf(p).length; });
-      work.classList.toggle("photos-on", !!isPhotos); document.body.classList.toggle("photos-on", !!isPhotos); // pas de choix grille / colonne pour les photos
+      var isShow = !MULTI[slug] && shown.length && (SHOW[slug] || []).indexOf(cat) > -1;
+      var isPhotos = !isShow && cat !== "FEATURED" && shown.length && shown.every(function (p) { return !p.full && (p.nosnip || !p.video) && photosOf(p).length; });
+      work.classList.toggle("photos-on", !!(isPhotos || isShow)); document.body.classList.toggle("photos-on", !!(isPhotos || isShow)); // pas de choix grille / colonne
+      if (isShow) { renderShow(shown); return; }
       if (isPhotos) { renderPhotos(shown); return; }
       shown.forEach(function (p, i) {
         var d = document.createElement("div"); d.className = "card"; d.style.setProperty("--i", i);
@@ -1031,6 +1036,60 @@
     // images ajoutées par le robot de l'admin) → les photos en colonnes, chacune avec son ratio d'origine (jamais
     // recadrées), qui montent en fondu ; clic = photo en grand (flèches : toutes les photos de la catégorie).
     function photosOf(p) { return p.images && p.images.length ? p.images : p.stills || []; }
+    // Présentation « vidéo + stills » d'un onglet (interrupteur de l'admin → `showcase` de la fiche, Gus 29/10) : par projet, la
+    // vidéo en grand (extrait au survol), titre et crédits à côté, 6 stills autour ; projet sans vidéo : sa 1re image en grand et
+    // les 6 suivantes. Projets alternés gauche / droite, séparés par un trait fin ; type de contenu Slate au-dessus.
+    // Clic sur la vidéo = lecteur (et toute la galerie dessous) ; clic sur une image = l'image en grand dans le lecteur, avec toute
+    // la galerie dessous (sans la vidéo).
+    function galleryOf(p) {
+      var all = photosOf(p).slice();
+      (p.extras || []).forEach(function (x) { (x.stills || []).forEach(function (u) { if (all.indexOf(u) < 0) all.push(u); }); });
+      return all;
+    }
+    function hasFilm(p) { return !!(p.full || (p.video && !p.nosnip)); }
+    function openShowStill(p, i) {
+      var all = galleryOf(p);
+      var q = Object.assign({}, p, { full: "", video: "", nosnip: true, img: all[i], stills: all, images: null, extras: null, poster: null, _big: i });
+      openPlayer(q, false, [q]);
+    }
+    function renderShow(list) {
+      feed.className = "feed showcase";
+      var films = list.filter(hasFilm);
+      list.forEach(function (p, i) {
+        var all = galleryOf(p), film = hasFilm(p), small = (film ? all : all.slice(1)).slice(0, 6);
+        if (i) { var hr = document.createElement("div"); hr.className = "sc-hr"; feed.appendChild(hr); }
+        var w = document.createElement("div"); w.className = "sc" + (i % 2 ? " flip" : "") + (small.length ? "" : " bare"); w.style.setProperty("--i", i); // bare : pas de stills
+        var ty = document.createElement("p"); ty.className = "sc-type"; ty.textContent = typesOf(p).join(" · "); w.appendChild(ty);
+        var g = document.createElement("div"); g.className = "sc-grid"; w.appendChild(g);
+        var big;
+        if (film || !all.length) {
+          big = document.createElement("div"); big.className = "still sc-big"; big.style.setProperty("--h", p.h);
+          if (p.zoom > 1) { big.style.setProperty("--z", p.zoom); if (p.zoomPos) big.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) big.classList.add("zoomed"); }
+          if (p.img) big.style.setProperty("--img", 'url("' + thumb(p.img, FW) + '")');
+          big.addEventListener("mouseenter", function () { showProj(p); snip(big, p, true); });
+          big.addEventListener("mouseleave", function () { snip(big, p, false); document.body.classList.remove("proj-on"); });
+          big.addEventListener("click", function () { openPlayer(p, false, films.length ? films : [p]); });
+          liveThumb(big, p);
+          if (film) { var pl = document.createElement("i"); pl.className = "sc-play"; big.appendChild(pl); }
+        } else {
+          big = document.createElement("button"); big.className = "sc-big sc-img"; big.setAttribute("aria-label", p.title);
+          big.style.backgroundImage = 'url("' + thumb(all[0], FW) + '")';
+          big.addEventListener("click", function () { openShowStill(p, 0); });
+        }
+        g.appendChild(big);
+        var info = document.createElement("div"); info.className = "sc-info";
+        var h = document.createElement("h3"); h.textContent = p.title; info.appendChild(h);
+        if (p.sub) { var sb = document.createElement("p"); sb.textContent = p.sub; info.appendChild(sb); }
+        g.appendChild(info);
+        small.forEach(function (u, k) {
+          var b = document.createElement("button"); b.className = "sc-s s" + k; b.setAttribute("aria-label", p.title + " — image " + (k + 1));
+          b.style.backgroundImage = 'url("' + thumb(u, GW) + '")';
+          b.addEventListener("click", function () { openShowStill(p, all.indexOf(u)); });
+          g.appendChild(b);
+        });
+        feed.appendChild(w);
+      });
+    }
     function renderPhotos(list) {
       feed.className = "feed photos";
       // Colonnes remplies en JS, dans l'ordre (chaque photo dans la colonne la moins haute), chaque case ayant déjà la
