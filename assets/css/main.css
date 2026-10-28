@@ -572,11 +572,8 @@ body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
 .sc-info { grid-area: t; aspect-ratio: 32 / 9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 12px 24px; text-align: center; font-family: var(--kinou-sans); }
 .sc-info h3 { margin: 0; font-weight: 600; font-size: clamp(22px, 2.4vw, 36px); letter-spacing: -0.02em; line-height: 1.1; }
 .sc-info p { margin: 0; white-space: pre-line; font-weight: 600; font-size: 11px; line-height: 1.8; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.55); }
-.sc-play { position: absolute; z-index: 2; left: 50%; top: 50%; width: 0; height: 0; margin: -14px 0 0 -9px; border-style: solid; border-width: 14px 0 14px 24px; border-color: transparent transparent transparent rgba(255,252,235,.9); pointer-events: none; transition: opacity .3s; }
-.sc-big:hover .sc-play, .sc-big:has(video.snip.on) .sc-play { opacity: 0; } /* triangle caché dès que l'extrait joue (téléphone : extrait en boucle) */
-.sc.bare .sc-grid { grid-template-areas: "v v t t"; }
 .sc.bare .sc-info { aspect-ratio: auto; } .feed .sc.bare .sc-big.still { aspect-ratio: 16 / 9; height: auto; }
-.sc-big video.snip.slow { transition: opacity 1.4s ease; } /* téléphone : extrait en long fondu, 1,5 s après l'arrivée */
+.sc-big video.snip.slow { transition: opacity 1.4s ease; } /* extrait en long fondu, 1,5 s après l'arrivée à l'écran */
 .sc-hr { width: 38%; height: 1px; margin: 10vh auto; background: linear-gradient(90deg, transparent, rgba(255,252,235,.28), transparent); }
 #player .pstage img.pbig { cursor: zoom-in; height: auto; max-height: 78vh; }
 /* Image cliquée (présentation vidéo + stills) : le cadre prend la forme de l'image (cinémascope, portrait…), sans bandes noires */

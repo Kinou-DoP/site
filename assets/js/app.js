@@ -1065,8 +1065,8 @@
       var q = Object.assign({}, p, { full: "", video: "", nosnip: true, img: all[i], stills: all, images: null, extras: vids, poster: null, _big: i });
       openPlayer(q, false, [q]);
     }
-    // Téléphone : l'extrait de la grande vidéo démarre 1,5 s après son arrivée à l'écran, en long fondu (on voit d'abord la
-    // vignette, souvent la plus belle image ; Gus 30/10). Il s'arrête (vignette de retour) quand la vidéo quitte l'écran.
+    // Téléphone et ordinateur : l'extrait de la grande vidéo démarre 1,5 s après son arrivée à l'écran, en long fondu (on voit
+    // d'abord la vignette, souvent la plus belle image ; Gus 30/10). Il s'arrête (vignette de retour) quand la vidéo quitte l'écran.
     var slowSeen = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         var st = e.target, v = st.querySelector("video.slow"); if (!v) return;
@@ -1076,7 +1076,7 @@
       });
     }, { root: work, threshold: 0.6 }) : null;
     function slowThumb(st, p) {
-      if (!slowSeen || !liveOn() || !p.video || reduceMotion) return;
+      if (!slowSeen || !p.video || reduceMotion) return;
       var v = document.createElement("video");
       v.className = "snip live slow"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "none"; v.dataset.src = p.video;
       v.addEventListener("playing", function () { v.classList.add("on"); });
@@ -1111,11 +1111,10 @@
           big = document.createElement("div"); big.className = "still sc-big"; big.style.setProperty("--h", p.h);
           if (p.zoom > 1) { big.style.setProperty("--z", p.zoom); if (p.zoomPos) big.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) big.classList.add("zoomed"); }
           if (p.img) big.style.setProperty("--img", 'url("' + thumb(p.img, FW) + '")');
-          big.addEventListener("mouseenter", function () { showProj(p); snip(big, p, true); });
-          big.addEventListener("mouseleave", function () { snip(big, p, false); document.body.classList.remove("proj-on"); });
+          big.addEventListener("mouseenter", function () { showProj(p); }); // l'extrait démarre seul (slowThumb), pas au survol
+          big.addEventListener("mouseleave", function () { document.body.classList.remove("proj-on"); });
           big.addEventListener("click", function () { openPlayer(p, false, films.length ? films : [p]); });
           slowThumb(big, p);
-          if (film) { var pl = document.createElement("i"); pl.className = "sc-play"; big.appendChild(pl); }
         } else {
           big = document.createElement("button"); big.className = "sc-big sc-img"; big.setAttribute("aria-label", p.title);
           big.style.backgroundImage = 'url("' + thumb(all[0], FW) + '")';

@@ -211,7 +211,7 @@ crédits apparaissent (Gus 28/10).
 
 ### Présentation « vidéo + stills » d'un onglet (`showcase`, Gus 29/10, d'après l'ancien kinou.fr/vadim-narrative)
 Interrupteur dans l'admin, sur l'onglet ouvert d'une fiche → `showcase: ["NARRATIVE", …]` dans la fiche (`SHOW[slug]` dans app.js).
-`renderShow` : par projet, grille de 4 colonnes — vidéo en grand (2 × 2, `.sc-big.still`, extrait au survol, triangle de lecture),
+`renderShow` : par projet, grille de 4 colonnes — vidéo en grand (2 × 2, `.sc-big.still`, sans triangle de lecture),
 titre + crédits à côté (`.sc-info`), 2 stills dessous, puis 4 stills ; vidéo à gauche et texte à droite pour tous les projets (l'alternance gauche / droite n'a pas plu ; essayé à droite puis remis à gauche, Gus 30/10) ; type de contenu Slate
 au-dessus (`.sc-type`, `typesOf`) ; trait fin dégradé entre les projets (`.sc-hr`) ; arrivée `riseBlur`. Téléphone : titre, 2 stills,
 la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, puis toutes les galeries `extras`) : les 6 premiers ;
@@ -220,8 +220,8 @@ projet sans vidéo : 1re image en grand + les 6 suivantes ; sans stills (`.bare`
 flèches = toute la galerie), toute la galerie dessous, puis le film du projet et les autres vidéos ajoutées sous le film (ordre de l'admin).
 Clic vidéo : lecteur habituel (stills et vidéos ajoutés sous le film, dans l'ordre de l'admin). Ordinateur : boutons grille / colonne
 visibles ; « feed » = cette présentation (par défaut sur ces onglets, `showTab`), « grille » = grille habituelle (adresse `/grid`) ; sans choix
-(bouton ou adresse), feed sur ces onglets et grille ailleurs. Triangle de lecture caché dès que l'extrait joue (téléphone).
-Téléphone : extrait de la grande vidéo lancé 1,5 s après son arrivée à l'écran (≥ 60 % visible), en fondu de 1,4 s (`slowThumb`,
+(bouton ou adresse), feed sur ces onglets et grille ailleurs. 
+Téléphone et ordinateur (Gus 30/10) : extrait de la grande vidéo lancé 1,5 s après son arrivée à l'écran (≥ 60 % visible), en fondu de 1,4 s (`slowThumb`,
 `.snip.slow`), arrêté quand elle sort ; projet au repère (45 % de la hauteur, `scFocus` appelé par `pickFocus`) = « sélectionné » :
 sa vignette (ou 1re image) en fond flouté (Gus 30/10).
 Toute la largeur de l'écran (pas de largeur maximale) ; survol d'une image = cette image en fond flouté (`showProj`).
