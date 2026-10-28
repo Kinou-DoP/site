@@ -682,7 +682,7 @@
         var ps = pp.cloneNode(); ps.className = "pposter-s"; pcap.appendChild(ps);
       }
       var src = p.full || (p.nosnip ? "" : p.video); // film complet (avec son) ; l'extrait seulement hors accueil
-      pstage.style.backgroundImage = src ? "none" : bgFor(p); // vidéo : fond noir (pas la vignette autour du film)
+      pstage.style.backgroundImage = src || p._big !== undefined ? "none" : bgFor(p); // vidéo, ou image cliquée (présentation vidéo + stills) : fond noir (sinon l'image apparaît en double autour)
       if (src) {
         var v = document.createElement("video");
         v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = "auto";
