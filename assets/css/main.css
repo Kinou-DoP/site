@@ -547,6 +547,9 @@ body.spot .feed.gallery .meta { opacity: 1; padding: 30px 19px 19px; left: -3px;
 /* Vignette toujours sur son propre calque : sinon, à la fin du zoom de survol, le navigateur la recale au pixel près et elle
    « descend » d'un ou deux pixels (visible avec la page zoomée, Gus 28/10). */
 body.spot .feed.gallery .still { will-change: transform; }
+/* Bord sombre collé à chaque vignette (fond noir + liseré de 3px, presque jusqu'à la voisine) : page zoomée, le bord de la vignette
+   ne laisse plus voir le fond clair de la page (fine ligne claire, Gus 29/10). */
+body.spot .feed.gallery .card { background: #000; box-shadow: 0 0 0 3px rgba(0,0,0,.85); }
 body.spot .feed.gallery .meta h3 { margin-bottom: 0; transition: margin .4s ease; }
 body.spot .feed.gallery .meta > p { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .45s ease, opacity .3s ease; }
 body.spot .feed.gallery .card:hover .meta h3 { margin-bottom: 4px; }

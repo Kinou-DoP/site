@@ -202,7 +202,8 @@ largeur z × 100 %, décalée (`--cw`, `--cx`, `--cy`). Le `zoom` / `zoomPos` or
 2,39 enlève déjà les bandes noires des bandes-annonces en scope).
 Extrait affiché (toutes les pages) : l'image fixe dessous est retirée 0,25 s après (`.still.vidon`, `snip`) : sinon liseré clair
 autour de l'extrait quand la page est zoomée. Remise dès que la vidéo s'arrête ou se vide, et quand la page est cachée
-(`visibilitychange`) : sinon vignettes noires au retour sur un onglet resté ouvert. Dégradé des titres (spotlight, fiction) qui déborde de 3px.
+(`visibilitychange`) : sinon vignettes noires au retour sur un onglet resté ouvert. Dégradé des titres (spotlight, fiction) qui déborde de 3px. Cartes du spotlight et de la fiction : fond noir + liseré
+sombre de 3px autour (`box-shadow`), contre la fine ligne claire au zoom.
 Extrait de la fiction : 1px de plus de chaque côté (sinon bord de l'image fixe visible derrière, page zoomée). Vignettes du
 spotlight et de la fiction en `will-change: transform` (sinon elles « descendent » d'un pixel à la fin du zoom de survol).
 Spotlight et fiction (`body.spot`, ordinateur, grille) : titre toujours affiché sur la vignette ; au survol il remonte et les
