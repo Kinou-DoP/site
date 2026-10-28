@@ -1051,7 +1051,10 @@
     function hasFilm(p) { return !!(p.full || (p.video && !p.nosnip)); }
     function openShowStill(p, i) {
       var all = galleryOf(p);
-      var q = Object.assign({}, p, { full: "", video: "", nosnip: true, img: all[i], stills: all, images: null, extras: null, poster: null, _big: i });
+      // Sous la galerie : le film du projet, puis les autres vidéos ajoutées sous le film dans l'admin (dans leur ordre).
+      var vids = (hasFilm(p) ? [{ full: p.full, video: p.nosnip ? "" : p.video, img: p.img }] : [])
+        .concat((p.extras || []).filter(function (x) { return !x.stills && (x.full || x.video); }));
+      var q = Object.assign({}, p, { full: "", video: "", nosnip: true, img: all[i], stills: all, images: null, extras: vids, poster: null, _big: i });
       openPlayer(q, false, [q]);
     }
     function renderShow(list) {

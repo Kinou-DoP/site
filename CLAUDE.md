@@ -217,7 +217,8 @@ au-dessus (`.sc-type`, `typesOf`) ; trait fin dégradé entre les projets (`.sc-
 la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, puis toutes les galeries `extras`) : les 6 premiers ;
 projet sans vidéo : 1re image en grand + les 6 suivantes ; sans stills (`.bare`) : vidéo + titre seuls. Clic vidéo = lecteur
 (flèches : films de l'onglet) ; clic image = `openShowStill` : lecteur avec l'image en grand (`img.pbig`, clic = plein écran,
-flèches = toute la galerie), toute la galerie dessous, sans la vidéo. Pas de choix grille / colonne sur ces onglets.
+flèches = toute la galerie), toute la galerie dessous, puis le film du projet et les autres vidéos ajoutées sous le film (ordre de l'admin).
+Clic vidéo : lecteur habituel (stills et vidéos ajoutés sous le film, dans l'ordre de l'admin). Pas de choix grille / colonne sur ces onglets.
 Toute la largeur de l'écran (pas de largeur maximale) ; survol d'une image = cette image en fond flouté (`showProj`).
 Types : les mots « Trailer » / « Bande-annonce » sont retirés aussi à l'intérieur d'un type (« Short Film Trailer » → « Short Film »), puis dédoublonnés.
 
