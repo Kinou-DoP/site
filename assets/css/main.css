@@ -488,10 +488,12 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .cats.past .sub:hover { opacity: .8; }
 .cats.past .sub.on { opacity: 1; }
 .cats.past button[data-cat="PAST RELEASES"] { opacity: 1; }
-.cdate { position: absolute; z-index: 3; top: 12px; left: 12px; padding: 5px 8px 4px; background: var(--kinou-fg); color: #000; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.cdate { position: absolute; z-index: 3; top: 12px; right: 12px; padding: 5px 8px 4px; background: var(--kinou-fg); color: #000; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: 0; transition: opacity .3s; pointer-events: none; }
 .card { position: relative; }
-.card:hover .cdate, .card.focus .cdate { opacity: 1; }
-@media (hover: none) and (min-width: 701px) { .cdate { opacity: 1; } } /* téléphone : seulement sur le film sélectionné (.card.focus, Gus 28/10) */
+/* Genre + plateformes (fiction) en haut à gauche, date en haut à droite : au survol, et sur téléphone au film sélectionné. */
+.ctag { position: absolute; z-index: 3; top: 15px; left: 14px; max-width: calc(100% - 110px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--kinou-fg); font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,0,0,.7); opacity: 0; transition: opacity .3s; pointer-events: none; }
+.card:hover .cdate, .card.focus .cdate, .card:hover .ctag, .card.focus .ctag { opacity: 1; }
+@media (hover: none) and (min-width: 701px) { .cdate, .ctag { opacity: 1; } } /* téléphone : seulement sur le film sélectionné (.card.focus, Gus 28/10) */
 /* Téléphone, fiction : genres de PAST RELEASES sur une 2e ligne sous les onglets (#subcats, subRow dans app.js), qui descendent
    un à un en sortant du flou ; la bande (--kinou-zm) s'abaisse en douceur pour leur faire de la place. */
 .subcats { display: none; }
@@ -512,8 +514,8 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 .cats button:not([aria-hidden]) { animation: subIn .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 70ms); }
 @media (max-width: 700px) {
   .subcats button { animation-delay: calc(var(--td, 0ms) + var(--i, 0) * 80ms + 60ms); }
-  .cdate { transform: translateY(-3px); transition: opacity .6s ease, transform .6s ease; } /* date : mini fondu sur le film sélectionné */
-  .card.focus .cdate { transform: none; }
+  .cdate, .ctag { transform: translateY(-3px); transition: opacity .6s ease, transform .6s ease; } /* date, genre : mini fondu sur le film sélectionné */
+  .card.focus .cdate, .card.focus .ctag { transform: none; }
 }
 @media (min-width: 701px) {
   body.fic .cats.past .sub { animation: subSide .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--td, 0ms) + var(--j, 0) * 80ms + 60ms); }

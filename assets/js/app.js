@@ -426,7 +426,7 @@
     }
     // ---------- Fiction (data/fiction.json, rubrique « fiction » de l'admin) ----------
     // Comme le spotlight (bande Slate lue par le robot, `films`), mais les onglets sont réglés à la main dans l'admin, film par
-    // film (`overrides[id]`) : `status` new | soon | past (défaut past), `genre` (films sortis), `date` (AAAA-MM-JJ), `poster`.
+    // film (`overrides[id]`) : `status` new | soon | past (défaut past), `genre` (onglet si film sorti), `platforms`, `date` (AAAA-MM-JJ), `poster`.
     // NEW RELEASES = FEATURED interne ; PAST RELEASES montre tous les films sortis, et ses genres apparaissent alors à côté.
     var FIC = "fiction", FIC_GENRES = ["FEATURE FILM", "SERIES", "DOCUMENTARY", "SHORT FILM"], PAST = ["PAST RELEASES"].concat(FIC_GENRES);
     var MULTI = { spotlight: true, fiction: true }; // pages de plusieurs chefs op (« DoP Nom » cliquable, pas d'About)
@@ -984,6 +984,9 @@
         meta.appendChild(h); if (s.textContent) meta.appendChild(s);
         if (p.dps && p.dps.length && MULTI[slug]) meta.appendChild(dpLine(p, "cdop"));
         // Fiction : date de sortie (carré blanc au survol), seulement dans NEW RELEASES et COMING SOON.
+        // Fiction : genre puis plateformes (« FEATURE FILM · NETFLIX ») en haut à gauche, affichés au survol / à la sélection.
+        var ftag = slug === FIC ? [p.genre].concat(p.platforms || []).filter(Boolean) : [];
+        if (ftag.length) { var tg = document.createElement("span"); tg.className = "ctag"; tg.textContent = ftag.join(" · "); d.appendChild(tg); }
         if (slug === FIC && (cat === "FEATURED" || cat === "COMING SOON") && ficDate(p.date)) { var dt = document.createElement("span"); dt.className = "cdate"; dt.textContent = ficDate(p.date); d.appendChild(dt); } // sur la carte, pas la vignette (agrandie au survol)
         if (p.cat && cat === "FEATURED" && slug !== FIC) { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);

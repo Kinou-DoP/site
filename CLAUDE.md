@@ -182,7 +182,8 @@ les onglets se règlent **à la main** dans l'admin, film par film (`overrides[<
 `genre` (FEATURE FILM, SERIES, DOCUMENTARY, SHORT FILM ; films sortis), `date` (AAAA-MM-JJ), `poster` (affiche déposée dans l'admin →
 `data/fiction/<id>-<horodatage>.webp`, lue via `DATA_BASE`). `ficToDP` (app.js) : NEW RELEASES = FEATURED interne (`catLabel`),
 COMING SOON, PAST RELEASES (tous les films sortis) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
-quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. Date de sortie : carré blanc « 16 Oct » (mois en anglais) sur la
+quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. Genre + plateformes (`platforms`, admin) en haut à gauche de la vignette (« FEATURE FILM · NETFLIX », `.ctag`, tous les onglets,
+au survol / film sélectionné sur téléphone, Gus 29/10). Date de sortie : carré blanc « 16 Oct » (mois en anglais) **en haut à droite** de la
 vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement dans NEW RELEASES et COMING SOON
 (posée sur la carte, pas sur la vignette qui s'agrandit au survol). Téléphone : date seulement sur le film sélectionné (`.card.focus`, Gus 28/10).
 Téléphone, genres de PAST RELEASES : 2e ligne sous les onglets (`#subcats`, boutons relais remplis par `subRow`, les vrais genres
