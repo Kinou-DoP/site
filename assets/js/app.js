@@ -612,7 +612,7 @@
     pnext.addEventListener("click", function () { stepPlayer(1); });
     // Bouton retour du téléphone / du navigateur : ferme l'image agrandie, puis le lecteur (pas la page).
     var pushed = 0, skipPop = 0;
-    function pushStep() { history.pushState({ kinou: "player" }, ""); pushed++; }
+    function pushStep(url) { history.pushState({ kinou: "player" }, "", url || undefined); pushed++; }
     function popStep() { if (pushed > 0) { pushed--; skipPop++; history.back(); } }
     window.addEventListener("popstate", function (e) {
       if (skipPop) { skipPop--; return; }
@@ -629,7 +629,30 @@
     function parseHash() {
       var h = route().split("/"), m = null, last = (h[h.length - 1] || "").toLowerCase();
       if (h.length > 1 && /^(feed|grid|grille|colonne)$/.test(last)) { m = /^(feed|colonne)$/.test(last) ? "feed" : "gallery"; h.pop(); }
-      return { slug: decodeURIComponent(h[0] || ""), cat: (h[1] || "").toLowerCase(), mode: m };
+      return { slug: decodeURIComponent(h[0] || ""), cat: (h[1] || "").toLowerCase(), film: decodeURIComponent(h[2] || "").toLowerCase(), mode: m };
+    }
+    // Adresse d'un film ouvert dans le lecteur : <slug>/<onglet>/<titre> (ex. …/vadim-…/narrative/panda), pour l'envoyer à
+    // quelqu'un ; « featured » pour l'onglet d'arrivée (ALL du spotlight, NEW RELEASES de la fiction). Fermer le lecteur (croix,
+    // bouton retour) remet l'adresse de la page (Gus 30/10). Films de l'accueil et images cliquées : l'adresse ne change pas.
+    function filmSlug(p) { return catSlug((p.title || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")) || String(p.slate || ""); }
+    function tabFilms(slug, cat) {
+      var l = (WORK[slug] || []).filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
+      if (slug === FIC && cat === "COMING SOON") l.reverse(); // fiction : ordre inverse de la bande (prochaine sortie en premier)
+      return l;
+    }
+    function filmURL(p) {
+      if (!view || !WORK[view.o.slug] || tabFilms(view.o.slug, curCat).indexOf(p) < 0) return null;
+      return pageURL(view.o.slug + "/" + catSlug(curCat) + "/" + filmSlug(p));
+    }
+    // Arrivée par l'adresse d'un film : la page s'ouvre sur son onglet, puis le lecteur sur ce film.
+    function openFilmLater(slug, film) {
+      var t0 = Date.now();
+      setTimeout(function tryOpen() {
+        if (!view || view.o.slug !== slug || Date.now() - t0 > 8000) return;
+        if (!WORK[slug] || !feed.children.length) { setTimeout(tryOpen, 150); return; }
+        var list = tabFilms(slug, curCat), p = list.filter(function (x) { return filmSlug(x) === film || String(x.slate) === film; })[0];
+        if (p) openPlayer(p, false, feed.classList.contains("showcase") ? list.filter(hasFilm) : list);
+      }, 300);
     }
     function tabUrl(slug, c) {
       // « /feed » si choisi ; « /grid » seulement sur un onglet « vidéo + stills » (dont l'affichage par défaut est le feed).
@@ -644,7 +667,7 @@
     }
     function restorePage(st) {
       if (st && st.kinou) return; // entrée du lecteur (bouton « suivant » du navigateur) : rien à faire
-      if (!st || !st.k) st = route() ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat, mode: parseHash().mode } : { k: "home" };
+      if (!st || !st.k) st = route() ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat, film: parseHash().film, mode: parseHash().mode } : { k: "home" };
       if (st.k === "dp") {
         if (view && view.o.slug === st.slug) { // même page, autre onglet ou autre affichage (adresse modifiée à la main)
           var tb = st.cat && [].filter.call(cats.querySelectorAll("button"), function (x) { return catSlug(x.dataset.cat) === st.cat; })[0];
@@ -654,11 +677,12 @@
           return;
         }
         if (view) closeView(true);
-        if (PAGES[st.slug]) { openPage(st.slug, null, { noHistory: true, cat: st.cat, mode: st.mode }); return; }
+        if (PAGES[st.slug]) { openPage(st.slug, null, { noHistory: true, cat: st.cat, mode: st.mode }); if (st.film) openFilmLater(st.slug, st.film); return; }
         var a = document.querySelector('li a[data-view="' + st.slug + '"]');
         if (!a) return;
         if (document.body.classList.contains("is-home")) show("list");
         openView({ text: a.textContent, slug: st.slug, from: "list", a: a, instant: true, noHistory: true, cat: st.cat, mode: st.mode });
+        if (st.film) openFilmLater(st.slug, st.film);
         return;
       }
       if (view) closeView(); // le nom repart à sa place (accueil ou liste)
@@ -669,8 +693,9 @@
     function openPlayer(p, keep, list) {
       if (!keep) {
         playList = list || [].map.call(feed.querySelectorAll(".card"), function (c) { return c._p; });
-        if (!player.classList.contains("on")) pushStep();
+        if (!player.classList.contains("on")) pushStep(filmURL(p));
       }
+      if (keep || player.classList.contains("on")) { var fu = filmURL(p); if (fu && pushed > 0) { try { history.replaceState({ kinou: "player" }, "", fu); } catch (e) {} } }
       playIdx = playList.indexOf(p);
       player.classList.toggle("has-nav", playList.length > 1 && playIdx > -1);
       projvid.pause(); pauseSnips();
@@ -995,8 +1020,7 @@
       feed.style.setProperty("--d", delay + "ms");
       clearProj();
       feed.textContent = ""; if (popSeen) popSeen.disconnect();
-      var shown = WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
-      if (slug === FIC && cat === "COMING SOON") shown.reverse(); // fiction : ordre inverse de la bande (prochaine sortie en premier)
+      var shown = tabFilms(slug, cat);
       var isShow = shown.length && showTab(slug, cat) && (mode === "feed" || phone.matches);
       var isPhotos = !isShow && cat !== "FEATURED" && shown.length && shown.every(function (p) { return !p.full && (p.nosnip || !p.video) && photosOf(p).length; });
       work.classList.toggle("photos-on", !!isPhotos); document.body.classList.toggle("photos-on", !!isPhotos); // pas de choix grille / colonne pour les photos
@@ -1618,14 +1642,16 @@
     // Liens directs : page-du-site#slug-du-chef-op ouvre directement sa page.
     function routeFromHash() {
       var h = parseHash(), slug = h.slug;
-      if (PAGES[slug] && !view) { openPage(slug, null, { noHistory: true, cat: h.cat, mode: h.mode }); undeep(700); return; }
+      if (PAGES[slug] && !view) { openPage(slug, null, { noHistory: true, cat: h.cat, mode: h.mode }); if (h.film) openFilmLater(slug, h.film); undeep(700); return; }
       var a = slug && document.querySelector('li a[data-view="' + slug + '"]');
       if (!a || view) { undeep(); return; }
       show("list");
       openView({ text: a.textContent, slug: slug, from: "list", a: a, instant: true, noHistory: true, cat: h.cat, mode: h.mode });
+      if (h.film) openFilmLater(slug, h.film);
       undeep(700); // la liste a fini de s'effacer derrière la page
     }
-    var r0 = route();
+    var r0 = route(), f0 = r0 && parseHash().film;
+    if (f0) r0 = r0.split("/").slice(0, 2).join("/"); // adresse d'un film : la page dessous garde l'adresse de son onglet
     if (r0) routeFromHash(); else undeep();
     // Adresse réécrite sous sa forme définitive (ancienne adresse en #… ou arrivée par une page d'aperçu) : c'est elle qu'on partage.
     try { history.replaceState(view ? { k: "dp", slug: view.o.slug } : { k: "home" }, "", view ? pageURL(r0) : pageURL("")); } catch (e) {}
