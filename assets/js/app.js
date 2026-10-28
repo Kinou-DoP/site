@@ -1070,11 +1070,21 @@
     var slowSeen = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         var st = e.target, v = st.querySelector("video.slow"); if (!v) return;
-        clearTimeout(st._slowT);
-        if (e.isIntersecting) st._slowT = setTimeout(function () { if (!v.src) v.src = v.dataset.src; var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }, 1500);
+        clearTimeout(st._slowT); st._seen = e.isIntersecting;
+        if (e.isIntersecting) { if (!st._hov) slowLater(st, v); }
         else { v.pause(); v.classList.remove("on"); }
       });
     }, { root: work, threshold: 0.6 }) : null;
+    function slowPlay(v) { if (!v.src) v.src = v.dataset.src; var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+    function slowLater(st, v) { clearTimeout(st._slowT); st._slowT = setTimeout(function () { slowPlay(v); }, 1500); }
+    // Ordinateur : la souris passe avant. Survol = l'extrait tout de suite (ou il continue s'il jouait déjà) ; la souris part =
+    // vignette de retour, puis l'extrait reprend seul 1,5 s après (Gus 30/10).
+    function slowHover(st, on) {
+      var v = st.querySelector("video.slow"); if (!v || phone.matches) return;
+      st._hov = on; clearTimeout(st._slowT);
+      if (on) slowPlay(v);
+      else { v.pause(); v.classList.remove("on"); if (st._seen) slowLater(st, v); }
+    }
     function slowThumb(st, p) {
       if (!slowSeen || !p.video || reduceMotion) return;
       var v = document.createElement("video");
@@ -1111,10 +1121,11 @@
           big = document.createElement("div"); big.className = "still sc-big"; big.style.setProperty("--h", p.h);
           if (p.zoom > 1) { big.style.setProperty("--z", p.zoom); if (p.zoomPos) big.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) big.classList.add("zoomed"); }
           if (p.img) big.style.setProperty("--img", 'url("' + thumb(p.img, FW) + '")');
-          big.addEventListener("mouseenter", function () { showProj(p); }); // l'extrait démarre seul (slowThumb), pas au survol
-          big.addEventListener("mouseleave", function () { document.body.classList.remove("proj-on"); });
+          big.addEventListener("mouseenter", function () { showProj(p); slowHover(big, true); });
+          big.addEventListener("mouseleave", function () { slowHover(big, false); document.body.classList.remove("proj-on"); });
           big.addEventListener("click", function () { openPlayer(p, false, films.length ? films : [p]); });
           slowThumb(big, p);
+          if (film) big.insertAdjacentHTML("beforeend", '<svg class="sc-play" viewBox="0 0 24 28" aria-hidden="true"><path d="M2 2 L22 14 L2 26 Z"/></svg>');
         } else {
           big = document.createElement("button"); big.className = "sc-big sc-img"; big.setAttribute("aria-label", p.title);
           big.style.backgroundImage = 'url("' + thumb(all[0], FW) + '")';

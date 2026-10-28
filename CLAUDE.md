@@ -211,7 +211,7 @@ crédits apparaissent (Gus 28/10).
 
 ### Présentation « vidéo + stills » d'un onglet (`showcase`, Gus 29/10, d'après l'ancien kinou.fr/vadim-narrative)
 Interrupteur dans l'admin, sur l'onglet ouvert d'une fiche → `showcase: ["NARRATIVE", …]` dans la fiche (`SHOW[slug]` dans app.js).
-`renderShow` : par projet, grille de 4 colonnes — vidéo en grand (2 × 2, `.sc-big.still`, sans triangle de lecture),
+`renderShow` : par projet, grille de 4 colonnes — vidéo en grand (2 × 2, `.sc-big.still`, triangle de lecture en contour `.sc-play`, caché quand l'extrait joue),
 titre + crédits à côté (`.sc-info`), 2 stills dessous, puis 4 stills ; vidéo à gauche et texte à droite pour tous les projets (l'alternance gauche / droite n'a pas plu ; essayé à droite puis remis à gauche, Gus 30/10) ; type de contenu Slate
 au-dessus (`.sc-type`, `typesOf`) ; trait fin dégradé entre les projets (`.sc-hr`) ; arrivée `riseBlur`. Téléphone : titre, 2 stills,
 la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, puis toutes les galeries `extras`) : les 6 premiers ;
@@ -222,7 +222,7 @@ Clic vidéo : lecteur habituel (stills et vidéos ajoutés sous le film, dans l'
 visibles ; « feed » = cette présentation (par défaut sur ces onglets, `showTab`), « grille » = grille habituelle (adresse `/grid`) ; sans choix
 (bouton ou adresse), feed sur ces onglets et grille ailleurs. 
 Téléphone et ordinateur (Gus 30/10) : extrait de la grande vidéo lancé 1,5 s après son arrivée à l'écran (≥ 60 % visible), en fondu de 1,4 s (`slowThumb`,
-`.snip.slow`), arrêté quand elle sort ; projet au repère (45 % de la hauteur, `scFocus` appelé par `pickFocus`) = « sélectionné » :
+`.snip.slow`), arrêté quand elle sort ; ordinateur : la souris passe avant (`slowHover` : survol = extrait tout de suite, ou il continue s'il jouait ; souris partie = vignette, extrait relancé seul 1,5 s après) ; projet au repère (45 % de la hauteur, `scFocus` appelé par `pickFocus`) = « sélectionné » :
 sa vignette (ou 1re image) en fond flouté (Gus 30/10).
 Toute la largeur de l'écran (pas de largeur maximale) ; survol d'une image = cette image en fond flouté (`showProj`).
 Types : les mots « Trailer » / « Bande-annonce » sont retirés aussi à l'intérieur d'un type (« Short Film Trailer » → « Short Film »), puis dédoublonnés.
