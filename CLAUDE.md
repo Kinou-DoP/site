@@ -218,7 +218,9 @@ la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, pu
 projet sans vidéo : 1re image en grand + les 6 suivantes ; sans stills (`.bare`) : vidéo + titre seuls. Clic vidéo = lecteur
 (flèches : films de l'onglet) ; clic image = `openShowStill` : lecteur avec l'image en grand (`img.pbig`, clic = plein écran,
 flèches = toute la galerie), toute la galerie dessous, puis le film du projet et les autres vidéos ajoutées sous le film (ordre de l'admin).
-Clic vidéo : lecteur habituel (stills et vidéos ajoutés sous le film, dans l'ordre de l'admin). Pas de choix grille / colonne sur ces onglets.
+Clic vidéo : lecteur habituel (stills et vidéos ajoutés sous le film, dans l'ordre de l'admin). Ordinateur : boutons grille / colonne
+visibles ; « feed » = cette présentation (par défaut sur ces onglets, `showTab`), « grille » = grille habituelle (adresse `/grid`) ; sans choix
+(bouton ou adresse), feed sur ces onglets et grille ailleurs. Triangle de lecture caché dès que l'extrait joue (téléphone).
 Toute la largeur de l'écran (pas de largeur maximale) ; survol d'une image = cette image en fond flouté (`showProj`).
 Types : les mots « Trailer » / « Bande-annonce » sont retirés aussi à l'intérieur d'un type (« Short Film Trailer » → « Short Film »), puis dédoublonnés.
 

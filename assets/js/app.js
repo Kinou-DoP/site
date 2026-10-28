@@ -632,8 +632,9 @@
       return { slug: decodeURIComponent(h[0] || ""), cat: (h[1] || "").toLowerCase(), mode: m };
     }
     function tabUrl(slug, c) {
-      var feedUrl = view && view.o.mode === "feed";
-      try { history.replaceState({ k: "dp", slug: slug }, "", pageURL(slug + (c && c !== "FEATURED" ? "/" + catSlug(c) : "") + (feedUrl ? "/feed" : ""))); } catch (e) {}
+      // « /feed » si choisi ; « /grid » seulement sur un onglet « vidéo + stills » (dont l'affichage par défaut est le feed).
+      var m = view && view.o.mode, suf = m === "feed" && !showTab(slug, c) ? "/feed" : m === "gallery" && showTab(slug, c) ? "/grid" : "";
+      try { history.replaceState({ k: "dp", slug: slug }, "", pageURL(slug + (c && c !== "FEATURED" ? "/" + catSlug(c) : "") + suf)); } catch (e) {}
     }
     // Affichage voulu : une colonne sur téléphone ; sinon celui de l'adresse ou du bouton choisi (grille par défaut).
     function wantMode() { return phone.matches ? "feed" : (view && view.o.mode) || "gallery"; }
@@ -977,7 +978,13 @@
         .filter(function (t) { var k = t.toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true; });
     }
     function narrTypes(p) { return /narrative/i.test(p.cat || "") ? typesOf(p) : []; }
+    // Onglet en présentation « vidéo + stills » (interrupteur de l'admin) : c'est son affichage « feed » (par défaut) ; le bouton
+    // grille de l'ordinateur le remet en grille habituelle (Gus 30/10).
+    function showTab(slug, cat) { return !MULTI[slug] && (SHOW[slug] || []).indexOf(cat) > -1; }
     function render(slug, cat, delay) {
+      // Affichage par défaut (rien choisi dans l'adresse ni avec les boutons) : feed (= présentation) sur ces onglets, grille ailleurs.
+      if (!phone.matches && view && view.o.slug === slug && !view.o.mode) mode = showTab(slug, cat) ? "feed" : "gallery";
+      modes.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.mode === mode); });
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
       cats.classList.toggle("past", slug === FIC && PAST.indexOf(cat) > -1); subRow(slug, cat);
       if (liveSeen) { liveSeen.disconnect(); feed.querySelectorAll("video.live").forEach(function (v) { v.pause(); v.removeAttribute("src"); v.load(); }); }
@@ -989,9 +996,9 @@
       feed.textContent = "";
       var shown = WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
       if (slug === FIC && cat === "COMING SOON") shown.reverse(); // fiction : ordre inverse de la bande (prochaine sortie en premier)
-      var isShow = !MULTI[slug] && shown.length && (SHOW[slug] || []).indexOf(cat) > -1;
+      var isShow = shown.length && showTab(slug, cat) && (mode === "feed" || phone.matches);
       var isPhotos = !isShow && cat !== "FEATURED" && shown.length && shown.every(function (p) { return !p.full && (p.nosnip || !p.video) && photosOf(p).length; });
-      work.classList.toggle("photos-on", !!(isPhotos || isShow)); document.body.classList.toggle("photos-on", !!(isPhotos || isShow)); // pas de choix grille / colonne
+      work.classList.toggle("photos-on", !!isPhotos); document.body.classList.toggle("photos-on", !!isPhotos); // pas de choix grille / colonne pour les photos
       if (isShow) { renderShow(shown); return; }
       if (isPhotos) { renderPhotos(shown); return; }
       shown.forEach(function (p, i) {
