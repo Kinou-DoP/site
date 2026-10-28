@@ -580,7 +580,9 @@ body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
 .sc.bare .sc-grid { grid-template-areas: "v v t t"; } .sc.bare.flip .sc-grid { grid-template-areas: "t t v v"; }
 .sc.bare .sc-info { aspect-ratio: auto; } .feed .sc.bare .sc-big.still { aspect-ratio: 16 / 9; height: auto; }
 .sc-hr { width: 38%; height: 1px; margin: 10vh auto; background: linear-gradient(90deg, transparent, rgba(255,252,235,.28), transparent); }
-#player .pstage img.pbig { cursor: zoom-in; }
+#player .pstage img.pbig { cursor: zoom-in; height: auto; max-height: 78vh; }
+/* Image cliquée (présentation vidéo + stills) : le cadre prend la forme de l'image (cinémascope, portrait…), sans bandes noires */
+#player .pstage:has(img.pbig) { aspect-ratio: auto; background: none !important; }
 @media (max-width: 700px) {
   .sc { display: flex; flex-direction: column; }
   .sc-type, .sc.flip .sc-type { order: 2; margin: 14px 0 0; text-align: left; }
