@@ -238,7 +238,7 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight », « fiction », « press » (à venir), « contact »,
    masqués sous 700px (dans le menu du téléphone) ; à droite « cinematographers ».
 10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras ; films Narrative : suivie des types de contenu Slate, « NARRATIVE · SHORT FILM »,
-   et ces types seuls dans l'onglet Narrative ; « Stills » et « Fiction » jamais affichés ; aussi dans le lecteur, en bas à droite de la vidéo, `.ptypes` — `narrTypes`, `overrides[<id>].types` écrit par le robot de l'admin, Gus 29/10) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
+   et ces types seuls dans l'onglet Narrative ; « Stills », « Fiction », « Trailer », « Bande-annonce » jamais affichés ; aussi dans le lecteur, en bas à droite de la vidéo, `.ptypes` — `narrTypes`, `overrides[<id>].types` écrit par le robot de l'admin, Gus 29/10) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
    toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.
 11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit ; plusieurs chefs op = noms plus petits) ; pas de fond coloré de remplacement (noir) ;
    on arrive sur un film au hasard parmi les 10, puis l'ordre de la bande.

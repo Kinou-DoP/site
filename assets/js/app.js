@@ -969,7 +969,7 @@
     }
     function narrTypes(p) {
       if (!/narrative/i.test(p.cat || "") || !p.types) return [];
-      var seen = { narrative: 1, stills: 1, fiction: 1 }; // jamais affichés (Gus 29/10)
+      var seen = { narrative: 1, stills: 1, fiction: 1, trailer: 1, "bande annonce": 1, "bande-annonce": 1 }; // jamais affichés (Gus 29/10)
       return p.types.filter(function (t) { var k = String(t).trim().toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true; });
     }
     function render(slug, cat, delay) {
