@@ -1063,7 +1063,7 @@
       list.forEach(function (p, i) {
         var all = galleryOf(p), film = hasFilm(p), small = (film ? all : all.slice(1)).slice(0, 6);
         if (i) { var hr = document.createElement("div"); hr.className = "sc-hr"; feed.appendChild(hr); }
-        var w = document.createElement("div"); w.className = "sc" + (small.length ? "" : " bare"); // vidéo à droite partout (l'alternance gauche / droite n'a pas plu, Gus 30/10) w.style.setProperty("--i", i); // bare : pas de stills
+        var w = document.createElement("div"); w.className = "sc" + (small.length ? "" : " bare"); // même sens partout, vidéo à gauche (l'alternance n'a pas plu, Gus 30/10) w.style.setProperty("--i", i); // bare : pas de stills
         var ty = document.createElement("p"); ty.className = "sc-type"; ty.textContent = typesOf(p).join(" · "); w.appendChild(ty);
         var g = document.createElement("div"); g.className = "sc-grid"; w.appendChild(g);
         var big;
