@@ -400,8 +400,8 @@ d'onglet met l'adresse à jour (`replaceState`, sans étape de plus pour le bout
 **Adresse d'un film** (Gus 30/10) : ouvrir un film dans le lecteur met l'adresse `<slug>/<onglet>/<titre>` (`filmURL`, `filmSlug` = titre
 sans accents ; `featured` pour l'onglet d'arrivée : ALL du spotlight, NEW RELEASES de la fiction ; flèches = `replaceState`) ; fermer
 (croix, Échap, retour) remet celle de la page. Arrivée par cette adresse : la page sur son onglet puis le lecteur sur le film
-(`openFilmLater` ; titre inconnu = la page seule). Films de l'accueil et images cliquées : adresse inchangée. Aperçu du lien = celui
-de la page du chef op seulement si elle a une page d'aperçu ; sinon générique (404.html). Les anciennes adresses `#<slug>…`
+(`openFilmLater` ; titre inconnu = la page seule). Films de l'accueil et images cliquées : adresse inchangée. Aperçu du lien : générique
+(« kinou », l'adresse passe par 404.html) ; à faire si Gus le demande : pages d'aperçu par film (titre + vignette). Les anciennes adresses `#<slug>…`
 marchent toujours et sont réécrites. Le site reste une seule page : `<slug>/index.html` est une **page d'aperçu de lien**
 (nom + photo du chef op en balises Open Graph, pour WhatsApp, iMessage, Slack… qui ne lisent ni le JavaScript ni le « # »),
 qui renvoie en JavaScript vers `../#<slug>` ; fabriquée par `tools/share-pages.mjs` (photo = portrait About, sinon vignette du
