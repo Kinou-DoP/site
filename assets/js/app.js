@@ -704,6 +704,9 @@
         });
         pcap.appendChild(who);
       }
+      // Films Narrative : leurs types de contenu en bas à droite de la vidéo (comme sur la vignette ; Gus 29/10).
+      var plab = narrTypes(p); if (plab.length && curCat === "FEATURED") plab = [p.cat].concat(plab);
+      if (plab.length) { var pt = document.createElement("span"); pt.className = "ptypes"; pt.textContent = plab.join(" · "); pcap.insertBefore(pt, pcap.firstChild); }
       var s = document.createElement("p"); s.textContent = p.sub || p.cat; pcap.appendChild(s);
       if (spotDps) pcap.appendChild(dpLine(p, "pdop", true));
       buildStills(p, src);
@@ -966,7 +969,7 @@
     }
     function narrTypes(p) {
       if (!/narrative/i.test(p.cat || "") || !p.types) return [];
-      var seen = { narrative: 1 };
+      var seen = { narrative: 1, stills: 1, fiction: 1 }; // jamais affichés (Gus 29/10)
       return p.types.filter(function (t) { var k = String(t).trim().toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true; });
     }
     function render(slug, cat, delay) {
