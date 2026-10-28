@@ -918,6 +918,7 @@
     function pickFocus(sizesOnly) {
       if (sizesOnly !== true) focusRaf = 0;
       if (!touchOnly.matches || work.classList.contains("about-mode") || player.classList.contains("on")) return;
+      if (feed.classList.contains("showcase")) { if (sizesOnly !== true) scFocus(); return; } // présentation vidéo + stills
       // Repère à 40 % de la hauteur, mais près du haut de la page il descend avec le défilement depuis le centre du
       // 1er film : tout en haut, c'est toujours le 1er film (le plus important) qui est choisi.
       var r = work.getBoundingClientRect(), best = null, bd = 1e9, f1 = feed.querySelector(".card .still");
@@ -1064,13 +1065,45 @@
       var q = Object.assign({}, p, { full: "", video: "", nosnip: true, img: all[i], stills: all, images: null, extras: vids, poster: null, _big: i });
       openPlayer(q, false, [q]);
     }
+    // Téléphone : l'extrait de la grande vidéo démarre 1,5 s après son arrivée à l'écran, en long fondu (on voit d'abord la
+    // vignette, souvent la plus belle image ; Gus 30/10). Il s'arrête (vignette de retour) quand la vidéo quitte l'écran.
+    var slowSeen = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var st = e.target, v = st.querySelector("video.slow"); if (!v) return;
+        clearTimeout(st._slowT);
+        if (e.isIntersecting) st._slowT = setTimeout(function () { if (!v.src) v.src = v.dataset.src; var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }, 1500);
+        else { v.pause(); v.classList.remove("on"); }
+      });
+    }, { root: work, threshold: 0.6 }) : null;
+    function slowThumb(st, p) {
+      if (!slowSeen || !liveOn() || !p.video || reduceMotion) return;
+      var v = document.createElement("video");
+      v.className = "snip live slow"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "none"; v.dataset.src = p.video;
+      v.addEventListener("playing", function () { v.classList.add("on"); });
+      st.appendChild(v); slowSeen.observe(st);
+    }
+    // Téléphone : le projet au repère (45 % de la hauteur) est « sélectionné » : sa vignette en fond flouté.
+    var focusSc = null;
+    function scFocus() {
+      var r = work.getBoundingClientRect(), line = r.top + r.height * 0.45, best = null, bd = 1e9;
+      feed.querySelectorAll(".sc").forEach(function (w) {
+        var b = w.getBoundingClientRect(), d = line < b.top ? b.top - line : line > b.bottom ? line - b.bottom : 0;
+        if (d < bd) { bd = d; best = w; }
+      });
+      if (best === focusSc) return;
+      if (focusSc) focusSc.classList.remove("focus");
+      focusSc = best;
+      if (best) { best.classList.add("focus"); if (best._bg) showProj({ img: best._bg }); }
+    }
     function renderShow(list) {
+      focusSc = null; if (slowSeen) slowSeen.disconnect();
       feed.className = "feed showcase";
       var films = list.filter(hasFilm);
       list.forEach(function (p, i) {
         var all = galleryOf(p), film = hasFilm(p), small = (film ? all : all.slice(1)).slice(0, 6);
         if (i) { var hr = document.createElement("div"); hr.className = "sc-hr"; feed.appendChild(hr); }
-        var w = document.createElement("div"); w.className = "sc" + (small.length ? "" : " bare"); // même sens partout, vidéo à gauche (l'alternance n'a pas plu, Gus 30/10) w.style.setProperty("--i", i); // bare : pas de stills
+        var w = document.createElement("div"); w.className = "sc" + (small.length ? "" : " bare");
+        w._bg = p.img || all[0]; // fond flouté quand le projet est sélectionné (téléphone) // même sens partout, vidéo à gauche (l'alternance n'a pas plu, Gus 30/10) w.style.setProperty("--i", i); // bare : pas de stills
         var ty = document.createElement("p"); ty.className = "sc-type"; ty.textContent = typesOf(p).join(" · "); w.appendChild(ty);
         var g = document.createElement("div"); g.className = "sc-grid"; w.appendChild(g);
         var big;
@@ -1081,7 +1114,7 @@
           big.addEventListener("mouseenter", function () { showProj(p); snip(big, p, true); });
           big.addEventListener("mouseleave", function () { snip(big, p, false); document.body.classList.remove("proj-on"); });
           big.addEventListener("click", function () { openPlayer(p, false, films.length ? films : [p]); });
-          liveThumb(big, p);
+          slowThumb(big, p);
           if (film) { var pl = document.createElement("i"); pl.className = "sc-play"; big.appendChild(pl); }
         } else {
           big = document.createElement("button"); big.className = "sc-big sc-img"; big.setAttribute("aria-label", p.title);

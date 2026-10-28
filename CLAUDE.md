@@ -221,6 +221,9 @@ flèches = toute la galerie), toute la galerie dessous, puis le film du projet e
 Clic vidéo : lecteur habituel (stills et vidéos ajoutés sous le film, dans l'ordre de l'admin). Ordinateur : boutons grille / colonne
 visibles ; « feed » = cette présentation (par défaut sur ces onglets, `showTab`), « grille » = grille habituelle (adresse `/grid`) ; sans choix
 (bouton ou adresse), feed sur ces onglets et grille ailleurs. Triangle de lecture caché dès que l'extrait joue (téléphone).
+Téléphone : extrait de la grande vidéo lancé 1,5 s après son arrivée à l'écran (≥ 60 % visible), en fondu de 1,4 s (`slowThumb`,
+`.snip.slow`), arrêté quand elle sort ; projet au repère (45 % de la hauteur, `scFocus` appelé par `pickFocus`) = « sélectionné » :
+sa vignette (ou 1re image) en fond flouté (Gus 30/10).
 Toute la largeur de l'écran (pas de largeur maximale) ; survol d'une image = cette image en fond flouté (`showProj`).
 Types : les mots « Trailer » / « Bande-annonce » sont retirés aussi à l'intérieur d'un type (« Short Film Trailer » → « Short Film »), puis dédoublonnés.
 

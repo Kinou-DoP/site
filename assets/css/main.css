@@ -576,6 +576,7 @@ body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
 .sc-big:hover .sc-play, .sc-big:has(video.snip.on) .sc-play { opacity: 0; } /* triangle caché dès que l'extrait joue (téléphone : extrait en boucle) */
 .sc.bare .sc-grid { grid-template-areas: "v v t t"; }
 .sc.bare .sc-info { aspect-ratio: auto; } .feed .sc.bare .sc-big.still { aspect-ratio: 16 / 9; height: auto; }
+.sc-big video.snip.slow { transition: opacity 1.4s ease; } /* téléphone : extrait en long fondu, 1,5 s après l'arrivée */
 .sc-hr { width: 38%; height: 1px; margin: 10vh auto; background: linear-gradient(90deg, transparent, rgba(255,252,235,.28), transparent); }
 #player .pstage img.pbig { cursor: zoom-in; height: auto; max-height: 78vh; }
 /* Image cliquée (présentation vidéo + stills) : le cadre prend la forme de l'image (cinémascope, portrait…), sans bandes noires */
