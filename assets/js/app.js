@@ -1106,14 +1106,14 @@
       if (best) { best.classList.add("focus"); if (best._bg) showProj({ img: best._bg }); }
     }
     function renderShow(list) {
-      focusSc = null; if (slowSeen) slowSeen.disconnect();
+      focusSc = null; if (slowSeen) slowSeen.disconnect(); if (popSeen) popSeen.disconnect();
       feed.className = "feed showcase";
       var films = list.filter(hasFilm);
       list.forEach(function (p, i) {
         var all = galleryOf(p), film = hasFilm(p), small = (film ? all : all.slice(1)).slice(0, 6);
         if (i) { var hr = document.createElement("div"); hr.className = "sc-hr"; feed.appendChild(hr); }
         var w = document.createElement("div"); w.className = "sc" + (small.length ? "" : " bare");
-        w._bg = p.img || all[0]; // fond flouté quand le projet est sélectionné (téléphone) // même sens partout, vidéo à gauche (l'alternance n'a pas plu, Gus 30/10) w.style.setProperty("--i", i); // bare : pas de stills
+        w._bg = p.img || all[0]; // fond flouté quand le projet est sélectionné (téléphone) ; vidéo à gauche partout (Gus 30/10)
         var ty = document.createElement("p"); ty.className = "sc-type"; ty.textContent = typesOf(p).join(" · "); w.appendChild(ty);
         var g = document.createElement("div"); g.className = "sc-grid"; w.appendChild(g);
         var big;
@@ -1147,8 +1147,14 @@
           g.appendChild(b);
         });
         feed.appendChild(w);
+        // Arrivée des images et de la vidéo, comme sur l'ancien site Squarespace : un peu plus petites, elles grandissent
+        // jusqu'à leur taille en apparaissant, au moment où elles entrent à l'écran (Gus 30/10).
+        if (popSeen) g.querySelectorAll(".sc-big, .sc-s").forEach(function (m, k) { m.classList.add("pop"); m.style.setProperty("--pd", (k ? 120 + k * 70 : 0) + "ms"); popSeen.observe(m); });
       });
     }
+    var popSeen = "IntersectionObserver" in window && !reduceMotion ? new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); popSeen.unobserve(e.target); } });
+    }, { root: work, threshold: 0.12 }) : null;
     function renderPhotos(list) {
       feed.className = "feed photos";
       // Colonnes remplies en JS, dans l'ordre (chaque photo dans la colonne la moins haute), chaque case ayant déjà la

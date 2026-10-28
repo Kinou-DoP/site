@@ -213,7 +213,7 @@ crédits apparaissent (Gus 28/10).
 Interrupteur dans l'admin, sur l'onglet ouvert d'une fiche → `showcase: ["NARRATIVE", …]` dans la fiche (`SHOW[slug]` dans app.js).
 `renderShow` : par projet, grille de 4 colonnes — vidéo en grand (2 × 2, `.sc-big.still`, triangle de lecture en contour `.sc-play`, caché quand l'extrait joue),
 titre + crédits à côté (`.sc-info`), 2 stills dessous, puis 4 stills ; vidéo à gauche et texte à droite pour tous les projets (l'alternance gauche / droite n'a pas plu ; essayé à droite puis remis à gauche, Gus 30/10) ; type de contenu Slate
-au-dessus (`.sc-type`, `typesOf`) ; trait fin dégradé entre les projets (`.sc-hr`) ; arrivée `riseBlur`. Téléphone : titre, 2 stills,
+au-dessus (`.sc-type`, `typesOf`) ; trait fin dégradé entre les projets (`.sc-hr`) ; arrivée `riseBlur` ; images et vidéo qui apparaissent en grandissant (94 % → 100 %, fondu) quand elles entrent à l'écran, une à une (`.pop.in`, `popSeen`, comme l'ancien Squarespace, Gus 30/10). Téléphone : titre, 2 stills,
 la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, puis toutes les galeries `extras`) : les 6 premiers ;
 projet sans vidéo : 1re image en grand + les 6 suivantes ; sans stills (`.bare`) : vidéo + titre seuls. Clic vidéo = lecteur
 (flèches : films de l'onglet) ; clic image = `openShowStill` : lecteur avec l'image en grand (`img.pbig`, clic = plein écran,

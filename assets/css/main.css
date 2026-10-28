@@ -578,6 +578,8 @@ body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
 .sc.bare .sc-info { aspect-ratio: auto; } .feed .sc.bare .sc-big.still { aspect-ratio: 16 / 9; height: auto; }
 .sc-big video.snip.slow { transition: opacity 1.4s ease; } /* extrait en long fondu, 1,5 s après l'arrivée à l'écran */
 .sc-big:hover video.snip.slow.on, .sc-big video.snip.slow:not(.on) { transition-duration: .4s; } /* survol : extrait vite ; souris partie : vignette vite */
+.sc .pop { opacity: 0; scale: .94; transition: opacity 1.1s ease, scale 1.4s cubic-bezier(.2, .7, .2, 1), filter .35s ease; transition-delay: var(--pd, 0ms), var(--pd, 0ms), 0s; }
+.sc .pop.in { opacity: 1; scale: 1; } /* arrivée : un peu plus petite, grandit jusqu'à sa taille (comme l'ancien Squarespace, Gus 30/10) */
 .sc-hr { width: 38%; height: 1px; margin: 10vh auto; background: linear-gradient(90deg, transparent, rgba(255,252,235,.28), transparent); }
 #player .pstage img.pbig { cursor: zoom-in; height: auto; max-height: 78vh; }
 /* Image cliquée (présentation vidéo + stills) : le cadre prend la forme de l'image (cinémascope, portrait…), sans bandes noires */
