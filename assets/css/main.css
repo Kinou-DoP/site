@@ -560,7 +560,7 @@ body.spot .feed.gallery .card:hover .meta > p { max-height: 5em; opacity: 1; }
 /* Présentation « vidéo + stills » d'un onglet (interrupteur de l'admin, `showcase`, renderShow dans app.js, Gus 29/10) :
    ordinateur = grille de 4 colonnes : vidéo en grand (2 × 2), titre et crédits à côté, 2 stills dessous, puis 4 stills ; un projet
    sur deux en miroir ; type de contenu au-dessus. Téléphone : titre, 2 stills, la vidéo, 4 stills, type en dessous. */
-.feed.showcase { display: block; max-width: 1400px; }
+.feed.showcase { display: block; max-width: none; } /* toute la largeur, quel que soit l'écran (Gus 29/10) */
 .sc { animation: riseBlur .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 90ms + var(--d, 0ms)); }
 .sc-type { margin: 0 0 12px; min-height: 13px; font-family: var(--kinou-sans); font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.6); }
 .sc.flip .sc-type { text-align: right; }

@@ -218,6 +218,8 @@ la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, pu
 projet sans vidéo : 1re image en grand + les 6 suivantes ; sans stills (`.bare`) : vidéo + titre seuls. Clic vidéo = lecteur
 (flèches : films de l'onglet) ; clic image = `openShowStill` : lecteur avec l'image en grand (`img.pbig`, clic = plein écran,
 flèches = toute la galerie), toute la galerie dessous, sans la vidéo. Pas de choix grille / colonne sur ces onglets.
+Toute la largeur de l'écran (pas de largeur maximale) ; survol d'une image = cette image en fond flouté (`showProj`).
+Types : les mots « Trailer » / « Bande-annonce » sont retirés aussi à l'intérieur d'un type (« Short Film Trailer » → « Short Film »), puis dédoublonnés.
 
 ### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
 `{ team: [{ role, name, email, phone }], address: [lignes], newsletter, newsletterLabel, social: { instagram, vimeo, imdb, facebook }, legal }`.

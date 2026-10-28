@@ -972,7 +972,9 @@
     }
     function typesOf(p) {
       var seen = { narrative: 1, stills: 1, fiction: 1, trailer: 1, "bande annonce": 1, "bande-annonce": 1 }; // jamais affichés (Gus 29/10)
-      return (p.types || []).filter(function (t) { var k = String(t).trim().toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true; });
+      // « Short Film Trailer » → « Short Film » (mots bannis retirés aussi à l'intérieur d'un type), puis sans doublon.
+      return (p.types || []).map(function (t) { return String(t).replace(/\b(trailer|bande[- ]annonce)\b/gi, "").replace(/\s+/g, " ").trim(); })
+        .filter(function (t) { var k = t.toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true; });
     }
     function narrTypes(p) { return /narrative/i.test(p.cat || "") ? typesOf(p) : []; }
     function render(slug, cat, delay) {
@@ -1075,6 +1077,8 @@
           big = document.createElement("button"); big.className = "sc-big sc-img"; big.setAttribute("aria-label", p.title);
           big.style.backgroundImage = 'url("' + thumb(all[0], FW) + '")';
           big.addEventListener("click", function () { openShowStill(p, 0); });
+          big.addEventListener("mouseenter", function () { showProj({ img: all[0] }); });
+          big.addEventListener("mouseleave", function () { document.body.classList.remove("proj-on"); });
         }
         g.appendChild(big);
         var info = document.createElement("div"); info.className = "sc-info";
@@ -1085,6 +1089,8 @@
           var b = document.createElement("button"); b.className = "sc-s s" + k; b.setAttribute("aria-label", p.title + " — image " + (k + 1));
           b.style.backgroundImage = 'url("' + thumb(u, GW) + '")';
           b.addEventListener("click", function () { openShowStill(p, all.indexOf(u)); });
+          b.addEventListener("mouseenter", function () { showProj({ img: u }); }); // fond flou : l'image survolée
+          b.addEventListener("mouseleave", function () { document.body.classList.remove("proj-on"); });
           g.appendChild(b);
         });
         feed.appendChild(w);
