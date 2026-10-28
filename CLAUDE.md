@@ -173,8 +173,8 @@ reconnue : seulement dans ALL) ; chefs op crédités en dernière ligne des cré
 sans accents ni « , AFC », `dpByName` / `dpLine` / `toDP` ; vignette et lecteur ; le bouton retour revient au spotlight) ; pas d'onglet ABOUT ;
 `overrides` de l'admin comme une fiche (titres, masquer, recadrage, stills et vidéos sous le film…).
 Ouverture : lien « spotlight » de l'en-tête et du menu du téléphone (`openSpot`, le mot devient le titre) ou `#spotlight[/cat]`.
-`body.spot` : sur ordinateur, titre « Spotlight » **à gauche** (pages de chef op : à droite), onglets **en ligne au-dessus** des films (grille sur toute la largeur), pas de choix grille /
-colonne ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur téléphone.
+`body.spot` : sur ordinateur, titre « Spotlight » **à gauche** (pages de chef op : à droite), onglets **en ligne au-dessus** des films (grille sur toute la largeur) ; ordinateur (> 900px) : boutons grille / colonne en bas à
+droite du bandeau (grille à l'arrivée, colonne centrée de 1100px max, adresse `/feed` ; spotlight et fiction, Gus 30/10) ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur téléphone.
 
 ### Fiction (`data/fiction.json`, rubrique « fiction » de l'admin, adresse `#fiction`)
 `{ reel, overrides, films, readAt, readAsk }` : comme le spotlight (bande Slate lue en entier par le robot GitHub, `films`), mais
@@ -250,7 +250,10 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 4. **Grille clips** : galerie 3 colonnes 16:9 à toutes les tailles (gap 6px, 4px mobile) ; mode feed en 1 colonne.
 5. **Overlay** : plein écran, fermeture sur Escape, croix ou clic hors zone ; lecteur sur fond « verre dépoli »
    (page floutée 36px, voile noir 62 %), image agrandie sur fond noir 98 %.
-6. **Animations** : celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms (léger flou au départ, net dès ~60 % du trajet : `heroBlur`, aller et retour, Gus 28/10) — les onglets apparaissent juste
+6. **Animations** : arrivée des films en grandissant (94 % → 100 % + fondu, quand ils entrent à l'écran, `.card.pop.in`, `popSeen` ;
+   en cascade au 1er affichage, puis par rangée ; grille : la carte et son ombre `.shade i` ; colonne : la vignette) sur les pages
+   de chef op en grille, le spotlight et la fiction (toutes présentations), comme l'ancien Squarespace (Gus 30/10) ; feed d'un chef op
+   (et téléphone) : montée habituelle `rise`. Puis celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms (léger flou au départ, net dès ~60 % du trajet : `heroBlur`, aller et retour, Gus 28/10) — les onglets apparaissent juste
    après, `view.t0` + `ANIM` → `transitionDelay` de `.cats`, etc.) + le voile
    lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight », « fiction », « press » (à venir), « contact »,

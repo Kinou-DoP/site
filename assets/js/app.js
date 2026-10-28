@@ -994,7 +994,7 @@
       feed.className = "feed" + (mode === "gallery" ? " gallery" : "");
       feed.style.setProperty("--d", delay + "ms");
       clearProj();
-      feed.textContent = "";
+      feed.textContent = ""; if (popSeen) popSeen.disconnect();
       var shown = WORK[slug].filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
       if (slug === FIC && cat === "COMING SOON") shown.reverse(); // fiction : ordre inverse de la bande (prochaine sortie en premier)
       var isShow = shown.length && showTab(slug, cat) && (mode === "feed" || phone.matches);
@@ -1040,6 +1040,12 @@
         var shade = document.createElement("div"); shade.className = "shade";
         for (var n = feed.children.length; n > 0; n--) shade.appendChild(document.createElement("i"));
         feed.insertBefore(shade, feed.firstChild);
+      }
+      // Arrivée en grandissant (grille, spotlight, fiction ; pas le feed d'un chef op) : chaque film quand il entre à l'écran.
+      if (popSeen && (mode === "gallery" || slug === SPOT || slug === FIC)) {
+        popT0 = Date.now(); popD = delay || 0;
+        var sh = mode === "gallery" ? feed.querySelectorAll(".shade i") : [];
+        feed.querySelectorAll(".card").forEach(function (c, i) { c.classList.add("pop"); c._i = i; c._sh = sh[i]; if (sh[i]) sh[i].classList.add("pop"); popSeen.observe(c); });
       }
     }
     // Catégorie de photos (ex. « PHOTOGRAPHY ») : tous ses projets sont en images seulement (page Slate « illustration »,
@@ -1152,8 +1158,17 @@
         if (popSeen) g.querySelectorAll(".sc-big, .sc-s").forEach(function (m, k) { m.classList.add("pop"); m.style.setProperty("--pd", (k ? 120 + k * 70 : 0) + "ms"); popSeen.observe(m); });
       });
     }
+    // Films à l'écran dès l'affichage : en cascade après l'animation du nom (delay de render) ; ensuite, au défilement, par rangée.
+    var popT0 = 0, popD = 0;
     var popSeen = "IntersectionObserver" in window && !reduceMotion ? new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); popSeen.unobserve(e.target); } });
+      var first = Date.now() - popT0 < 300;
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var t = e.target;
+        if (t._i != null) t.style.setProperty("--pd", (first ? popD + t._i * 70 : (t._i % (mode === "gallery" ? 3 : 1)) * 70) + "ms");
+        t.classList.add("in"); if (t._sh) { t._sh.style.setProperty("--pd", t.style.getPropertyValue("--pd")); t._sh.classList.add("in"); }
+        popSeen.unobserve(t);
+      });
     }, { root: work, threshold: 0.12 }) : null;
     function renderPhotos(list) {
       feed.className = "feed photos";
