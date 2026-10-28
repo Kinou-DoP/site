@@ -964,6 +964,11 @@
       if (autoCard !== keep) { snip(autoCard.querySelector(".still"), autoCard._p, false); }
       autoCard = null;
     }
+    function narrTypes(p) {
+      if (!/narrative/i.test(p.cat || "") || !p.types) return [];
+      var seen = { narrative: 1 };
+      return p.types.filter(function (t) { var k = String(t).trim().toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true; });
+    }
     function render(slug, cat, delay) {
       curCat = cat; focusCard = null; setTimeout(pickFocus, 900);
       cats.classList.toggle("past", slug === FIC && PAST.indexOf(cat) > -1); subRow(slug, cat);
@@ -1001,7 +1006,10 @@
         var ftag = slug === FIC ? [p.genre].concat(p.platforms || []).filter(Boolean) : [];
         if (ftag.length) { var tg = document.createElement("span"); tg.className = "ctag"; tg.textContent = ftag.join(" · "); d.appendChild(tg); }
         if (slug === FIC && (cat === "FEATURED" || cat === "COMING SOON") && ficDate(p.date)) { var dt = document.createElement("span"); dt.className = "cdate"; dt.textContent = ficDate(p.date); d.appendChild(dt); } // sur la carte, pas la vignette (agrandie au survol)
-        if (p.cat && cat === "FEATURED" && slug !== FIC) { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = p.cat; (mode === "gallery" ? meta : st).appendChild(cc); }
+        // Films « Narrative » : types de contenu Slate (Short Film, Series…, lus par le robot de l'admin → p.types) à la suite de la
+        // catégorie dans FEATURED, seuls dans l'onglet Narrative (Narrative jamais écrit deux fois).
+        var clab = p.cat && cat === "FEATURED" && slug !== FIC ? [p.cat].concat(narrTypes(p)) : cat === p.cat ? narrTypes(p) : [];
+        if (clab.length) { var cc = document.createElement("span"); cc.className = "ccat"; cc.textContent = clab.join(" · "); (mode === "gallery" ? meta : st).appendChild(cc); }
         d.appendChild(st); d.appendChild(meta); feed.appendChild(d);
         liveThumb(st, p);
         d._p = p;

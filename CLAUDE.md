@@ -237,7 +237,8 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
    lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
 8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight », « fiction », « press » (à venir), « contact »,
    masqués sous 700px (dans le menu du téléphone) ; à droite « cinematographers ».
-10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
+10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras ; films Narrative : suivie des types de contenu Slate, « NARRATIVE · SHORT FILM »,
+   et ces types seuls dans l'onglet Narrative — `narrTypes`, `overrides[<id>].types` écrit par le robot de l'admin, Gus 29/10) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
    toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.
 11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit ; plusieurs chefs op = noms plus petits) ; pas de fond coloré de remplacement (noir) ;
    on arrive sur un film au hasard parmi les 10, puis l'ordre de la bande.
@@ -287,6 +288,13 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
 ## À faire (noté par Gus)
+- **Vignettes du spotlight / de la fiction qui sautent de quelques pixels** (à la fin du zoom de survol, page zoomée) : `will-change`
+  déjà essayé (28/10), pas suffisant d'après Gus (29/10) ; à reprendre plus tard.
+- **Variante des pages Narrative** (idée de Gus 29/10, ancien site kinou.fr/vadim-narrative) : par projet, vidéo en grand (extrait au survol),
+  titre + crédits + type (Short Film, Series…) à côté, 6 stills autour ; téléphone : 2 stills, la vidéo, 4 stills ; séparateur entre
+  projets ; clic vidéo = lecteur + toute la galerie ; clic still = image en grand + galerie entière ; projet en stills seulement : 1re
+  image en grand + les 6 suivantes. Admin : bouton « créer un onglet fiction » sur la fiche, projets ajoutés un par un (vidéo Slate
+  + lien de stills). En discussion, pas commencé.
 - **Clés GitHub de l'admin à modifier** (Gus, pas encore fait au 28/10) : sur github.com → Settings → Developer settings →
   Fine-grained tokens, ajouter le dépôt **Kinou-DoP/site** (Contents : Read and write) à la clé de chaque personne qui publie.
   Sans ça, `sharePage` (admin) ne peut pas écrire `<slug>/index.html` : les liens partagés d'un chef op n'affichent pas sa
