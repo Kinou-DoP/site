@@ -1345,6 +1345,7 @@
           // Zoom réglé dans l'admin (about.zoom) : agrandissement vers le point de cadrage.
           aboutbg.style.transformOrigin = d.pos || "center 30%";
           aboutbg.style.transform = d.zoom > 1 ? "scale(" + d.zoom + ")" : "";
+          aboutbg.style.filter = d.color ? "none" : ""; // noir et blanc sauf si décoché dans l'admin (about.color)
           document.body.classList.add("about-on");
         }
         about.style.animation = "none"; void about.offsetWidth; about.style.animation = "";

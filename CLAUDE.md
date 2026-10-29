@@ -306,7 +306,8 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
    Sur ordinateur, en arrivant sur un onglet (page d'un chef op ou changement d'onglet), le 1er film est déjà « survolé »
    (extrait + fond flou, `autoFirst`) ; dès qu'on survole un film, fonctionnement normal (`dropAuto`). Pas si on arrive
    de l'accueil sur un film présélectionné (`selCard`).
-   Portrait de l'onglet About : toujours en noir et blanc (`filter: grayscale(1)` sur `#aboutbg`).
+   Portrait de l'onglet About : en noir et blanc (`filter: grayscale(1)` sur `#aboutbg`), sauf si l'interrupteur « Noir et blanc sur le
+   site » est décoché dans l'admin (`about.color: true` → couleur).
    Cadrage : `about.pos` (background-position) ; zoom `about.zoom` = `transform: scale` avec `transform-origin` = pos.
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
