@@ -1330,6 +1330,13 @@
           var a = document.createElement("a"); a.textContent = l[0] + " \u2197"; a.href = u; a.target = "_blank"; a.rel = "noopener";
           links.appendChild(a);
         });
+        // Autres liens ajoutés dans l'admin (IMDb, Vimeo…) : about.links = [{ label, url }], dans l'ordre.
+        (d.links || []).forEach(function (l) {
+          var u = String(l.url || "").trim(), t = String(l.label || "").trim(); if (!u || !t) return;
+          if (!/^[a-z]+:/i.test(u)) u = "https://" + u;
+          var a = document.createElement("a"); a.textContent = t.toUpperCase() + " \u2197"; a.href = u; a.target = "_blank"; a.rel = "noopener";
+          links.appendChild(a);
+        });
         if (links.children.length) about.appendChild(links);
         work.classList.add("about-mode"); work.scrollTop = 0; clearProj();
         if (d.img) {
