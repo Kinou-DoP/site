@@ -26,6 +26,14 @@ possible. On travaille **uniquement sur GitHub** :
   l'admin, ou le robot GitHub de l'admin (Actions, gratuit : `tools/fill-home.mjs`, lit Slate directement).
   Slate n'autorise pas la lecture depuis le navigateur (pas de CORS) : l'admin ne peut pas lire Slate lui-même.
 
+**Depuis le 30/10, les fonctions Netlify ne répondent plus du tout** (503 « Usage exceeded ») :
+- le site (GitHub Pages) lit les données **directement dans le dépôt admin public** (`DATA_BASE` =
+  `https://raw.githubusercontent.com/Kinou-DoP/admin/main/data/`, cache 5 min, pas de vidage possible) ; `/api/dp` n'est plus
+  appelé hors Netlify (`ON_NETLIFY`) : la copie des clips enregistrée dans la fiche par l'admin fait foi ;
+- l'admin fait lire Slate par le **robot GitHub** (`tools/ask.mjs` + `.github/workflows/slate-ask.yml` du dépôt admin, `data/ask/`,
+  environ 1 min par lecture) dès que Netlify répond 503 : import / « Relire le bundle », liens de stills et vidéos sous un film,
+  extrait au survol, bande de l'accueil. `tools/slate.mjs` de l'admin = copie de `netlify/functions/slate.mjs` (garder identiques).
+
 Contournements en place (à retirer ou simplifier au retour sur Netlify) :
 - Vidéo ajoutée sous un film (`extras`) : `/api/stills` figé ne lit que les images ; l'admin lit alors la page comme une
   bande (`/api/reel`, 1er film : titre, extrait, vignette, **sans `full`**). Le robot GitHub de l'admin ajoute le `full`
