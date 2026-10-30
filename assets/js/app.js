@@ -17,8 +17,10 @@
   if (route()) document.documentElement.classList.add("deep");
   function undeep(ms) { setTimeout(function () { document.documentElement.classList.remove("deep"); }, ms || 0); }
   // Donnees JSON : publiees par l'admin (repo Kinou-DoP/admin), lues ici par le site officiel et la beta.
-  // (via /api/data du site, qui les lit dans GitHub ; en local, on passe par la beta)
-  var DATA_BASE = /(^|\.)netlify\.app$|(^|\.)kinou\.fr$/.test(location.hostname) ? "/api/data/" : "https://beta--kinou-test.netlify.app/api/data/";
+  // Sur Netlify : via /api/data du site (qui les lit dans GitHub). Ailleurs (GitHub Pages, en local) : directement dans le dépôt
+  // admin public (raw.githubusercontent.com, cache 5 min) — les fonctions Netlify de la beta sont coupées (« Usage exceeded », 30/10).
+  var ON_NETLIFY = /(^|\.)netlify\.app$|(^|\.)kinou\.fr$/.test(location.hostname);
+  var DATA_BASE = ON_NETLIFY ? "/api/data/" : "https://raw.githubusercontent.com/Kinou-DoP/admin/main/data/";
   function getJSON(path) {
     return fetch(DATA_BASE + path).then(function (r) {
       if (!r.ok) throw new Error(r.status + " " + DATA_BASE + path);
@@ -485,7 +487,7 @@
     // Fiche avec bundle Slate : la page s'affiche tout de suite avec la copie enregistree dans la fiche,
     // puis se met a jour sans bruit quand /api/dp/<slug> (lu sur Slate, cache 10 min) repond, si quelque chose a change.
     function live(d) {
-      if (!d.bundle) return;
+      if (!d.bundle || !ON_NETLIFY) return; // /api/dp n'existe que sur Netlify : ailleurs, la copie de la fiche (tenue à jour par l'admin)
       fetch(DATA_BASE.replace(/data\/$/, "") + "dp/" + d.slug).then(function (r) { if (!r.ok) throw r; return r.json(); }).then(function (s) {
         if (JSON.stringify(s.clips) === JSON.stringify(d.clips) && JSON.stringify(s.categories) === JSON.stringify(d.categories)) return;
         d.categories = s.categories; d.clips = s.clips; register(d);
