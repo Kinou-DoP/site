@@ -416,7 +416,7 @@ html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: h
 @media (min-width: 901px) {
   body > .modes { position: fixed; z-index: 3; top: calc(var(--kinou-zm) - 34px); left: 240px; margin: 0; opacity: 0; pointer-events: none; transition: opacity .3s; }
   body.viewing.has-work > .modes { opacity: 1; pointer-events: auto; transition: opacity .5s .6s; }
-  body.about-on > .modes, body.photos-on > .modes { visibility: hidden; }
+  body.about-on > .modes, body.photos-on > .modes, body:has(.work.about-mode) > .modes { visibility: hidden; } /* About : pas de grille / colonne, avec ou sans portrait */
   .cats { top: calc(var(--kinou-zm) + 16px); }
   .work { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 4px); mask-image: linear-gradient(to bottom, transparent, #000 4px); }
 }
