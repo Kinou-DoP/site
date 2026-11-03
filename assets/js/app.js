@@ -710,13 +710,19 @@
         var ps = pp.cloneNode(); ps.className = "pposter-s"; pcap.appendChild(ps);
       }
       var src = p.full || (p.nosnip ? "" : p.video); // film complet (avec son) ; l'extrait seulement hors accueil
-      pstage.style.backgroundImage = src || p._big !== undefined ? "none" : bgFor(p); // vidéo, ou image cliquée (présentation vidéo + stills) : fond noir (sinon l'image apparaît en double autour)
+      // Projet en images avec une seule image : elle s'affiche en grand, à la place du film, pas en galerie d'une case (Gus 03/11).
+      var own = p.stills && p.stills.length ? p.stills : p.images && p.images.length ? p.images : [];
+      var solo = !src && p._big === undefined && own.length === 1 ? own[0] : null;
+      pstage.style.backgroundImage = src || solo || p._big !== undefined ? "none" : bgFor(p); // vidéo, ou image cliquée (présentation vidéo + stills) : fond noir (sinon l'image apparaît en double autour)
       if (src) {
         var v = document.createElement("video");
         v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = "auto";
         if (p.img) v.poster = p.img;
         v.src = src; pstage.appendChild(v);
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
+      } else if (solo) {
+        var im1 = document.createElement("img"); im1.src = solo; im1.alt = p.title; im1.className = "pbig"; pstage.appendChild(im1);
+        im1.addEventListener("click", function () { showStill(0); });
       } else if (p.img) {
         var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
         // Image d'une présentation « vidéo + stills » : clic = en plein écran (flèches : toute la galerie).
@@ -740,7 +746,7 @@
       if (plab.length) { var pt = document.createElement("span"); pt.className = "ptypes"; pt.textContent = plab.join(" · "); pcap.insertBefore(pt, pcap.firstChild); }
       var s = document.createElement("p"); s.textContent = p.sub || p.cat; pcap.appendChild(s);
       if (spotDps) pcap.appendChild(dpLine(p, "pdop", true));
-      buildStills(p, src);
+      buildStills(p, src, solo);
       player.scrollTop = 0;
       player.classList.add("on"); pglass.classList.add("on");
     }
@@ -759,14 +765,16 @@
     var seen = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { seen.unobserve(e.target); reveal(e.target); } });
     }, { root: player }) : null;
-    function buildStills(p, src) {
+    function buildStills(p, src, solo) {
       if (seen) seen.disconnect();
       pgal.textContent = ""; if (plight.classList.contains("on")) closeStill();
       var blocks = blocksOf(p, src), all = [];
       stillsP = { title: p.title, stills: all };
+      // Image seule déjà en grand : pas répétée dessous, mais agrandie au clic (1re image de la visionneuse).
+      if (solo && blocks[0] && blocks[0].stills && blocks[0].stills.length === 1 && blocks[0].stills[0] === solo) { all.push(solo); blocks = blocks.slice(1); }
       player.classList.toggle("has-stills", blocks.length > 0);
       // Projet sans film qui commence par des stills : pas de grande image, la galerie directement sous le titre.
-      player.classList.toggle("nostage", !src && p._big === undefined && !!(blocks[0] && blocks[0].stills));
+      player.classList.toggle("nostage", !src && !solo && p._big === undefined && !!(blocks[0] && blocks[0].stills));
       blocks.forEach(function (x) {
         if (x.stills && x.stills.length) {
           var g = document.createElement("div"); g.className = "pgrid"; pgal.appendChild(g);

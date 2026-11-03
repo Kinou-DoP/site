@@ -128,6 +128,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   Projet en images seulement (type « illustration » sur Slate, sans vidéo) : ses images deviennent `stills` à la lecture du bundle
   (pas encore en ligne : fonctions Netlify figées ; en attendant, le robot de l'admin les met dans `overrides[<id>].images`) ;
   le lecteur n'a pas de grande image (`.nostage`) : la galerie directement sous le titre et les crédits.
+  **Une seule image** (ex. The Conjuring 5 chez Julien Ramirez Hernan, Gus 03/11) : elle s'affiche en grand à la place du film
+  (`solo` dans `openPlayer`, `img.pbig` à sa forme, clic = plein écran), pas en galerie d'une case.
 - `hover` (dans `overrides[<id>]` d'un projet en stills, case « Extrait vidéo au survol » de l'admin) : `{ link, title, video, img? }`,
   extrait d'une autre vidéo Slate (court métrage qu'on ne peut pas montrer en entier, sans bande-annonce) ; `register()` le
   met dans `p.video` avec `p.nosnip` : il joue au survol (et au repère sur téléphone), jamais dans le lecteur (galerie au clic).
