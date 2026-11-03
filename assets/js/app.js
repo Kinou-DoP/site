@@ -768,7 +768,7 @@
     function buildStills(p, src, solo) {
       if (seen) seen.disconnect();
       pgal.textContent = ""; if (plight.classList.contains("on")) closeStill();
-      var blocks = blocksOf(p, src), all = [];
+      var blocks = blocksOf(p, src), all = [], order = [], run = ++galRun;
       stillsP = { title: p.title, stills: all };
       // Image seule déjà en grand : pas répétée dessous, mais agrandie au clic (1re image de la visionneuse).
       if (solo && blocks[0] && blocks[0].stills && blocks[0].stills.length === 1 && blocks[0].stills[0] === solo) { all.push(solo); blocks = blocks.slice(1); }
@@ -785,7 +785,7 @@
             b.setAttribute("aria-label", "Image " + (k + 1));
             b.addEventListener("click", function () { showStill(k); });
             g.appendChild(b);
-            if (seen) seen.observe(b); else reveal(b);
+            order.push({ src: b.dataset.src, el: b });
           });
           return;
         }
@@ -796,12 +796,24 @@
         v.src = x.full || x.video; w.appendChild(v); pgal.appendChild(w);
         if (seen) seen.observe(w); else reveal(w);
       });
+      orderedLoad(order, function (it) { it.el.style.backgroundImage = 'url("' + it.src + '")'; it.el.classList.add("shown"); },
+        function () { return run === galRun && player.classList.contains("on"); });
     }
     // Une seule video du lecteur joue a la fois (film et videos du dessous).
     player.addEventListener("play", function (e) {
       [].forEach.call(player.querySelectorAll("video"), function (v) { if (v !== e.target) v.pause(); });
     }, true);
     // L'image monte une fois chargee (pas de case vide qui apparait) ; une video monte tout de suite.
+    // Images d'une galerie chargées dans l'ordre (4 d'avance au plus) et affichées dans l'ordre : plus de « trous » quand
+    // les dernières arrivent avant les premières (Gus 03/11). alive() faux = galerie fermée / remplacée : on arrête.
+    function orderedLoad(items, show, alive) {
+      var next = 0, done = 0;
+      function pump() { while (next < items.length && next - done < 4) load(items[next++]); }
+      function load(it) { var im = new Image(); im.onload = im.onerror = function () { it.ok = true; flush(); }; im.src = it.src; }
+      function flush() { if (!alive()) return; while (done < items.length && items[done].ok) show(items[done++]); pump(); }
+      pump();
+    }
+    var galRun = 0;
     function reveal(b) {
       if (b.classList.contains("pxv")) { b.classList.add("shown"); return; }
       var im = new Image();
@@ -1222,6 +1234,7 @@
         layout();
       })();
       function layout() {
+        var order = [];
         groups.forEach(function (g) {
           var p = g.p;
           if (groups.length > 1) { // plusieurs séries : leur titre au-dessus de chacune
@@ -1241,14 +1254,14 @@
             b.className = "ph"; b.style.aspectRatio = r; b.style.setProperty("--i", k++ % 6); b.setAttribute("aria-label", "Photo " + (i + 1));
             im.alt = p.title;
             var show = function () { b.classList.add("shown"); };
-            if (g.probe) { if (im.complete) show(); else im.onload = im.onerror = show; }
-            else { im.loading = "lazy"; im.decoding = "async"; im.onload = im.onerror = show; im.src = u; }
+            order.push({ src: u, im: im, show: show }); // affichées dans l'ordre (orderedLoad), même déjà mesurées
             b.appendChild(im);
             var best = 0; for (var c2 = 1; c2 < n; c2++) if (hs[c2] < hs[best] - 1e-6) best = c2;
             cols[best].appendChild(b); hs[best] += 1 / r;
             b.addEventListener("click", function () { openPhoto(all, i, p.title); });
           });
         });
+        orderedLoad(order, function (it) { if (!it.im.src) it.im.src = it.src; it.show(); }, function () { return run === renderRun; });
       }
     }
     // Photo en grand, sans passer par le lecteur : la fermer revient directement à la page.

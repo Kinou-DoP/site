@@ -145,6 +145,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   `overrides[<id>].ratios` (largeur/hauteur, robot) : colonnes remplies en JS dans l'ordre (colonne la moins haute), chaque case
   a déjà la forme de sa photo → rien ne bouge au chargement (avant, colonnes CSS = photos qui sautaient). Sans `ratios` : le site
   lit la taille des photos avant de les placer (≤ 4 s).
+- Galeries (lecteur et catégorie de photos) : images chargées **dans l'ordre de la bande**, 4 d'avance au plus, et affichées dans
+  l'ordre (une image n'apparaît que quand toutes celles d'avant sont là : `orderedLoad`, Gus 03/11) — plus de « trous ».
 - `about.links` : liens en plus dans l'onglet About (`[{ label, url }]`, admin « + Ajouter un lien » : IMDb, Vimeo…), après CV / INSTAGRAM /
   WEBSITE, nom en majuscules + ↗ ; lien sans nom ou sans adresse ignoré, `https://` ajouté s'il manque.
 - `about.img` : chemin relatif au dossier `data/dps/`.
