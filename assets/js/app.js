@@ -434,8 +434,16 @@
     var MULTI = { spotlight: true, fiction: true }; // pages de plusieurs chefs op (« DoP Nom » cliquable, pas d'About)
     function ficToDP(s) {
       var ov = s.overrides || {}, clips = [];
+      // NEW RELEASES : 9 films au plus (Gus 04/11) ; au-delà, les plus anciens (date de sortie ; sans date = tout juste ajouté,
+      // donc gardé ; même date : ordre de la bande) vont dans PAST RELEASES. Même règle dans l'admin (ficCapNew).
+      var keepNew = {};
+      (s.films || []).map(function (f, i) { return { f: f, i: i, d: (ov[f.slate] || {}).date || "9999" }; })
+        .filter(function (x) { return (ov[x.f.slate] || {}).status === "new"; })
+        .sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : a.i - b.i; })
+        .slice(0, 9).forEach(function (x) { keepNew[x.f.slate] = true; });
       (s.films || []).forEach(function (f, i) {
         var o = ov[f.slate] || {}, st = o.status || "past";
+        if (st === "new" && !keepNew[f.slate]) st = "past";
         var base = { title: f.title, slate: f.slate };
         ["sub", "video", "full", "img", "images", "ratios"].forEach(function (k) { if (f[k]) base[k] = f[k]; });
         if (f.artists && f.artists.length) base.dps = f.artists.map(dpByName);

@@ -151,7 +151,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   lenses, awards, synopsis, synopsisEn }` (texte libre ; `runtime` seul chiffre → « 90 min » ; `awards` une ligne par prix / sélection,
   en une seule colonne ; `synopsis` = français, `synopsisEn` = anglais, paragraphes séparés par une ligne vide ; un seul rempli = lui
   seul, les deux = anglais d'abord + choix EN / FR comme les bios, même mémoire `kinou-lang`). Lecteur (`fillInfo`, `.pinfo` sous les crédits) : à gauche « 2025 | 8 episodes · 45 min |
-  1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis CAMERA / LENSES ; à droite les prix (blanc) ; synopsis dessous
+  1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis CAMERA / LENSES ; à droite les prix (blanc, alignés sur le bord
+  droit de la vidéo comme « NARRATIVE · FEATURE FILM ») ; synopsis dessous
   (gris) ; une colonne sur téléphone. Présentation vidéo + stills : la même ligne sous les crédits (`.sc-spec`).
 - `about.links` : liens en plus dans l'onglet About (`[{ label, url }]`, admin « + Ajouter un lien » : IMDb, Vimeo…), après CV / INSTAGRAM /
   WEBSITE, nom en majuscules + ↗ ; lien sans nom ou sans adresse ignoré, `https://` ajouté s'il manque.
@@ -201,7 +202,9 @@ droite du bandeau (grille à l'arrivée, colonne centrée de 1100px max, adresse
 les onglets se règlent **à la main** dans l'admin, film par film (`overrides[<id>]`) : `status` `new` | `soon` | `past` (défaut past),
 `genre` (FEATURE FILM, SERIES, DOCUMENTARY, SHORT FILM ; films sortis), `date` (AAAA-MM-JJ), `poster` (affiche déposée dans l'admin →
 `data/fiction/<id>-<horodatage>.webp`, lue via `DATA_BASE`). `ficToDP` (app.js) : NEW RELEASES = FEATURED interne (`catLabel`),
-COMING SOON, PAST RELEASES (tous les films sortis) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
+COMING SOON, PAST RELEASES (tous les films sortis) ; **NEW RELEASES : 9 films au plus** (Gus 04/11) : au-delà, les plus anciens
+(date de sortie ; sans date = tout juste ajouté, gardé ; même date : ordre de la bande) passent d'eux-mêmes en PAST RELEASES (`keepNew`
+dans `ficToDP` ; l'admin écrit aussi le changement, `ficCapNew`) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
 quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. Genre + plateformes (`platforms`, admin) en haut à gauche de la vignette (« FEATURE FILM · NETFLIX », `.ctag`, gris sans ombre, tous les onglets,
 au survol / film sélectionné sur téléphone, Gus 29/10). Date de sortie : carré blanc « 16 Oct » (mois en anglais) **en haut à droite** de la
 vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement dans NEW RELEASES et COMING SOON
@@ -330,6 +333,10 @@ passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une co
 7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
 
 ## À faire (noté par Gus)
+- **Idées pour plus tard (Gus 04/11)** :
+  - bouton dans l'admin qui **préremplit les infos d'un film** (année, durée, épisodes, synopsis FR / EN) depuis **TMDB** (themoviedb.org,
+    clé API gratuite à créer), à partir du titre ; reste à vérifier et à compléter caméra, optiques, prix ;
+  - **traduction automatique** des bios et des synopsis (FR ↔ EN) dans l'admin, à relire avant publication.
 - **Vignettes du spotlight / de la fiction qui sautent de quelques pixels** (à la fin du zoom de survol, page zoomée) : `will-change`
   déjà essayé (28/10), pas suffisant d'après Gus (29/10) ; à reprendre plus tard.
 - **Clés GitHub de l'admin à modifier** (Gus, pas encore fait au 28/10) : sur github.com → Settings → Developer settings →

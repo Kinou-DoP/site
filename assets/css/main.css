@@ -383,7 +383,7 @@ body.closing #roulette { transition: opacity .3s .7s; }
 #player .pinfo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 48px; margin-top: 28px; font-family: var(--kinou-sans); }
 #player .pinfo[hidden] { display: none; }
 #player .pinfo p { margin: 0; }
-#player .pi-a { grid-column: 1; } #player .pi-b { grid-column: 2; }
+#player .pi-a { grid-column: 1; } #player .pi-b { grid-column: 2; justify-self: end; text-align: right; } /* prix collés à droite, sous le bord droit de la vidéo (Gus 04/11) */
 #player .pi-line { font-size: 15px; line-height: 1.5; color: var(--kinou-fg); }
 #player .pi-line i { font-style: normal; margin: 0 .7em; color: rgba(255,252,235,.35); }
 #player .pi-tech { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-top: 10px; font-size: 13px; line-height: 1.6; color: rgba(255,252,235,.85); }
@@ -396,7 +396,7 @@ body.closing #roulette { transition: opacity .3s .7s; }
 #player .pi-syn .lang button:hover { opacity: .75; }
 #player .pi-syn .lang button.on { opacity: 1; }
 #player .pi-awards li { break-inside: avoid; } /* prix : une seule colonne, une ligne par prix */
-@media (max-width: 700px) { #player .pinfo { grid-template-columns: 1fr; gap: 16px; margin-top: 22px; } #player .pi-a, #player .pi-b { grid-column: 1; } }
+@media (max-width: 700px) { #player .pinfo { grid-template-columns: 1fr; gap: 16px; margin-top: 22px; } #player .pi-a, #player .pi-b { grid-column: 1; justify-self: start; text-align: left; } }
 .sc-info p.sc-spec { color: rgba(255,252,235,.75); }
 #player .pdps { margin: 0 0 6px; font-family: var(--kinou-sans); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--kinou-fg); }
 #player .pdps a { padding: 0; font: inherit; color: inherit; transition: opacity .2s; }
