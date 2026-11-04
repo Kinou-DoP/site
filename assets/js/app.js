@@ -746,9 +746,42 @@
       if (plab.length) { var pt = document.createElement("span"); pt.className = "ptypes"; pt.textContent = plab.join(" · "); pcap.insertBefore(pt, pcap.firstChild); }
       var s = document.createElement("p"); s.textContent = p.sub || p.cat; pcap.appendChild(s);
       if (spotDps) pcap.appendChild(dpLine(p, "pdop", true));
+      fillInfo(p);
       buildStills(p, src, solo);
       player.scrollTop = 0;
       player.classList.add("on"); pglass.classList.add("on");
+    }
+    // Infos d'un film (admin, overrides[<id>].info, Gus 04/11), sous les crédits : « 2025 | 90 min | 1.85 | Netflix » et
+    // caméra / optiques à gauche, prix & sélections à droite (en blanc), synopsis dessous (en gris). Rien si aucune info.
+    var pinfo = document.createElement("div"); pinfo.className = "pinfo"; pcap.parentNode.insertBefore(pinfo, pcap.nextSibling);
+    function specOf(p) {
+      var f = p.info || {}, d = String(f.runtime || "").trim();
+      if (/^\d+$/.test(d)) d += " min";
+      if (f.episodes) d = f.episodes + " episode" + (+f.episodes > 1 ? "s" : "") + (d ? " · " + d : "");
+      return [f.year, d, f.ratio, f.platforms || (p.platforms || []).join(", ")].filter(Boolean);
+    }
+    function fillInfo(p) {
+      var f = p.info || {}, spec = specOf(p);
+      pinfo.textContent = "";
+      function el2(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; }
+      var a = el2("div", "pi-a"), b = el2("div", "pi-b");
+      if (spec.length) {
+        var l = el2("p", "pi-line");
+        spec.forEach(function (x, i) { if (i) l.appendChild(el2("i", "", "|")); l.appendChild(document.createTextNode(x)); });
+        a.appendChild(l);
+      }
+      if (f.camera || f.lenses) {
+        var t = el2("p", "pi-tech");
+        [["Camera", f.camera], ["Lenses", f.lenses]].forEach(function (x) { if (!x[1]) return; var w = el2("span", "", ""); w.appendChild(el2("b", "", x[0])); w.appendChild(document.createTextNode(x[1])); t.appendChild(w); });
+        a.appendChild(t);
+      }
+      var aw = String(f.awards || "").split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
+      if (aw.length) { var ul = el2("ul", "pi-awards"); aw.forEach(function (x) { ul.appendChild(el2("li", "", x)); }); b.appendChild(ul); }
+      if (a.children.length) pinfo.appendChild(a);
+      if (b.children.length) pinfo.appendChild(b);
+      var syn = String(f.synopsis || "").split(/\n\s*\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+      if (syn.length) { var sy = el2("div", "pi-syn"); syn.forEach(function (x) { sy.appendChild(el2("p", "", x)); }); pinfo.appendChild(sy); }
+      pinfo.hidden = !pinfo.children.length;
     }
     // Sous les credits, dans l'ordre de l'admin (p.extras) : galeries de stills et autres videos.
     // Ancien format : p.stills seul. Projet sans film : ses images (p.stills) d'abord, puis les extras.
@@ -1189,6 +1222,7 @@
         var info = document.createElement("div"); info.className = "sc-info";
         var h = document.createElement("h3"); h.textContent = p.title; info.appendChild(h);
         if (p.sub) { var sb = document.createElement("p"); sb.textContent = p.sub; info.appendChild(sb); }
+        var spec = specOf(p); if (spec.length) { var sp = document.createElement("p"); sp.className = "sc-spec"; sp.textContent = spec.join("  |  "); info.appendChild(sp); }
         g.appendChild(info);
         small.forEach(function (u, k) {
           var b = document.createElement("button"); b.className = "sc-s s" + k; b.setAttribute("aria-label", p.title + " — image " + (k + 1));
