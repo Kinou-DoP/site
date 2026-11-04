@@ -779,8 +779,28 @@
       if (aw.length) { var ul = el2("ul", "pi-awards"); aw.forEach(function (x) { ul.appendChild(el2("li", "", x)); }); b.appendChild(ul); }
       if (a.children.length) pinfo.appendChild(a);
       if (b.children.length) pinfo.appendChild(b);
-      var syn = String(f.synopsis || "").split(/\n\s*\n/).map(function (x) { return x.trim(); }).filter(Boolean);
-      if (syn.length) { var sy = el2("div", "pi-syn"); syn.forEach(function (x) { sy.appendChild(el2("p", "", x)); }); pinfo.appendChild(sy); }
+      // Synopsis français (synopsis) et anglais (synopsisEn) : un seul renseigné = lui seul ; les deux = anglais d'abord, choix EN / FR
+      // comme pour les bios (même mémoire du choix, « kinou-lang » ; Gus 04/11).
+      function paras(t) { return String(t || "").split(/\n\s*\n/).map(function (x) { return x.trim(); }).filter(Boolean); }
+      var fr = paras(f.synopsis), en = paras(f.synopsisEn);
+      if (fr.length || en.length) {
+        var sy = el2("div", "pi-syn"), txt = el2("div"), lang = en.length ? "en" : "fr";
+        if (en.length && fr.length) {
+          try { if (localStorage.getItem("kinou-lang") === "fr") lang = "fr"; } catch (e) {}
+          var tg = el2("div", "lang");
+          ["en", "fr"].forEach(function (l) {
+            var bt = el2("button", l === lang ? "on" : "", l.toUpperCase()); bt.type = "button"; bt.setAttribute("aria-label", l === "fr" ? "Français" : "English");
+            bt.addEventListener("click", function () {
+              lang = l; try { localStorage.setItem("kinou-lang", l); } catch (e) {}
+              tg.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === bt); }); fillSyn();
+            });
+            tg.appendChild(bt);
+          });
+          sy.appendChild(tg);
+        }
+        var fillSyn = function () { txt.textContent = ""; (lang === "en" ? en : fr).forEach(function (x) { txt.appendChild(el2("p", "", x)); }); };
+        fillSyn(); sy.appendChild(txt); pinfo.appendChild(sy);
+      }
       pinfo.hidden = !pinfo.children.length;
     }
     // Sous les credits, dans l'ordre de l'admin (p.extras) : galeries de stills et autres videos.
