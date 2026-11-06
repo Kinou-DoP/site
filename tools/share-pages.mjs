@@ -25,8 +25,9 @@ for (var d of index.dps || []) {
   if (!/^[a-z0-9-]+$/.test(d.slug) || PAGES[d.slug]) continue;
   var fiche = null; try { fiche = await get("dps/" + d.slug + ".json"); } catch (e) {}
   var a = (fiche && fiche.about) || {}, img = "";
-  // Photo : le portrait (onglet About) ; sinon la vignette du 1er film FEATURED.
-  if (a.img) img = /^https?:/.test(a.img) ? a.img : DATA + "dps/" + a.img;
+  // Photo : l'image d'aperçu du portrait (about.og), sinon le portrait (onglet About), sinon la vignette du 1er film FEATURED.
+  if (a.og) img = DATA + "dps/" + a.og; // portrait en JPEG, noir et blanc ou couleur comme sur le site (makeOg de l'admin)
+  else if (a.img) img = /^https?:/.test(a.img) ? a.img : DATA + "dps/" + a.img;
   else if (fiche && fiche.clips) { var c = fiche.clips.filter(function (x) { return x.featured; }).sort(function (x, y) { return (x.featuredOrder || 0) - (y.featuredOrder || 0); })[0] || fiche.clips[0]; if (c && c.img) img = c.img; }
   fs.mkdirSync(d.slug, { recursive: true });
   fs.writeFileSync(d.slug + "/index.html", page(d.slug, d.name, img, "Cinematographer · kinou"));

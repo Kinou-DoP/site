@@ -432,8 +432,9 @@ sans accents ; `featured` pour l'onglet d'arrivée : ALL du spotlight, NEW RELEA
 (« kinou », l'adresse passe par 404.html) ; à faire si Gus le demande : pages d'aperçu par film (titre + vignette). Les anciennes adresses `#<slug>…`
 marchent toujours et sont réécrites. Le site reste une seule page : `<slug>/index.html` est une **page d'aperçu de lien**
 (nom + photo du chef op en balises Open Graph, pour WhatsApp, iMessage, Slack… qui ne lisent ni le JavaScript ni le « # »),
-qui renvoie en JavaScript vers `../#<slug>` ; fabriquée par `tools/share-pages.mjs` (photo = portrait About, sinon vignette du
-1er film FEATURED ; spotlight / fiction / contact : leur nom), lancé par `.github/workflows/share-pages.yml` à chaque push sur
+qui renvoie en JavaScript vers `../#<slug>` ; fabriquée par `tools/share-pages.mjs` (photo = `about.og`, portrait en JPEG noir et
+blanc, ou couleur si « Noir et blanc sur le site » est décoché, fabriqué par l'admin à la publication, `makeOg`, Gus 06/11 ; sinon
+portrait About, sinon vignette du 1er film FEATURED ; spotlight / fiction / contact : leur nom), lancé par `.github/workflows/share-pages.yml` à chaque push sur
 `beta` (ou à la main, onglet Actions) ; **et écrite par l'admin à chaque publication d'une fiche** (`sharePage` dans admin.js, même
 contenu : garder les deux identiques ; clé GitHub de la personne avec accès en écriture au dépôt site). Pas de passage régulier
 (il faudrait le workflow sur `main` : écarté, Gus 27/10). En attendant un aperçu, l'adresse d'un chef op marche quand même. Ne pas modifier ces dossiers à la main. Adresse sans page (onglet, chef op pas encore
