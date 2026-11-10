@@ -83,7 +83,7 @@ data/
 ├── site.json              # réglages (logo image : { logo: "brand/logo.png", logoHeight: 36 }) ; le site réduit le logo
 │                          # (8 × la hauteur affichée) et le garde dans le navigateur (localStorage « kinou-logo »)
 └── dps/
-    ├── index.json         # liste ordonnée des DPs : [{ slug, name, img? }]
+    ├── index.json         # liste ordonnée des DPs : [{ slug, name, img?, hidden? }] (hidden = page cachée, voir plus bas)
     ├── <slug>.json        # une fiche par DP (clips + about)
     └── img/               # portraits ABOUT
 ```
@@ -156,6 +156,9 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   (gris) ; une colonne sur téléphone. Présentation vidéo + stills : la même ligne sous les crédits (`.sc-spec`).
 - `about.links` : liens en plus dans l'onglet About (`[{ label, url }]`, admin « + Ajouter un lien » : IMDb, Vimeo…), après CV / INSTAGRAM /
   WEBSITE, nom en majuscules + ↗ ; lien sans nom ou sans adresse ignoré, `https://` ajouté s'il manque.
+- **Page cachée** (`hidden: true` dans l'entrée de `dps/index.json`, interrupteur « En ligne sur le site » de l'admin, Gus 10/11) :
+  absente de la liste et de la roulette, adresse directe sans effet, nom sans lien (accueil, spotlight, fiction : `dpByName` ne la
+  trouve pas), pas de page d'aperçu de lien (`tools/share-pages.mjs` la saute et supprime l'ancienne).
 - `about.img` : chemin relatif au dossier `data/dps/`.
 - Exception de mise en page = ajouter `"template": "special"` dans le JSON.
 

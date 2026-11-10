@@ -114,7 +114,7 @@
         p.dps.forEach(function (d, k) {
           if (k) { var amp = document.createElement("span"); amp.className = "amp"; amp.textContent = " & "; ns.appendChild(amp); }
           var parts = d.name.split(","), main = parts[0].trim(), tags = parts.slice(1).join(", ").trim();
-          var a = document.createElement("a"); a.href = pageURL(d.slug); a.dataset.slug = d.slug; a.dataset.name = d.name;
+          var a = document.createElement("a"); a.href = pageURL(d.slug); if (d.slug) a.dataset.slug = d.slug; a.dataset.name = d.name; // sans page (chef op hors liste ou caché) : nom sans lien
           var nm = document.createElement("span"); nm.className = "n"; nm.textContent = main; a.appendChild(nm);
           if (tags) { var tg = document.createElement("span"); tg.className = "tags"; tg.textContent = tags; a.appendChild(tg); }
           if (!d.slug) a.removeAttribute("href");
@@ -1796,8 +1796,11 @@
 
   Promise.all([getJSON("home.json"), getJSON("dps/index.json")]).then(function (r) {
     // Ancien format : { dp, slug } ; nouveau (admin, bande Slate) : dps: [{ name, slug }].
-    var slides = r[0].slides.map(function (p) { if (!p.dps) p.dps = [{ name: p.dp, slug: p.slug }]; return p; });
+    // Pages cachées dans l'admin (« En ligne sur le site » décoché, `hidden` dans index.json ; Gus 10/11) : ni dans la liste, ni
+    // ouvrables (adresse, liens) ; leur nom reste écrit sur l'accueil et sous les films, sans lien.
+    var off = {}, dps = r[1].dps.filter(function (d) { if (d.hidden) off[d.slug] = true; return !d.hidden; });
+    var slides = r[0].slides.map(function (p) { if (!p.dps) p.dps = [{ name: p.dp, slug: p.slug }]; p.dps.forEach(function (d) { if (off[d.slug]) delete d.slug; }); return p; });
     initHome(slides, r[0].duration);
-    initSite(r[1].dps, slides);
+    initSite(dps, slides);
   }).catch(function (e) { undeep(); console.error("kinou : chargement des donnees impossible", e); });
 })();

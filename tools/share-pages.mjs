@@ -22,7 +22,7 @@ function page(slug, title, image, desc) {
 }
 var index = await get("dps/index.json"), made = [];
 for (var d of index.dps || []) {
-  if (!/^[a-z0-9-]+$/.test(d.slug) || PAGES[d.slug]) continue;
+  if (!/^[a-z0-9-]+$/.test(d.slug) || PAGES[d.slug] || d.hidden) continue; // page cachée dans l'admin : pas d'aperçu (l'ancien est supprimé plus bas)
   var fiche = null; try { fiche = await get("dps/" + d.slug + ".json"); } catch (e) {}
   var a = (fiche && fiche.about) || {}, img = "";
   // Photo : l'image d'aperçu du portrait (about.og), sinon le portrait (onglet About), sinon la vignette du 1er film FEATURED.
