@@ -135,7 +135,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   met dans `p.video` avec `p.nosnip` : il joue au survol (et au repère sur téléphone), jamais dans le lecteur (galerie au clic).
 - `extras` (dans `overrides[<id>]` d'une fiche ou dans une slide de l'accueil) : ce qui s'affiche sous le film dans le lecteur,
   dans l'ordre de l'admin : `[{ link, title, stills: [...] } | { link, title, full, video, img }]` — galeries (3 colonnes, 2 sur
-  téléphone) et vidéos à la taille du film (montée en fondu comme les stills ; une seule vidéo joue à la fois).
+  téléphone) et vidéos à la taille du film (montée en fondu comme les stills ; une seule vidéo joue à la fois ; titre de la vidéo
+  en blanc au-dessus, en haut à gauche, comme celui du film : `.pxv .ptitle`, Gus 13/11).
   Remplace l'ancien `stills` + `stillsLink` des overrides (toujours lu s'il n'y a pas d'`extras`).
 - **Catégorie de photos** (ex. showreel `#photography` du bundle contenant la page Slate « illustration » des photos,
   `kinou.slateapp.com/work/<…>-photography`) : quand tous les projets d'un onglet (hors FEATURED) sont en images seulement,

@@ -851,6 +851,7 @@
           return;
         }
         var w = document.createElement("div"); w.className = "pxv";
+        if (x.title) { var t = document.createElement("h3"); t.className = "ptitle"; t.textContent = x.title; w.appendChild(t); }
         var v = document.createElement("video");
         v.controls = true; v.playsInline = true; v.preload = "metadata";
         if (x.img) v.poster = x.img;

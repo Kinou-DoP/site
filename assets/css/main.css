@@ -168,9 +168,11 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 #player .pgal { display: none; flex: none; flex-direction: column; align-items: center; gap: 32px; width: min(100%, 1800px); margin-top: 64px; padding-bottom: 22vh; }
 #player.has-stills .pgal { display: flex; }
 #player .pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; width: 100%; }
-#player .pxv { width: min(100%, 1400px, calc((100vh - 290px) * 16 / 9)); aspect-ratio: 16 / 9; background: #000; opacity: 0; }
+#player .pxv { width: min(100%, 1400px, calc((100vh - 290px) * 16 / 9)); opacity: 0; }
 #player .pxv.shown { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
-#player .pxv video { display: block; width: 100%; height: 100%; object-fit: contain; }
+#player .pxv video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; object-fit: contain; }
+/* Titre d'une vidéo ajoutée sous le film : en haut à gauche, comme le titre du film (Gus 13/11). */
+#player .pxv .ptitle { margin: 0 0 14px; }
 #player.nostage .pstage { display: none; }
 #player.nostage .pin { --pw: min(100%, 1800px); }
 #player.nostage .pgal { margin-top: 40px; }
