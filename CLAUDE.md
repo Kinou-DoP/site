@@ -44,6 +44,12 @@ Sans effet quand Slate répond. Le robot de l'admin (lecture des bundles) ne mar
 **Essai Cloudflare Pages (16/11)** : projet Cloudflare « kinou » de Gus relié au dépôt (branche de production `beta`, sans commande
 de construction, dossier `/`) → https://kinou-4tv.pages.dev/ (suffixe ajouté par Cloudflare, le nom « kinou » étant déjà pris) ; mis en ligne
 à chaque push sur `beta`, en même temps que GitHub Pages. Le site y marche tel quel (racine `/`, `404.html` renvoie vers `/#<chemin>`).
+**Fonctions Cloudflare** (`functions/`, Pages Functions, 16/11 ; partagé : `functions/_shared.js`, lecture de Slate = `netlify/functions/slate.mjs`) :
+`/api/data/<chemin>` (dernier commit de `main` de l'admin lu par git `info/refs` (sans clé, gardé 10 s), puis fichier de ce commit sur
+raw.githubusercontent.com : **publication visible en ~10 s** au lieu de 5 min ; le site sur `*.pages.dev` y lit les JSON, `JSON_BASE` / `ON_CF`
+dans app.js ; images et CV toujours en direct sur raw), `/api/bundle/<id>`, `/api/stills`, `/api/reel` (pour l'admin, `SITE` de admin.js),
+`/api/refresh/<slug>` (vérifie la clé GitHub, rien à vider). Pas de `/api/dp` (le site n'appelle Slate qu'à travers les fiches publiées).
+Quota gratuit : 100 000 appels de fonctions par jour (≈ 3 à 7 JSON par visite) ; 10 ms de calcul par appel (gros bundle : peut échouer → robot).
 À faire pour la bascule : brancher kinou.fr sur Cloudflare (DNS chez OVH), `IMG_CDN` / `thumb()` vers le redimensionnement d'images de
 Cloudflare (seulement sur un domaine à soi), `SITE_URL` de `tools/share-pages.mjs`, mentions légales (hébergeur), puis admin.
 

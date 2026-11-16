@@ -21,9 +21,13 @@
   // admin public (raw.githubusercontent.com, cache 5 min) — les fonctions Netlify de la beta sont coupées (« Usage exceeded », 30/10).
   var ON_NETLIFY = /(^|\.)netlify\.app$|(^|\.)kinou\.fr$/.test(location.hostname);
   var DATA_BASE = ON_NETLIFY ? "/api/data/" : "https://raw.githubusercontent.com/Kinou-DoP/admin/main/data/";
+  // Cloudflare Pages (essai, 16/11) : fiches JSON lues par la fonction /api/data du site (functions/), toujours à jour
+  // (dernier commit de l'admin) ; images et CV restent lus directement dans le dépôt (pas d'appel de fonction pour eux).
+  var ON_CF = /\.pages\.dev$/.test(location.hostname);
+  var JSON_BASE = ON_CF ? ROOT + "api/data/" : DATA_BASE;
   function getJSON(path) {
-    return fetch(DATA_BASE + path).then(function (r) {
-      if (!r.ok) throw new Error(r.status + " " + DATA_BASE + path);
+    return fetch(JSON_BASE + path).then(function (r) {
+      if (!r.ok) throw new Error(r.status + " " + JSON_BASE + path);
       return r.json();
     });
   }
