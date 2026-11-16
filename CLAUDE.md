@@ -41,6 +41,12 @@ Secours dans app.js (16/11) : `slateRaw(u)` lit l'adresse d'origine écrite en b
 galeries) et un écouteur `error` sur toutes les `<img>` chargent l'original en cas d'erreur (plus lourd : PNG / JPEG non réduits, 1–2,5 Mo).
 Sans effet quand Slate répond. Le robot de l'admin (lecture des bundles) ne marche pas pendant la panne.
 
+**Essai Cloudflare Pages (16/11)** : projet Cloudflare « kinou » de Gus relié au dépôt (branche de production `beta`, sans commande
+de construction, dossier `/`) → https://kinou-4tv.pages.dev/ (suffixe ajouté par Cloudflare, le nom « kinou » étant déjà pris) ; mis en ligne
+à chaque push sur `beta`, en même temps que GitHub Pages. Le site y marche tel quel (racine `/`, `404.html` renvoie vers `/#<chemin>`).
+À faire pour la bascule : brancher kinou.fr sur Cloudflare (DNS chez OVH), `IMG_CDN` / `thumb()` vers le redimensionnement d'images de
+Cloudflare (seulement sur un domaine à soi), `SITE_URL` de `tools/share-pages.mjs`, mentions légales (hébergeur), puis admin.
+
 Contournements en place (à retirer ou simplifier au retour sur Netlify) :
 - Vidéo ajoutée sous un film (`extras`) : `/api/stills` figé ne lit que les images ; l'admin lit alors la page comme une
   bande (`/api/reel`, 1er film : titre, extrait, vignette, **sans `full`**). Le robot GitHub de l'admin ajoute le `full`

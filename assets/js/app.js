@@ -540,7 +540,7 @@
     function slateRaw(u) {
       var m = /^https:\/\/images\.slatecdn\.net\/[^/]+\/(.+)$/.exec(u || "");
       if (!m) return "";
-      var b = m[1].split("/").filter(function (x) { return x.indexOf(":") < 0; }).join("").replace(/\.[a-z0-9]+$/i, "");
+      var b = m[1].split(/[?#]/)[0].split("/").filter(function (x) { return x.indexOf(":") < 0; }).join("").replace(/\.[a-z0-9]+$/i, "");
       try { var o = atob(b.replace(/-/g, "+").replace(/_/g, "/")); return /^https:\/\//.test(o) ? o : ""; } catch (e) { return ""; }
     }
     // Charge une image (de secours si besoin) puis cb(adresse qui a marché, ou celle de départ si aucune).
