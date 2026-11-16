@@ -434,6 +434,9 @@
     // Comme le spotlight (bande Slate lue par le robot, `films`), mais les onglets sont réglés à la main dans l'admin, film par
     // film (`overrides[id]`) : `status` new | soon | past (défaut past), `genre` (onglet si film sorti), `platforms`, `date` (AAAA-MM-JJ), `poster`.
     // NEW RELEASES = FEATURED interne ; PAST RELEASES montre tous les films sortis, et ses genres apparaissent alors à côté.
+    // FIC_ALL : tous les longs (ou courts) quel que soit le statut (new, soon, past), pour les liens « Nos longs métrages » du suivi
+    // des festivals de l'admin (Gus 16/11) : adresse fiction/feature-films ; onglet affiché seulement quand il est ouvert (.only).
+    var FIC_ALL = { "FEATURE FILM": "FEATURE FILMS", "SHORT FILM": "SHORT FILMS" };
     var FIC = "fiction", FIC_GENRES = ["FEATURE FILM", "SERIES", "DOCUMENTARY", "SHORT FILM"], PAST = ["PAST RELEASES"].concat(FIC_GENRES);
     var MULTI = { spotlight: true, fiction: true }; // pages de plusieurs chefs op (« DoP Nom » cliquable, pas d'About)
     function ficToDP(s) {
@@ -452,12 +455,14 @@
         ["sub", "video", "full", "img", "images", "ratios"].forEach(function (k) { if (f[k]) base[k] = f[k]; });
         if (f.artists && f.artists.length) base.dps = f.artists.map(dpByName);
         function add(c, extra) { clips.push(Object.assign({}, base, { cat: c }, extra || {})); }
+        var g = String(o.genre || "").toUpperCase(); if (FIC_ALL[g]) add(FIC_ALL[g]);
         if (st === "new") add("", { featured: true, featuredOrder: i + 1 });
         else if (st === "soon") add("COMING SOON");
         else { add("PAST RELEASES"); if (o.genre) add(String(o.genre).toUpperCase()); }
       });
       var used = {}; clips.forEach(function (c) { used[c.cat] = true; });
-      var cats = ["FEATURED", "COMING SOON", "PAST RELEASES"].concat(FIC_GENRES.filter(function (g) { return used[g]; }));
+      var cats = ["FEATURED", "COMING SOON", "PAST RELEASES"].concat(FIC_GENRES.filter(function (g) { return used[g]; }))
+        .concat(Object.keys(FIC_ALL).map(function (g) { return FIC_ALL[g]; }).filter(function (c) { return used[c]; }));
       return { slug: FIC, name: "Fiction", hue: 30, categories: cats, clips: clips, overrides: ov };
     }
     // Date de sortie sur la vignette (NEW RELEASES et COMING SOON) : « 16 Oct » (en anglais, comme le reste du site).
@@ -1387,6 +1392,7 @@
         var b = document.createElement("button");
         b.textContent = catLabel(slug, c); b.dataset.cat = c; if (c === curCat) b.className = "on";
         if (slug === FIC && FIC_GENRES.indexOf(c) > -1) b.classList.add("sub"); // genres : visibles seulement dans PAST RELEASES
+        if (slug === FIC && c.slice(-1) === "S" && FIC_GENRES.indexOf(c.slice(0, -1)) > -1) b.classList.add("only"); // FIC_ALL : seulement ouvert
         if (copy) b.setAttribute("aria-hidden", "true");
         else { b.style.setProperty("--i", cats.children.length); if (b.classList.contains("sub")) b.style.setProperty("--j", FIC_GENRES.indexOf(c)); } // rang dans l'arrivée en cascade (CSS)
         b.addEventListener("click", function () {

@@ -228,7 +228,9 @@ les onglets se règlent **à la main** dans l'admin, film par film (`overrides[<
 COMING SOON, PAST RELEASES (tous les films sortis) ; **NEW RELEASES : 9 films au plus** (Gus 04/11) : au-delà, les plus anciens
 (date de sortie ; sans date = tout juste ajouté, gardé ; même date : ordre de la bande) passent d'eux-mêmes en PAST RELEASES (`keepNew`
 dans `ficToDP` ; l'admin écrit aussi le changement, `ficCapNew`) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
-quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. Genre + plateformes (`platforms`, admin) en haut à gauche de la vignette (« FEATURE FILM · NETFLIX », `.ctag`, gris sans ombre, tous les onglets,
+quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. **Tous les longs / tous les courts** (Gus 16/11, liens « Nos longs métrages » / « Nos courts métrages » du suivi des festivals
+de l'admin) : onglets `FEATURE FILMS` / `SHORT FILMS` (`FIC_ALL`, films du genre quel que soit le statut), adresse `fiction/feature-films` /
+`fiction/short-films`, visibles seulement quand ils sont ouverts (`.cats .only`). Genre + plateformes (`platforms`, admin) en haut à gauche de la vignette (« FEATURE FILM · NETFLIX », `.ctag`, gris sans ombre, tous les onglets,
 au survol / film sélectionné sur téléphone, Gus 29/10). Date de sortie : carré blanc « 16 Oct » (mois en anglais) **en haut à droite** de la
 vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement dans NEW RELEASES et COMING SOON
 (posée sur la carte, pas sur la vignette qui s'agrandit au survol). Téléphone : date seulement sur le film sélectionné (`.card.focus`, Gus 28/10).

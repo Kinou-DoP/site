@@ -513,6 +513,7 @@ body.cpage { --kinou-zm: calc(var(--kinou-hero-top) + var(--kinou-hero-h) + 28px
 /* Fiction (body.fic, data/fiction.json) : comme le spotlight (body.spot). Genres de PAST RELEASES (.sub) : visibles seulement
    quand PAST RELEASES ou un genre est ouvert (.cats.past), plus petits, à la suite. Date de sortie : carré blanc au survol. */
 .cats .sub { display: none; }
+.cats .only:not(.on) { display: none; } /* FEATURE FILMS / SHORT FILMS (tous statuts) : onglet visible seulement par son adresse */
 .cats.past .sub { display: block; font-size: 11px; opacity: .35; }
 .cats.past .sub:hover { opacity: .8; }
 .cats.past .sub.on { opacity: 1; }
