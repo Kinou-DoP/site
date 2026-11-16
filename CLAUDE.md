@@ -102,7 +102,7 @@ data/
 ├── site.json              # réglages (logo image : { logo: "brand/logo.png", logoHeight: 36 }) ; le site réduit le logo
 │                          # (8 × la hauteur affichée) et le garde dans le navigateur (localStorage « kinou-logo »)
 └── dps/
-    ├── index.json         # liste ordonnée des DPs : [{ slug, name, img?, hidden? }] (hidden = page cachée, voir plus bas)
+    ├── index.json         # liste ordonnée des DPs : [{ slug, name, img?, hidden?, gender? }] (hidden = page cachée, voir plus bas ; gender "f" | "x" = femme / autre, absent = homme : mails de récupération de l'admin, pas utilisé par le site)
     ├── <slug>.json        # une fiche par DP (clips + about)
     └── img/               # portraits ABOUT
 ```
