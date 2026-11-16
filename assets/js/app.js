@@ -534,6 +534,27 @@
     var DPR = Math.min(window.devicePixelRatio || 1, 2);
     var GW = Math.min(1200, Math.max(600, Math.ceil(window.innerWidth / 3 * DPR / 200) * 200)); // galerie (3 colonnes)
     var FW = Math.min(1800, Math.max(1000, Math.ceil(Math.min(window.innerWidth, 1400) * DPR / 200) * 200)); // feed (1 colonne)
+    // Panne de shots (Slate, depuis le 14/11/2026) : leur service d'images (images.slatecdn.net) ne répond plus, mais les
+    // fichiers d'origine restent lisibles sur leur stockage Amazon S3. L'adresse d'origine est écrite dans l'URL signée
+    // (base64 après la signature et les options) : en cas d'erreur, on charge l'original (plus lourd, non réduit).
+    function slateRaw(u) {
+      var m = /^https:\/\/images\.slatecdn\.net\/[^/]+\/(.+)$/.exec(u || "");
+      if (!m) return "";
+      var b = m[1].split("/").filter(function (x) { return x.indexOf(":") < 0; }).join("").replace(/\.[a-z0-9]+$/i, "");
+      try { var o = atob(b.replace(/-/g, "+").replace(/_/g, "/")); return /^https:\/\//.test(o) ? o : ""; } catch (e) { return ""; }
+    }
+    // Charge une image (de secours si besoin) puis cb(adresse qui a marché, ou celle de départ si aucune).
+    function loadImg(u, cb) {
+      var im = new Image(), raw = "";
+      im.onload = function () { cb(im.src); };
+      im.onerror = function () { if (!raw && (raw = slateRaw(u))) im.src = raw; else cb(u); };
+      im.src = u;
+    }
+    // Images affichées (<img>) : même secours, pour toutes (lecteur, photo en grand, catégorie de photos…).
+    document.addEventListener("error", function (e) {
+      var im = e.target; if (!im || im.tagName !== "IMG" || im.dataset.raw) return;
+      var raw = slateRaw(im.src); if (raw) { im.dataset.raw = "1"; im.src = raw; }
+    }, true);
     function thumb(u, w) {
       return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=80&fm=webp" : u;
     }
@@ -871,16 +892,14 @@
     function orderedLoad(items, show, alive) {
       var next = 0, done = 0;
       function pump() { while (next < items.length && next - done < 4) load(items[next++]); }
-      function load(it) { var im = new Image(); im.onload = im.onerror = function () { it.ok = true; flush(); }; im.src = it.src; }
+      function load(it) { loadImg(it.src, function (u) { it.src = u; it.ok = true; flush(); }); }
       function flush() { if (!alive()) return; while (done < items.length && items[done].ok) show(items[done++]); pump(); }
       pump();
     }
     var galRun = 0;
     function reveal(b) {
       if (b.classList.contains("pxv")) { b.classList.add("shown"); return; }
-      var im = new Image();
-      im.onload = im.onerror = function () { b.style.backgroundImage = 'url("' + b.dataset.src + '")'; b.classList.add("shown"); };
-      im.src = b.dataset.src;
+      loadImg(b.dataset.src, function (u) { b.style.backgroundImage = 'url("' + u + '")'; b.classList.add("shown"); });
     }
     var plimg = document.getElementById("plimg");
     function showStill(i) {
@@ -1117,9 +1136,7 @@
         if (slug === FIC) scopeCrop(st, p); // fiction : cadrage cinémascope (vignette et extrait réglés à part dans l'admin)
         else if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); if (p.zoomPos) st.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) st.classList.add("zoomed"); }
         if (p.img) {
-          var url = thumb(p.img, mode === "gallery" ? GW : FW), im = new Image();
-          im.onload = im.onerror = (function (st, url) { return function () { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st, url);
-          im.src = url;
+          loadImg(thumb(p.img, mode === "gallery" ? GW : FW), (function (st) { return function (url) { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st));
         }
         var meta = document.createElement("div"); meta.className = "meta";
         var h = document.createElement("h3"); h.textContent = p.title;
@@ -1234,7 +1251,7 @@
         if (film || !all.length) {
           big = document.createElement("div"); big.className = "still sc-big"; big.style.setProperty("--h", p.h);
           if (p.zoom > 1) { big.style.setProperty("--z", p.zoom); if (p.zoomPos) big.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) big.classList.add("zoomed"); }
-          if (p.img) big.style.setProperty("--img", 'url("' + thumb(p.img, FW) + '")');
+          if (p.img) loadImg(thumb(p.img, FW), function (u) { big.style.setProperty("--img", 'url("' + u + '")'); });
           big.addEventListener("mouseenter", function () { showProj(p); slowHover(big, true); });
           big.addEventListener("mouseleave", function () { slowHover(big, false); document.body.classList.remove("proj-on"); });
           big.addEventListener("click", function () { openPlayer(p, false, films.length ? films : [p]); });
@@ -1242,7 +1259,7 @@
           if (film) big.insertAdjacentHTML("beforeend", '<svg class="sc-play" viewBox="0 0 24 28" aria-hidden="true"><path d="M2 2 L22 14 L2 26 Z"/></svg>');
         } else {
           big = document.createElement("button"); big.className = "sc-big sc-img"; big.setAttribute("aria-label", p.title);
-          big.style.backgroundImage = 'url("' + thumb(all[0], FW) + '")';
+          loadImg(thumb(all[0], FW), function (u) { big.style.backgroundImage = 'url("' + u + '")'; });
           big.addEventListener("click", function () { openShowStill(p, 0); });
           big.addEventListener("mouseenter", function () { showProj({ img: all[0] }); });
           big.addEventListener("mouseleave", function () { document.body.classList.remove("proj-on"); });
@@ -1255,7 +1272,7 @@
         g.appendChild(info);
         small.forEach(function (u, k) {
           var b = document.createElement("button"); b.className = "sc-s s" + k; b.setAttribute("aria-label", p.title + " — image " + (k + 1));
-          b.style.backgroundImage = 'url("' + thumb(u, GW) + '")';
+          loadImg(thumb(u, GW), function (v) { b.style.backgroundImage = 'url("' + v + '")'; });
           b.addEventListener("click", function () { openShowStill(p, all.indexOf(u)); });
           b.addEventListener("mouseenter", function () { showProj({ img: u }); }); // fond flou : l'image survolée
           b.addEventListener("mouseleave", function () { document.body.classList.remove("proj-on"); });
@@ -1324,7 +1341,7 @@
             b.addEventListener("click", function () { openPhoto(all, i, p.title); });
           });
         });
-        orderedLoad(order, function (it) { if (!it.im.src) it.im.src = it.src; it.show(); }, function () { return run === renderRun; });
+        orderedLoad(order, function (it) { if (it.im.src !== it.src) it.im.src = it.src; it.show(); }, function () { return run === renderRun; });
       }
     }
     // Photo en grand, sans passer par le lecteur : la fermer revient directement à la page.

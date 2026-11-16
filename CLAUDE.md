@@ -34,6 +34,13 @@ possible. On travaille **uniquement sur GitHub** :
   environ 1 min par lecture) dès que Netlify répond 503 : import / « Relire le bundle », liens de stills et vidéos sous un film,
   extrait au survol, bande de l'accueil. `tools/slate.mjs` de l'admin = copie de `netlify/functions/slate.mjs` (garder identiques).
 
+**Panne de shots / Slate (depuis le 14/11/2026, sans date de retour ; Gus a eu un mail du support)** : leur site, shots.re et leur
+service d'images `images.slatecdn.net` répondent 503 (les vidéos CloudFront marchent ; vignettes encore servies par certains caches).
+Secours dans app.js (16/11) : `slateRaw(u)` lit l'adresse d'origine écrite en base64 dans l'URL signée (fichier sur
+`s3-us-west-1.amazonaws.com/media-us-westslateappcom/…`, lisible) ; `loadImg` (vignettes, stills du lecteur, présentation vidéo + stills,
+galeries) et un écouteur `error` sur toutes les `<img>` chargent l'original en cas d'erreur (plus lourd : PNG / JPEG non réduits, 1–2,5 Mo).
+Sans effet quand Slate répond. Le robot de l'admin (lecture des bundles) ne marche pas pendant la panne.
+
 Contournements en place (à retirer ou simplifier au retour sur Netlify) :
 - Vidéo ajoutée sous un film (`extras`) : `/api/stills` figé ne lit que les images ; l'admin lit alors la page comme une
   bande (`/api/reel`, 1er film : titre, extrait, vignette, **sans `full`**). Le robot GitHub de l'admin ajoute le `full`
