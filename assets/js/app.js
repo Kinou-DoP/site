@@ -241,7 +241,7 @@
     DPS.forEach(function (d) {
       var li = document.createElement("li"), a = document.createElement("a");
       a.setAttribute("href", pageURL(d.slug)); a.dataset.view = d.slug; a.dataset.img = d.img || "images/" + d.slug + ".jpg";
-      a.textContent = d.name;
+      a.textContent = d.name; a.dataset.t = d.name; // data-t : version grasse superposée au survol (main.css)
       a.addEventListener("mouseenter", function () { loadDP(d.slug); }); // precharge la fiche
       li.appendChild(a); ul.appendChild(li);
     });
