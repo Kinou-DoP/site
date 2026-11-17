@@ -626,12 +626,21 @@
     var playList = [], playIdx = -1, homePlay = false;
     // Films de l'accueil pour le lecteur : film complet et stills pris dans la fiche du chef op (même id Slate)
     // quand la slide n'a pas les siens.
+    // Même film ailleurs (Gus 18/11) : fiches des chefs op crédités, puis page fiction et spotlight (même id Slate). On y prend tout
+    // ce qui manque à la slide (film complet, stills et vidéos dessous, infos du film, prix, types), sauf l'affiche.
     function homeItem(sl) {
-      var title = sl.film + (sl.song ? " · " + sl.song : ""), dp = sl.dps && sl.dps[0], same = null;
-      if (dp && dp.slug && WORK[dp.slug]) same = WORK[dp.slug].filter(function (c) { return c.slate && c.slate === sl.slate; })[0];
-      return { title: title, sub: sl.legend, video: sl.video, full: sl.full || (same && same.full) || "", nosnip: true, img: sl.img || (same && same.img),
-        stills: sl.stills && sl.stills.length ? sl.stills : (same && same.stills) || null,
-        extras: sl.extras && sl.extras.length ? sl.extras : sl.stills && sl.stills.length ? null : (same && same.extras) || null, h: sl.h, slate: sl.slate, dps: sl.dps, slide: sl };
+      var title = sl.film + (sl.song ? " · " + sl.song : ""), srcs = [];
+      (sl.dps || []).forEach(function (d) { if (d && d.slug && WORK[d.slug]) srcs.push(WORK[d.slug]); });
+      [FIC, SPOT].forEach(function (k) { if (WORK[k]) srcs.push(WORK[k]); });
+      var sames = [];
+      srcs.forEach(function (w) { w.forEach(function (c) { if (c.slate && sl.slate && String(c.slate) === String(sl.slate) && sames.indexOf(c) < 0) sames.push(c); }); });
+      function pick(k) { for (var i = 0; i < sames.length; i++) { var v = sames[i][k]; if (v && (!Array.isArray(v) || v.length) && (typeof v !== "object" || Array.isArray(v) || Object.keys(v).length)) return v; } return null; }
+      var same = sames[0] || null, xs = pick("extras"), st = pick("stills");
+      return { title: title, sub: sl.legend, video: sl.video, full: sl.full || pick("full") || "", nosnip: true, img: sl.img || (same && same.img),
+        stills: sl.stills && sl.stills.length ? sl.stills : st,
+        extras: sl.extras && sl.extras.length ? sl.extras : sl.stills && sl.stills.length ? null : xs,
+        info: sl.info || pick("info") || undefined, types: pick("types") || undefined, platforms: pick("platforms") || undefined,
+        h: sl.h, slate: sl.slate, dps: sl.dps, slide: sl };
     }
     function dpFromPlayer(d, a, p) {
       closePlayer(true); if (pushed > 0) pushed--;
@@ -639,7 +648,8 @@
     }
     function playHome(slides, i) {
       var need = [];
-      slides.forEach(function (sl) { if (sl.dps && sl.dps[0] && sl.dps[0].slug) need.push(loadDP(sl.dps[0].slug)); });
+      slides.forEach(function (sl) { (sl.dps || []).forEach(function (d) { if (d && d.slug) need.push(loadDP(d.slug)); }); });
+      need.push(loadDP(FIC), loadDP(SPOT)); // même film sur la page fiction ou le spotlight : infos, prix, stills
       HomeAPI.pause(); homePlay = true;
       Promise.all(need).then(function () {
         var list = slides.map(homeItem);
