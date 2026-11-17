@@ -398,6 +398,8 @@ body.closing #roulette { transition: opacity .3s .7s; }
 #player .pi-syn .lang button:hover { opacity: .75; }
 #player .pi-syn .lang button.on { opacity: 1; }
 #player .pi-awards li { break-inside: avoid; } /* prix : une seule colonne, une ligne par prix */
+#player .pcap:has(.pi-up) { display: flow-root; } /* prix à la hauteur des crédits (fillInfo) */
+#player .pcap .pi-awards.pi-up { float: right; clear: right; max-width: 62%; margin: 0 0 0 32px; text-align: right; }
 @media (max-width: 700px) { #player .pinfo { grid-template-columns: 1fr; gap: 16px; margin-top: 22px; } #player .pi-a, #player .pi-b { grid-column: 1; justify-self: start; text-align: left; } }
 .sc-info p.sc-spec { color: rgba(255,252,235,.75); }
 #player .pdps { margin: 0 0 6px; font-family: var(--kinou-sans); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--kinou-fg); }

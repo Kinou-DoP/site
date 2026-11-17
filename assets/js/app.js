@@ -815,6 +815,12 @@
       }
       var aw = String(f.awards || "").split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
       if (aw.length) { var ul = el2("ul", "pi-awards"); aw.forEach(function (x) { ul.appendChild(el2("li", "", x)); }); b.appendChild(ul); }
+      // Prix seuls (pas d'année, durée, caméra… à gauche) : à droite, à la hauteur des crédits (réal, prod), sous les types du
+      // film s'il y en a ; pas plus bas (Gus 17/11). Téléphone : une colonne, sous les crédits, comme avant.
+      if (aw.length && !a.children.length && !matchMedia("(max-width: 700px)").matches) {
+        ul.classList.add("pi-up"); var pt0 = pcap.querySelector(".ptypes");
+        pcap.insertBefore(ul, pt0 ? pt0.nextSibling : pcap.firstChild); b = el2("div");
+      }
       if (a.children.length) pinfo.appendChild(a);
       if (b.children.length) pinfo.appendChild(b);
       // Synopsis français (synopsis) et anglais (synopsisEn) : un seul renseigné = lui seul ; les deux = anglais d'abord, choix EN / FR

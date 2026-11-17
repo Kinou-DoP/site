@@ -172,7 +172,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   en une seule colonne ; `synopsis` = français, `synopsisEn` = anglais, paragraphes séparés par une ligne vide ; un seul rempli = lui
   seul, les deux = anglais d'abord + choix EN / FR comme les bios, même mémoire `kinou-lang`). Lecteur (`fillInfo`, `.pinfo` sous les crédits) : à gauche « 2025 | 8 episodes · 45 min |
   1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis CAMERA / LENSES ; à droite les prix (blanc, alignés sur le bord
-  droit de la vidéo comme « NARRATIVE · FEATURE FILM ») ; synopsis dessous
+  droit de la vidéo comme « NARRATIVE · FEATURE FILM » ; **prix seuls**, sans rien à gauche : à la hauteur des crédits réal / prod, sous les types,
+  `.pi-up` flottant dans `.pcap`, Gus 17/11 ; téléphone : sous les crédits comme avant) ; synopsis dessous
   (gris) ; une colonne sur téléphone. Présentation vidéo + stills : la même ligne sous les crédits (`.sc-spec`).
 - `about.links` : liens en plus dans l'onglet About (`[{ label, url }]`, admin « + Ajouter un lien » : IMDb, Vimeo…), après CV / INSTAGRAM /
   WEBSITE, nom en majuscules + ↗ ; lien sans nom ou sans adresse ignoré, `https://` ajouté s'il manque.
