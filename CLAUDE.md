@@ -40,6 +40,8 @@ Secours dans app.js (16/11) : `slateRaw(u)` lit l'adresse d'origine écrite en b
 `s3-us-west-1.amazonaws.com/media-us-westslateappcom/…`, lisible) ; `loadImg` (vignettes, stills du lecteur, présentation vidéo + stills,
 galeries) et un écouteur `error` sur toutes les `<img>` chargent l'original en cas d'erreur (plus lourd : PNG / JPEG non réduits, 1–2,5 Mo).
 Sans effet quand Slate répond. Le robot de l'admin (lecture des bundles) ne marche pas pendant la panne.
+**Retour de Slate (18/11)** : il refuse désormais (403) les demandes **sans User-Agent** ; les fonctions Cloudflare n'en envoient pas →
+« Slate 403 » à l'import d'un bundle. `slate.mjs` envoie donc un User-Agent (`UA`, aussi pour shots.re) ; même chose dans la copie de l'admin.
 
 **Essai Cloudflare Pages (16/11)** : projet Cloudflare « kinou » de Gus relié au dépôt (branche de production `beta`, sans commande
 de construction, dossier `/`) → https://kinou-4tv.pages.dev/ (suffixe ajouté par Cloudflare, le nom « kinou » étant déjà pris) ; mis en ligne
@@ -173,7 +175,7 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   seul, les deux = anglais d'abord + choix EN / FR comme les bios, même mémoire `kinou-lang`). Lecteur (`fillInfo`, `.pinfo` sous les crédits) : à gauche « 2025 | 8 episodes · 45 min |
   1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis CAMERA / LENSES ; à droite les prix (blanc, alignés sur le bord
   droit de la vidéo comme « NARRATIVE · FEATURE FILM » ; **prix seuls**, sans rien à gauche : à la hauteur des crédits réal / prod, sous les types,
-  `.pi-up` flottant dans `.pcap`, Gus 17/11 ; téléphone : sous les crédits comme avant) ; synopsis dessous
+  `.pi-up` flottant dans `.pcap`, Gus 17/11 ; **téléphone et tablette**, aussi en paysage (≤ 900px ou écran tactile) : une seule colonne collée à gauche, prix juste sous réal / prod puis année, durée, caméra…, Gus 18/11) ; synopsis dessous
   (gris) ; une colonne sur téléphone. Présentation vidéo + stills : la même ligne sous les crédits (`.sc-spec`).
 - `about.links` : liens en plus dans l'onglet About (`[{ label, url }]`, admin « + Ajouter un lien » : IMDb, Vimeo…), après CV / INSTAGRAM /
   WEBSITE, nom en majuscules + ↗ ; lien sans nom ou sans adresse ignoré, `https://` ajouté s'il manque.
