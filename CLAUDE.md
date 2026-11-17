@@ -168,7 +168,7 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
 - Galeries (lecteur et catégorie de photos) : images chargées **dans l'ordre de la bande**, 4 d'avance au plus, et affichées dans
   l'ordre (une image n'apparaît que quand toutes celles d'avant sont là : `orderedLoad`, Gus 03/11) — plus de « trous ».
 - `info` (dans `overrides[<id>]`, bloc « Infos du film » de l'admin, Gus 04/11) : `{ year, episodes, runtime, ratio, platforms, camera,
-  lenses, awards, synopsis, synopsisEn }` (texte libre ; `runtime` seul chiffre → « 90 min » ; `awards` une ligne par prix / sélection,
+  lenses, awards, synopsis, synopsisEn }` (texte libre ; `runtime` seul chiffre → « 90 min » ; `awards` une ligne par prix / sélection (lignes ajoutées aussi par l'admin depuis « Nos sélections », `info.awardsFrom` = suivi de l'admin, ignoré par le site),
   en une seule colonne ; `synopsis` = français, `synopsisEn` = anglais, paragraphes séparés par une ligne vide ; un seul rempli = lui
   seul, les deux = anglais d'abord + choix EN / FR comme les bios, même mémoire `kinou-lang`). Lecteur (`fillInfo`, `.pinfo` sous les crédits) : à gauche « 2025 | 8 episodes · 45 min |
   1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis CAMERA / LENSES ; à droite les prix (blanc, alignés sur le bord
