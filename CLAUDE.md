@@ -159,6 +159,9 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   téléphone) et vidéos à la taille du film (montée en fondu comme les stills ; une seule vidéo joue à la fois ; titre de la vidéo
   en blanc au-dessus, en haut à gauche, comme celui du film : `.pxv .ptitle`, Gus 13/11).
   Remplace l'ancien `stills` + `stillsLink` des overrides (toujours lu s'il n'y a pas d'`extras`).
+  **Vidéos en colonnes** (Gus 18/11) : `cols: { d, m }` sur une vidéo des `extras` (admin, « + ») = 1 à 3 colonnes sur ordinateur (`d`) et sur
+  téléphone ≤ 700px (`m`) ; les vidéos suivantes sans `cols` vont dans la même grille (`.pxrow`, `--xd` / `--xm`), jusqu'à des stills ou une vidéo
+  avec son propre `cols` (1·1 = de nouveau en grand) ; titres plus petits dans une grille de plusieurs colonnes.
 - **Catégorie de photos** (ex. showreel `#photography` du bundle contenant la page Slate « illustration » des photos,
   `kinou.slateapp.com/work/<…>-photography`) : quand tous les projets d'un onglet (hors FEATURED) sont en images seulement,
   `renderPhotos` les affiche en colonnes (3, 2 sur téléphone), chaque photo à son ratio d'origine (jamais recadrée), montée en

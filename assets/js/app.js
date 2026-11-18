@@ -923,7 +923,16 @@
       player.classList.toggle("has-stills", blocks.length > 0);
       // Projet sans film qui commence par des stills : pas de grande image, la galerie directement sous le titre.
       player.classList.toggle("nostage", !src && !solo && p._big === undefined && !!(blocks[0] && blocks[0].stills));
+      // Vidéos en colonnes (Gus 18/11) : `cols: { d, m }` sur une vidéo (admin, « + ») = 1 à 3 colonnes sur ordinateur / téléphone ;
+      // les vidéos suivantes sans réglage s'y rangent aussi, jusqu'à des stills ou une vidéo qui a son propre réglage.
+      var row = null;
       blocks.forEach(function (x) {
+        if (x.stills && x.stills.length) row = null;
+        else if (x.cols) {
+          var d = Math.min(3, Math.max(1, +x.cols.d || 1)), m = Math.min(3, Math.max(1, +x.cols.m || 1));
+          if (d === 1 && m === 1) row = null;
+          else { row = document.createElement("div"); row.className = "pxrow"; row.style.setProperty("--xd", d); row.style.setProperty("--xm", m); if (d > 1) row.classList.add("multi"); if (m > 1) row.classList.add("mmulti"); pgal.appendChild(row); }
+        }
         if (x.stills && x.stills.length) {
           var g = document.createElement("div"); g.className = "pgrid"; pgal.appendChild(g);
           x.stills.forEach(function (u, i) {
@@ -942,7 +951,7 @@
         var v = document.createElement("video");
         v.controls = true; v.playsInline = true; v.preload = "metadata";
         if (x.img) v.poster = x.img;
-        v.src = x.full || x.video; w.appendChild(v); pgal.appendChild(w);
+        v.src = x.full || x.video; w.appendChild(v); (row || pgal).appendChild(w);
         if (seen) seen.observe(w); else reveal(w);
       });
       orderedLoad(order, function (it) { it.el.style.backgroundImage = 'url("' + it.src + '")'; it.el.classList.add("shown"); },
