@@ -854,11 +854,13 @@
         });
         b.appendChild(ul);
       }
-      // Prix seuls (pas d'année, durée, caméra… à gauche) : à droite, à la hauteur des crédits (réal, prod), sous les types du
-      // film s'il y en a ; pas plus bas (Gus 17/11). Téléphone et tablette : une colonne collée à gauche, prix juste sous les crédits.
-      if (aw.length && !a.children.length && !matchMedia("(max-width: 900px), (hover: none) and (pointer: coarse)").matches) {
+      // Ordinateur : rien au-dessus des prix dans leur colonne → ils remontent à droite, à la hauteur des crédits (réal, prod), sous
+      // les types du film s'il y en a (Gus 18/11 : même s'il y a des infos à gauche) ; année, durée, caméra… restent à gauche, sous
+      // les crédits (`.pi-a` mis dans `.pcap`, à côté des prix). Téléphone et tablette : une colonne collée à gauche, prix juste sous les crédits.
+      if (aw.length && !matchMedia("(max-width: 900px), (hover: none) and (pointer: coarse)").matches) {
         ul.classList.add("pi-up"); var pt0 = pcap.querySelector(".ptypes");
         pcap.insertBefore(ul, pt0 ? pt0.nextSibling : pcap.firstChild); b = el2("div");
+        if (a.children.length) { a.classList.add("pi-in"); pcap.appendChild(a); a = el2("div"); }
       }
       if (a.children.length) pinfo.appendChild(a);
       if (b.children.length) pinfo.appendChild(b);

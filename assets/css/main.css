@@ -418,6 +418,11 @@ body.closing #roulette { transition: opacity .3s .7s; }
 #player .pi-awards .aw-it b { font-weight: 500; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.45); margin-right: .8em; }
 #player .pcap:has(.pi-up) { display: flow-root; } /* prix à la hauteur des crédits (fillInfo) */
 #player .pcap .pi-awards.pi-up { float: right; clear: right; max-width: 62%; margin: 0 0 0 32px; text-align: right; }
+/* Année, durée, caméra… à gauche sous les crédits quand les prix sont remontés (fillInfo, Gus 18/11) : styles de .pinfo, pas ceux des crédits. */
+#player .pcap .pi-a.pi-in { margin-top: 26px; }
+#player .pcap .pi-in p { white-space: normal; font-weight: 400; letter-spacing: normal; text-transform: none; }
+#player .pcap .pi-in .pi-line { font-size: 15px; line-height: 1.5; color: var(--kinou-fg); }
+#player .pcap .pi-in .pi-tech { font-size: 13px; line-height: 1.6; color: rgba(255,252,235,.85); }
 /* Téléphone et tablette (aussi en paysage) : une seule colonne collée à gauche, sur toute la largeur ; prix juste sous réal / prod,
    puis année, durée, caméra… (Gus 18/11). */
 @media (max-width: 900px), (hover: none) and (pointer: coarse) {

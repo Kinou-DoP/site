@@ -174,8 +174,8 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   en une seule colonne ; `synopsis` = français, `synopsisEn` = anglais, paragraphes séparés par une ligne vide ; un seul rempli = lui
   seul, les deux = anglais d'abord + choix EN / FR comme les bios, même mémoire `kinou-lang`). Lecteur (`fillInfo`, `.pinfo` sous les crédits) : à gauche « 2025 | 8 episodes · 45 min |
   1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis CAMERA / LENSES ; à droite les prix (blanc, alignés sur le bord
-  droit de la vidéo comme « NARRATIVE · FEATURE FILM » ; **prix seuls**, sans rien à gauche : à la hauteur des crédits réal / prod, sous les types,
-  `.pi-up` flottant dans `.pcap`, Gus 17/11 ; **téléphone et tablette**, aussi en paysage (≤ 900px ou écran tactile) : une seule colonne collée à gauche, prix juste sous réal / prod puis année, durée, caméra…, Gus 17/11) ; synopsis dessous
+  droit de la vidéo comme « NARRATIVE · FEATURE FILM » ; **ordinateur : toujours remontés à la hauteur des crédits réal / prod** (rien au-dessus d'eux dans leur colonne), sous les types,
+  `.pi-up` flottant dans `.pcap`, Gus 17/11 puis 18/11 : même avec des infos à gauche, qui restent sous les crédits (`.pi-a.pi-in` mis dans `.pcap`) ; **téléphone et tablette**, aussi en paysage (≤ 900px ou écran tactile) : une seule colonne collée à gauche, prix juste sous réal / prod puis année, durée, caméra…, Gus 17/11) ; synopsis dessous
   (gris) ; **prix groupés par festival** (Gus 18/11) : festival + année en petites capitales grises, prix en blanc, puis nominations et sélections
   plus discrètes avec une petite étiquette « Nominee » / « Official Selection » / « Shortlist » (lignes lues au format `awLine` de l'admin ; autre forme = ligne telle quelle ; tirets longs « – » « — » toujours affichés « • », Gus 18/11) ; une colonne sur téléphone. Présentation vidéo + stills : la même ligne sous les crédits (`.sc-spec`).
 - `about.links` : liens en plus dans l'onglet About (`[{ label, url }]`, admin « + Ajouter un lien » : IMDb, Vimeo…), après CV / INSTAGRAM /
