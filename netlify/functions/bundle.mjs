@@ -1,5 +1,5 @@
 // GET /api/bundle/<uuid | code shots.re> : lecture d'un bundle Slate pour l'import dans l'admin (jamais mis en cache).
-import { readBundle } from "./slate.mjs";
+import { readBundle, shortBundle } from "./slate.mjs";
 import { CORS } from "./config.mjs";
 
 export default async function (req, context) {
@@ -9,8 +9,7 @@ export default async function (req, context) {
     // Lien court shots.re/<code> : on suit la redirection jusqu'au bundle.
     if (!/^[0-9a-f-]{36}$/.test(id)) {
       if (!/^[A-Za-z0-9]{3,20}$/.test(id)) throw new Error("lien invalide");
-      var r = await fetch("https://shots.re/" + id);
-      id = (r.url.match(/\/bundles\/([0-9a-f-]{36})/) || [])[1];
+      id = await shortBundle(id);
       if (!id) throw new Error("ce lien shots.re ne mène pas à un bundle Slate");
     }
     var data = await readBundle(id);
