@@ -824,7 +824,36 @@
         a.appendChild(t);
       }
       var aw = String(f.awards || "").split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
-      if (aw.length) { var ul = el2("ul", "pi-awards"); aw.forEach(function (x) { ul.appendChild(el2("li", "", x)); }); b.appendChild(ul); }
+      // Prix groupés par festival (Gus 18/11) : nom du festival + année en petites capitales grises, puis les prix en blanc,
+      // les nominations et sélections dessous, précédées d'une petite étiquette (« Nominee », « Official Selection »).
+      // Lignes écrites par l'admin (awLine) : « Prix, Festival 2026 », « Nominated, Prix, Festival 2026 »,
+      // « Official selection – Section, Festival 2026 » ; une ligne d'une autre forme est affichée telle quelle.
+      if (aw.length) {
+        var ul = el2("ul", "pi-awards"), groups = [], byF = {};
+        aw.forEach(function (x) {
+          var m = x.match(/^(.*\S),\s*([^,]*?\S)\s+((?:19|20)\d\d)$/), g = { fest: "", items: [] }, it = { kind: "win", text: x };
+          if (m) {
+            g = byF[m[2] + " " + m[3]] || (byF[m[2] + " " + m[3]] = { fest: m[2], year: m[3], items: [] });
+            var h = m[1], n = h.match(/^nominated?\s*(?:[,:–-]\s*)?(.*)$/i), sl = h.match(/^((?:official\s+)?selection|shortlist(?:ed)?)\s*(?:[,:–-]\s*)?(.*)$/i);
+            it = n ? { kind: "nom", tag: "Nominee", text: n[1] } : sl ? { kind: "sel", tag: /^short/i.test(sl[1]) ? "Shortlist" : "Official Selection", text: sl[2] } : { kind: "win", text: h };
+          }
+          if (groups.indexOf(g) < 0) groups.push(g);
+          g.items.push(it);
+        });
+        var rank = { win: 0, nom: 1, sel: 2 };
+        groups.forEach(function (g) {
+          var li = el2("li", "aw");
+          if (g.fest) { var fe = el2("span", "aw-fest", g.fest); fe.appendChild(el2("i", "", g.year)); li.appendChild(fe); }
+          g.items.slice().sort(function (a, b2) { return rank[a.kind] - rank[b2.kind]; }).forEach(function (it) {
+            var r = el2("span", "aw-it " + it.kind);
+            if (it.tag) r.appendChild(el2("b", "", it.tag));
+            if (it.text) r.appendChild(document.createTextNode(it.text));
+            li.appendChild(r);
+          });
+          ul.appendChild(li);
+        });
+        b.appendChild(ul);
+      }
       // Prix seuls (pas d'année, durée, caméra… à gauche) : à droite, à la hauteur des crédits (réal, prod), sous les types du
       // film s'il y en a ; pas plus bas (Gus 17/11). Téléphone et tablette : une colonne collée à gauche, prix juste sous les crédits.
       if (aw.length && !a.children.length && !matchMedia("(max-width: 900px), (hover: none) and (pointer: coarse)").matches) {

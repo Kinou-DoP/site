@@ -406,6 +406,16 @@ body.closing #roulette { transition: opacity .3s .7s; }
 #player .pi-syn .lang button:hover { opacity: .75; }
 #player .pi-syn .lang button.on { opacity: 1; }
 #player .pi-awards li { break-inside: avoid; } /* prix : une seule colonne, une ligne par prix */
+/* Prix groupés par festival (fillInfo, Gus 18/11) : festival + année en petites capitales grises, prix en blanc, nominations et
+   sélections plus discrètes avec leur étiquette. */
+#player .pi-awards li.aw { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+#player .pi-awards li.aw + li.aw { margin-top: 14px; }
+#player .pi-awards .aw-fest { font-size: 10.5px; line-height: 1.6; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.5); margin-bottom: 2px; }
+#player .pi-awards .aw-fest i { font-style: normal; margin-left: .7em; color: rgba(255,252,235,.35); }
+#player .pi-awards .aw-it { line-height: 1.55; }
+#player .pi-awards .aw-it.win { font-weight: 500; color: var(--kinou-fg); }
+#player .pi-awards .aw-it.nom, #player .pi-awards .aw-it.sel { color: rgba(255,252,235,.68); }
+#player .pi-awards .aw-it b { font-weight: 500; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.45); margin-right: .8em; }
 #player .pcap:has(.pi-up) { display: flow-root; } /* prix à la hauteur des crédits (fillInfo) */
 #player .pcap .pi-awards.pi-up { float: right; clear: right; max-width: 62%; margin: 0 0 0 32px; text-align: right; }
 /* Téléphone et tablette (aussi en paysage) : une seule colonne collée à gauche, sur toute la largeur ; prix juste sous réal / prod,
@@ -413,6 +423,7 @@ body.closing #roulette { transition: opacity .3s .7s; }
 @media (max-width: 900px), (hover: none) and (pointer: coarse) {
   #player .pinfo { grid-template-columns: 1fr; gap: 16px; margin-top: 22px; }
   #player .pi-a, #player .pi-b { grid-column: 1; justify-self: stretch; text-align: left; }
+  #player .pi-awards li.aw { align-items: flex-start; }
   #player .pi-b { order: -1; }
 }
 .sc-info p.sc-spec { color: rgba(255,252,235,.75); }
