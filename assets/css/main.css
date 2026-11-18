@@ -184,11 +184,11 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 /* Vidéos sous le film en colonnes (cols de l'admin, Gus 18/11) : --xd colonnes sur ordinateur, --xm sur téléphone (≤ 700px). */
 #player .pxrow { display: grid; grid-template-columns: repeat(var(--xd, 1), minmax(0, 1fr)); gap: 32px; width: min(100%, 1800px); }
 #player .pxrow .pxv { width: 100%; margin: 0; }
-#player .pxrow.multi .pxv .ptitle { margin-bottom: 10px; font-size: clamp(14px, 1.25vw, 20px); }
+#player .pxrow.multi .pxv .ptitle { margin-bottom: 10px; font-size: clamp(14px, 1.25vw, 20px); font-weight: 400; letter-spacing: 0; color: rgba(255,252,235,.6); } /* plusieurs colonnes : titres fins et gris, moins chargé (Gus 18/11) */
 @media (max-width: 700px) {
   #player .pxrow { grid-template-columns: repeat(var(--xm, 1), minmax(0, 1fr)); gap: 16px 8px; }
-  #player .pxrow .pxv .ptitle { margin-bottom: 14px; font-size: 22px; } /* une colonne sur téléphone : titre normal */
-  #player .pxrow.mmulti .pxv .ptitle { margin-bottom: 6px; font-size: 13px; }
+  #player .pxrow .pxv .ptitle { margin-bottom: 14px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--kinou-fg); } /* une colonne sur téléphone : titre normal */
+  #player .pxrow.mmulti .pxv .ptitle { margin-bottom: 6px; font-size: 13px; font-weight: 400; letter-spacing: 0; color: rgba(255,252,235,.6); }
 }
 #player.nostage .pstage { display: none; }
 #player.nostage .pin { --pw: min(100%, 1800px); }
