@@ -229,7 +229,7 @@ droite du bandeau (grille à l'arrivée, colonne centrée de 1100px max, adresse
 les onglets se règlent **à la main** dans l'admin, film par film (`overrides[<id>]`) : `status` `new` | `soon` | `past` (défaut past),
 `genre` (FEATURE FILM, SERIES, DOCUMENTARY, SHORT FILM ; films sortis), `date` (AAAA-MM-JJ), `poster` (affiche déposée dans l'admin →
 `data/fiction/<id>-<horodatage>.webp`, lue via `DATA_BASE`). `ficToDP` (app.js) : NEW RELEASES = FEATURED interne (`catLabel`),
-COMING SOON, PAST RELEASES (tous les films sortis) ; **NEW RELEASES : 9 films au plus** (Gus 04/11) : au-delà, les plus anciens
+COMING SOON, PAST RELEASES (tous les films sortis) ; **Coming soon → New release tout seul le jour de la sortie, dès 9 h heure de Paris** (`ficStatus` / `ficOut`, Gus 18/11 ; compté dans les 9 New releases ; l'admin l'écrit aussi, `ficAutoOut`) ; **NEW RELEASES : 9 films au plus** (Gus 04/11) : au-delà, les plus anciens
 (date de sortie ; sans date = tout juste ajouté, gardé ; même date : ordre de la bande) passent d'eux-mêmes en PAST RELEASES (`keepNew`
 dans `ficToDP` ; l'admin écrit aussi le changement, `ficCapNew`) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
 quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. **Tous les longs / tous les courts** (Gus 16/11, liens « Nos longs métrages » / « Nos courts métrages » du suivi des festivals

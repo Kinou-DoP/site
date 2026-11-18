@@ -439,17 +439,25 @@
     var FIC_ALL = { "FEATURE FILM": "FEATURE FILMS", "SHORT FILM": "SHORT FILMS" };
     var FIC = "fiction", FIC_GENRES = ["FEATURE FILM", "SERIES", "DOCUMENTARY", "SHORT FILM"], PAST = ["PAST RELEASES"].concat(FIC_GENRES);
     var MULTI = { spotlight: true, fiction: true }; // pages de plusieurs chefs op (« DoP Nom » cliquable, pas d'About)
+    // Coming soon → New release tout seul le jour de la sortie, à partir de 9 h (heure de Paris) (Gus 18/11) ; même règle dans l'admin (ficStatus).
+    function ficOut(d) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d || "")) return false;
+      var now; try { now = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false }).format(new Date()); } catch (e) { now = new Date().toISOString().slice(0, 13).replace("T", " "); }
+      var day = now.slice(0, 10), h = +now.slice(11, 13);
+      return day > d || (day === d && h >= 9);
+    }
+    function ficStatus(o) { var st = (o && o.status) || "past"; return st === "soon" && ficOut(o.date) ? "new" : st; }
     function ficToDP(s) {
       var ov = s.overrides || {}, clips = [];
       // NEW RELEASES : 9 films au plus (Gus 04/11) ; au-delà, les plus anciens (date de sortie ; sans date = tout juste ajouté,
       // donc gardé ; même date : ordre de la bande) vont dans PAST RELEASES. Même règle dans l'admin (ficCapNew).
       var keepNew = {};
       (s.films || []).map(function (f, i) { return { f: f, i: i, d: (ov[f.slate] || {}).date || "9999" }; })
-        .filter(function (x) { return (ov[x.f.slate] || {}).status === "new"; })
+        .filter(function (x) { return ficStatus(ov[x.f.slate]) === "new"; })
         .sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : a.i - b.i; })
         .slice(0, 9).forEach(function (x) { keepNew[x.f.slate] = true; });
       (s.films || []).forEach(function (f, i) {
-        var o = ov[f.slate] || {}, st = o.status || "past";
+        var o = ov[f.slate] || {}, st = ficStatus(o);
         if (st === "new" && !keepNew[f.slate]) st = "past";
         var base = { title: f.title, slate: f.slate };
         ["sub", "video", "full", "img", "images", "ratios"].forEach(function (k) { if (f[k]) base[k] = f[k]; });
