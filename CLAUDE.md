@@ -86,7 +86,7 @@ Contournements en place (à retirer ou simplifier au retour sur Netlify) :
    et faire préférer `stills` + `ratios` du bundle (toujours à jour) aux `images` du robot. Sans `ratios`, le site mesure
    les photos lui-même avant de les placer (≤ 4 s, toutes les photos de l'onglet chargées d'un coup) : ça marche, en plus lent.
 6. **Mentions légales** (admin → contact → « Mentions légales », `legal` de `data/contact.json`) : vérifier qu'elles sont à jour,
-   surtout la rubrique « Hébergement » (aujourd'hui GitHub, Inc. / GitHub Pages) → mettre Netlify, Inc. si le site y est servi
+   surtout la rubrique « Hébergement » (depuis le 18/11 : Cloudflare Pages + GitHub Pages, et une rubrique « Services tiers » : Slate / Amazon CloudFront pour vidéos et images, Fontshare pour la police) → mettre Netlify, Inc. si le site y est servi
    (et kinou.fr), et la rubrique « Cookies » si on ajoute une mesure d'audience.
 7. Puis seulement, après validation de Gus : fusion `beta` → `main` (production kinou.fr, ≈ 15 crédits par mise en ligne).
 
