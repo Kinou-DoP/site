@@ -177,7 +177,7 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   droit de la vidéo comme « NARRATIVE · FEATURE FILM » ; **prix seuls**, sans rien à gauche : à la hauteur des crédits réal / prod, sous les types,
   `.pi-up` flottant dans `.pcap`, Gus 17/11 ; **téléphone et tablette**, aussi en paysage (≤ 900px ou écran tactile) : une seule colonne collée à gauche, prix juste sous réal / prod puis année, durée, caméra…, Gus 17/11) ; synopsis dessous
   (gris) ; **prix groupés par festival** (Gus 18/11) : festival + année en petites capitales grises, prix en blanc, puis nominations et sélections
-  plus discrètes avec une petite étiquette « Nominee » / « Official Selection » / « Shortlist » (lignes lues au format `awLine` de l'admin ; autre forme = ligne telle quelle) ; une colonne sur téléphone. Présentation vidéo + stills : la même ligne sous les crédits (`.sc-spec`).
+  plus discrètes avec une petite étiquette « Nominee » / « Official Selection » / « Shortlist » (lignes lues au format `awLine` de l'admin ; autre forme = ligne telle quelle ; tirets longs « – » « — » toujours affichés « • », Gus 18/11) ; une colonne sur téléphone. Présentation vidéo + stills : la même ligne sous les crédits (`.sc-spec`).
 - `about.links` : liens en plus dans l'onglet About (`[{ label, url }]`, admin « + Ajouter un lien » : IMDb, Vimeo…), après CV / INSTAGRAM /
   WEBSITE, nom en majuscules + ↗ ; lien sans nom ou sans adresse ignoré, `https://` ajouté s'il manque.
 - **Page cachée** (`hidden: true` dans l'entrée de `dps/index.json`, interrupteur « En ligne sur le site » de l'admin, Gus 10/11) :

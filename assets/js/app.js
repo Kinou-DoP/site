@@ -823,7 +823,7 @@
         [["Camera", f.camera], ["Lenses", f.lenses]].forEach(function (x) { if (!x[1]) return; var w = el2("span", "", ""); w.appendChild(el2("b", "", x[0])); w.appendChild(document.createTextNode(x[1])); t.appendChild(w); });
         a.appendChild(t);
       }
-      var aw = String(f.awards || "").split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
+      var aw = String(f.awards || "").split(/\n+/).map(function (x) { return x.replace(/\s*[–—]\s*/g, " • ").trim(); }).filter(Boolean); // tirets longs → « • » (Gus 18/11)
       // Prix groupés par festival (Gus 18/11) : nom du festival + année en petites capitales grises, puis les prix en blanc,
       // les nominations et sélections dessous, précédées d'une petite étiquette (« Nominee », « Official Selection »).
       // Lignes écrites par l'admin (awLine) : « Prix, Festival 2026 », « Nominated, Prix, Festival 2026 »,
@@ -834,7 +834,7 @@
           var m = x.match(/^(.*\S),\s*([^,]*?\S)\s+((?:19|20)\d\d)$/), g = { fest: "", items: [] }, it = { kind: "win", text: x };
           if (m) {
             g = byF[m[2] + " " + m[3]] || (byF[m[2] + " " + m[3]] = { fest: m[2], year: m[3], items: [] });
-            var h = m[1], n = h.match(/^nominated?\s*(?:[,:–-]\s*)?(.*)$/i), sl = h.match(/^((?:official\s+)?selection|shortlist(?:ed)?)\s*(?:[,:–-]\s*)?(.*)$/i);
+            var h = m[1], n = h.match(/^nominated?\s*(?:[,:•–-]\s*)?(.*)$/i), sl = h.match(/^((?:official\s+)?selection|shortlist(?:ed)?)\s*(?:[,:•–-]\s*)?(.*)$/i);
             it = n ? { kind: "nom", tag: "Nominee", text: n[1] } : sl ? { kind: "sel", tag: /^short/i.test(sl[1]) ? "Shortlist" : "Official Selection", text: sl[2] } : { kind: "win", text: h };
           }
           if (groups.indexOf(g) < 0) groups.push(g);
