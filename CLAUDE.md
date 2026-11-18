@@ -42,6 +42,9 @@ galeries) et un écouteur `error` sur toutes les `<img>` chargent l'original en 
 Sans effet quand Slate répond. Le robot de l'admin (lecture des bundles) ne marche pas pendant la panne.
 **Retour de Slate (17/11)** : il refuse désormais (403) les demandes **sans User-Agent** ; les fonctions Cloudflare n'en envoient pas →
 « Slate 403 » à l'import d'un bundle. `slate.mjs` envoie donc un User-Agent (`UA`, aussi pour shots.re) ; même chose dans la copie de l'admin.
+**18/11** : l'import par lien court (`/api/bundle/<code shots.re>`, `bundle.mjs`, `functions/api/bundle/[id].js`, `tools/ask.mjs` de l'admin)
+suivait shots.re **sans User-Agent** → « ce lien shots.re ne mène pas à un bundle Slate » (le lien du bundle marchait) ; tous passent
+maintenant par `shortBundle(code)` de `slate.mjs` (User-Agent, en-tête Location lu directement ; la redirection ajoute `?_referer=shortlink…`).
 
 **Essai Cloudflare Pages (16/11)** : projet Cloudflare « kinou » de Gus relié au dépôt (branche de production `beta`, sans commande
 de construction, dossier `/`) → https://kinou-4tv.pages.dev/ (suffixe ajouté par Cloudflare, le nom « kinou » étant déjà pris) ; mis en ligne
