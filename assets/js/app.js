@@ -826,6 +826,8 @@
         spec.forEach(function (x, i) { if (i) l.appendChild(el2("i", "", "|")); l.appendChild(document.createTextNode(x)); });
         a.appendChild(l);
       }
+      // Starring (Gus 18/11) : quelques acteurs, avant caméra / optiques, même présentation (étiquette grise en majuscules).
+      if (f.starring) { var stp = el2("p", "pi-tech pi-star"), sw = el2("span", "", ""); sw.appendChild(el2("b", "", "Starring")); sw.appendChild(document.createTextNode(String(f.starring).trim())); stp.appendChild(sw); a.appendChild(stp); }
       if (f.camera || f.lenses) {
         var t = el2("p", "pi-tech");
         [["Camera", f.camera], ["Lenses", f.lenses]].forEach(function (x) { if (!x[1]) return; var w = el2("span", "", ""); w.appendChild(el2("b", "", x[0])); w.appendChild(document.createTextNode(x[1])); t.appendChild(w); });

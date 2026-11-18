@@ -173,7 +173,7 @@ Fiche d'un DP (`data/dps/<slug>.json`) :
   lenses, awards, synopsis, synopsisEn }` (texte libre ; `runtime` seul chiffre → « 90 min » ; `awards` une ligne par prix / sélection (lignes ajoutées aussi par l'admin depuis « Nos sélections », `info.awardsFrom` = suivi de l'admin, `info.awardsHidden` = lignes masquées dans l'admin ; tous deux ignorés par le site),
   en une seule colonne ; `synopsis` = français, `synopsisEn` = anglais, paragraphes séparés par une ligne vide ; un seul rempli = lui
   seul, les deux = anglais d'abord + choix EN / FR comme les bios, même mémoire `kinou-lang`). Lecteur (`fillInfo`, `.pinfo` sous les crédits) : à gauche « 2025 | 8 episodes · 45 min |
-  1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis CAMERA / LENSES ; à droite les prix (blanc, alignés sur le bord
+  1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis STARRING (`starring`, acteurs, Gus 18/11) et CAMERA / LENSES ; à droite les prix (blanc, alignés sur le bord
   droit de la vidéo comme « NARRATIVE · FEATURE FILM » ; **ordinateur : toujours remontés à la hauteur des crédits réal / prod** (rien au-dessus d'eux dans leur colonne), sous les types,
   `.pi-up` flottant dans `.pcap`, Gus 17/11 puis 18/11 : même avec des infos à gauche, qui restent sous les crédits (`.pi-a.pi-in` mis dans `.pcap`) ; **téléphone et tablette**, aussi en paysage (≤ 900px ou écran tactile) : une seule colonne collée à gauche, prix juste sous réal / prod puis année, durée, caméra…, Gus 17/11) ; synopsis dessous
   (gris) ; **prix groupés par festival** (Gus 18/11) : festival + année en petites capitales grises, prix en blanc, puis nominations et sélections
