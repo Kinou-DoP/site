@@ -90,6 +90,9 @@ Contournements en place (à retirer ou simplifier au retour sur Netlify) :
    (et kinou.fr), et la rubrique « Cookies » si on ajoute une mesure d'audience.
 7. Puis seulement, après validation de Gus : fusion `beta` → `main` (production kinou.fr, ≈ 15 crédits par mise en ligne).
 
+**Étude en cours (19/11) : remplacer Slate** par notre propre hébergement des vidéos (Amazon S3 + CloudFront) : tout est dans le
+dépôt privé notes, `etudes/remplacer-slate.md` (mesures, coûts, risques, étapes). À lire avant de toucher à ce sujet.
+
 ## Architecture des données
 
 Les données vivent dans le repo `Kinou-DoP/admin` (dossier `data/`). Le site officiel **et** la beta
