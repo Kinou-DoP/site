@@ -288,6 +288,14 @@ sa vignette (ou 1re image) en fond flouté (Gus 30/10).
 Toute la largeur de l'écran (pas de largeur maximale) ; survol d'une image = cette image en fond flouté (`showProj`).
 Types : les mots « Trailer » / « Bande-annonce » sont retirés aussi à l'intérieur d'un type (« Short Film Trailer » → « Short Film »), puis dédoublonnés.
 
+### Bandes envoyées aux producteurs (`b/index.html`, Gus 19/11, 1re version)
+Page indépendante du reste du site, adresse `b/?<code>` : lit `data/bandes/<code>.json` (composée dans la bibliothèque de l'admin ;
+sur `*.pages.dev` par `/api/data`, ailleurs sur raw.githubusercontent.com) : logo (`site.json`), titre, description, sections, grille
+de 1 à 3 colonnes (`cols` ; 2 au plus sous 900px, 1 sur téléphone), titre en haut à gauche de chaque vignette, extrait au survol ; clic =
+lecteur (film complet avec le son, sinon l'extrait ; suite d'images = galerie), crédits (réal, prod, DoP, types : cachables, `hide`),
+« Télécharger » si `download`, flèches et Échap ; mot de passe (`pw` = { salt, hash } SHA-256, retenu le temps de l'onglet) ; date
+d'expiration (`expires`) dépassée = « plus disponible ». `noindex`.
+
 ### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
 `{ team: [{ role, name, email, phone }], address: [lignes], newsletter, newsletterLabel, social: { instagram, vimeo, imdb, facebook }, legal }`.
 Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « contact » de l'en-tête devient le titre, à gauche sur

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>kinou</title>
+<!-- Bande envoyée à un producteur (Gus 19/11, 1re version) : composée dans la bibliothèque de l'admin, données dans
+     data/bandes/<code>.json du dépôt admin ; adresse b/?<code>. Page indépendante du reste du site. -->
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap">
+<style>
+  :root { --kinou-bg: #000; --kinou-fg: #FFFCEB; --dim: rgba(255,252,235,.55); --faint: rgba(255,252,235,.18); --kinou-sans: "Satoshi", -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--kinou-bg); color: var(--kinou-fg); font-family: var(--kinou-sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 34px 40px 26px; }
+  header .bt { font-size: 13px; color: var(--dim); }
+  .logo { justify-self: center; font-weight: 700; font-size: 44px; letter-spacing: -0.04em; line-height: 1; text-decoration: none; }
+  .logo img { display: block; height: 44px; width: auto; }
+  .desc { max-width: 760px; margin: 0 auto 30px; padding: 0 24px; color: var(--dim); font-size: 15px; line-height: 1.55; text-align: center; white-space: pre-line; }
+  main { padding: 0 24px 80px; }
+  .sec { margin: 34px 4px 14px; font-weight: 700; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  .grid { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 10px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(min(var(--cols, 3), 2), 1fr); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } header { padding: 24px 18px 18px; grid-template-columns: 1fr; text-align: center; } header .bt { order: 2; } main { padding: 0 10px 60px; } }
+  .card { position: relative; aspect-ratio: 16 / 9; background: #0a0a0a center / cover no-repeat; overflow: hidden; cursor: pointer; }
+  .card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .3s; }
+  .card video.on { opacity: 1; }
+  .card .t { position: absolute; left: 14px; top: 12px; right: 14px; font-size: 13px; text-shadow: 0 1px 8px rgba(0,0,0,.7); }
+  .card .n { position: absolute; right: 12px; bottom: 10px; font-size: 11px; color: var(--dim); }
+  .card::after { content: ""; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background 1s; }
+  .card:hover::after { background: rgba(255,255,255,.08); transition: background .2s; }
+  footer { padding: 30px 24px 50px; text-align: center; color: var(--dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  footer .logo { display: inline-block; font-size: 28px; letter-spacing: -0.04em; text-transform: none; color: var(--kinou-fg); margin-bottom: 14px; }
+  footer .soc a { margin: 0 8px; text-decoration: none; }
+  .msg { max-width: 420px; margin: 18vh auto; padding: 0 24px; text-align: center; color: var(--dim); line-height: 1.6; }
+  .msg input { display: block; width: 100%; margin: 18px 0 12px; padding: 10px 0; border: 0; border-bottom: 1px solid var(--faint); background: none; color: var(--kinou-fg); font: 400 18px var(--kinou-sans); text-align: center; outline: none; }
+  .btn { display: inline-block; padding: 10px 20px; border: 1px solid var(--faint); background: none; color: var(--kinou-fg); font: 700 11px var(--kinou-sans); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; cursor: pointer; }
+  .btn:hover { border-color: var(--kinou-fg); }
+  /* Lecteur */
+  .lb { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 5vw 90px; background: rgba(0,0,0,.94); overflow-y: auto; }
+  .lb[hidden] { display: none; }
+  .lb video { width: 100%; max-width: 1400px; max-height: calc(100vh - 220px); background: #000; }
+  .lb .cap { width: 100%; max-width: 1400px; display: flex; justify-content: space-between; gap: 20px; margin-top: 14px; }
+  .lb .cap h2 { margin: 0 0 6px; font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+  .lb .cap p { margin: 0; color: var(--dim); font-size: 13px; line-height: 1.6; }
+  .lb .cap .ty { text-align: right; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+  .lb .x { position: fixed; top: 18px; right: 24px; border: 0; background: none; color: var(--kinou-fg); font-size: 30px; cursor: pointer; }
+  .lb .nav { position: fixed; bottom: 22px; left: 0; right: 0; display: flex; justify-content: center; gap: 40px; }
+  .lb .nav button { border: 0; background: none; color: var(--kinou-fg); font-size: 28px; cursor: pointer; opacity: .7; }
+  .lb .nav button:hover { opacity: 1; }
+  .lb .gal { width: 100%; max-width: 1400px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  @media (max-width: 700px) { .lb .gal { grid-template-columns: repeat(2, 1fr); } .lb { padding: 56px 10px 90px; } }
+  .lb .gal img { width: 100%; display: block; cursor: zoom-in; }
+  .lb .gal.one { grid-template-columns: 1fr; }
+  .lb .gal.one img { max-height: calc(100vh - 220px); object-fit: contain; cursor: zoom-out; }
+</style>
+</head>
+<body>
+<div id="app"><p class="msg">…</p></div>
+<script>
+(function () {
+  var RAW = "https://raw.githubusercontent.com/Kinou-DoP/admin/main/data/";
+  var BASE = /\.pages\.dev$/.test(location.hostname) ? location.origin + "/api/data/" : RAW; // Cloudflare : dernière version (~10 s)
+  var code = (location.search.slice(1) || location.hash.slice(1)).replace(/[^a-z0-9]/gi, "");
+  var app = document.getElementById("app");
+  function el(t, a, k) { var e = document.createElement(t); for (var x in a || {}) { if (x === "text") e.textContent = a[x]; else if (x === "on") for (var ev in a.on) e.addEventListener(ev, a.on[ev]); else if (a[x] != null && a[x] !== false) e.setAttribute(x, a[x]); } (k || []).forEach(function (c) { if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); }); return e; }
+  function get(p) { return fetch(BASE + p, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
+  function msg(t, kids) { app.textContent = ""; app.appendChild(el("div", { class: "msg" }, [el("p", { text: t })].concat(kids || []))); }
+  function sha(t) { return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function (b) { return Array.from(new Uint8Array(b)).map(function (x) { return x.toString(16).padStart(2, "0"); }).join(""); }); }
+  if (!code) return msg("Lien incomplet.");
+  Promise.all([get("bandes/" + code + ".json"), get("site.json").catch(function () { return {}; }), get("contact.json").catch(function () { return {}; })]).then(function (r) {
+    var b = r[0], site = r[1], contact = r[2];
+    var today = new Date().toISOString().slice(0, 10);
+    if (b.expires && today > b.expires) return msg("Cette bande n'est plus disponible.");
+    document.title = (b.title || "Bande") + " — kinou";
+    if (!b.pw) return show(b, site, contact);
+    var key = "kinou-b-" + code;
+    try { if (sessionStorage.getItem(key) === b.pw.hash) return show(b, site, contact); } catch (e) {}
+    var inp = el("input", { type: "password", placeholder: "Mot de passe", autofocus: "" }), err = el("p", { text: "" });
+    function tryPw() { sha(b.pw.salt + inp.value).then(function (h) { if (h === b.pw.hash) { try { sessionStorage.setItem(key, h); } catch (e) {} show(b, site, contact); } else err.textContent = "Mot de passe incorrect."; }); }
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") tryPw(); });
+    msg(b.title || "", [inp, el("button", { class: "btn", text: "Voir", on: { click: tryPw } }), err]);
+  }, function () { msg("Cette bande n'existe pas (ou plus)."); });
+
+  function show(b, site, contact) {
+    app.textContent = "";
+    var logo = el("a", { class: "logo", href: "../" }, [site.logo ? el("img", { src: RAW + site.logo, alt: "kinou" }) : "kinou"]);
+    app.appendChild(el("header", {}, [el("div", { class: "bt", text: b.title || "" }), logo, el("div")]));
+    if (b.description) app.appendChild(el("p", { class: "desc", text: b.description }));
+    var main = el("main"), grid = null, films = [];
+    (b.items || []).forEach(function (it) {
+      if (it.section !== undefined) { if (it.section) main.appendChild(el("div", { class: "sec", text: it.section })); grid = null; return; }
+      if (!grid) { grid = el("div", { class: "grid" }); grid.style.setProperty("--cols", b.cols || 3); main.appendChild(grid); }
+      var i = films.length; films.push(it);
+      var c = el("div", { class: "card", on: { click: function () { open(i); } } }, [el("div", { class: "t", text: it.title || "" }), it.images && !it.full && !it.video ? el("div", { class: "n", text: it.images.length + " images" }) : null]);
+      if (it.img) c.style.backgroundImage = 'url("' + it.img + '")';
+      var v = null;
+      if (it.video && matchMedia("(hover: hover)").matches) {
+        c.addEventListener("mouseenter", function () { if (!v) { v = el("video", { muted: "", loop: "", playsinline: "", autoplay: "" }); v.muted = true; v.src = it.video; c.insertBefore(v, c.firstChild); v.addEventListener("playing", function () { v && v.classList.add("on"); }); } });
+        c.addEventListener("mouseleave", function () { if (v) { v.remove(); v = null; } });
+      }
+      grid.appendChild(c);
+    });
+    app.appendChild(main);
+    var so = (contact && contact.social) || {}, soc = el("div", { class: "soc" });
+    [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"], ["facebook", "Facebook"]].forEach(function (s) { if (so[s[0]]) soc.appendChild(el("a", { href: so[s[0]], target: "_blank", rel: "noopener", text: s[1] })); });
+    app.appendChild(el("footer", {}, [el("a", { class: "logo", href: "../", text: "kinou" }), el("div", { text: "cinematographer agency" }), soc.childNodes.length ? el("p", {}, [soc]) : null]));
+
+    // Lecteur : film complet avec le son (sinon l'extrait), ou la galerie d'une suite d'images ; flèches = films de la bande.
+    var lb = el("div", { class: "lb", hidden: "" }), cur = -1;
+    document.body.appendChild(lb);
+    function close() { lb.hidden = true; lb.textContent = ""; cur = -1; document.body.style.overflow = ""; }
+    function open(i) {
+      cur = (i + films.length) % films.length; var it = films[cur]; lb.textContent = ""; lb.hidden = false; document.body.style.overflow = "hidden";
+      lb.appendChild(el("button", { class: "x", text: "×", "aria-label": "Fermer", on: { click: close } }));
+      if (it.full || it.video) { var v = el("video", { controls: "", autoplay: "", playsinline: "" }); v.src = it.full || it.video; lb.appendChild(v); }
+      if (it.images && it.images.length) {
+        var g = el("div", { class: "gal" });
+        it.images.forEach(function (u) { g.appendChild(el("img", { src: u, loading: "lazy", on: { click: function (e) { var one = g.classList.toggle("one"); g.querySelectorAll("img").forEach(function (x) { x.hidden = one && x !== e.target; }); } } })); });
+        if (it.full || it.video) g.style.marginTop = "24px";
+        lb.appendChild(g);
+      }
+      var h = b.hide || {}, lines = [];
+      if (!h.dir && it.dir) lines.push("Directed by " + it.dir);
+      if (!h.prod && it.prod) lines.push(it.prod);
+      if (!h.dop && it.dops && it.dops.length) lines.push("DoP " + it.dops.join(" & "));
+      var right = el("div", { class: "ty" }, [!h.types && it.cats ? it.cats.filter(function (c) { return !/^(stills|trailer|bande-annonce)$/i.test(c); }).join(" · ") : "",
+        b.download && it.full ? el("p", {}, [el("a", { class: "btn", href: it.full, download: "", target: "_blank", rel: "noopener", text: "Télécharger" })]) : null]);
+      lb.appendChild(el("div", { class: "cap" }, [el("div", {}, [el("h2", { text: it.title || "" })].concat(lines.map(function (l) { return el("p", { text: l }); }))), right]));
+      if (films.length > 1) lb.appendChild(el("div", { class: "nav" }, [el("button", { text: "‹", "aria-label": "Précédent", on: { click: function () { open(cur - 1); } } }), el("button", { text: "›", "aria-label": "Suivant", on: { click: function () { open(cur + 1); } } })]));
+    }
+    lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+    document.addEventListener("keydown", function (e) { if (cur < 0) return; if (e.key === "Escape") close(); else if (e.key === "ArrowRight") open(cur + 1); else if (e.key === "ArrowLeft") open(cur - 1); });
+  }
+})();
+</script>
+</body>
+</html>
