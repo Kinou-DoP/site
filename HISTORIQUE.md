@@ -1,0 +1,533 @@
+# HISTORIQUE — dépôt site
+
+Détail daté des demandes de Gus et des décisions, **jusqu'au 21/11/2026** : c'est l'ancien CLAUDE.md complet, gardé tel quel.
+Le CLAUDE.md actuel ne garde que le fonctionnement et les règles ; ARCHITECTURE.md décrit le code. À consulter avant de changer un
+comportement (pour savoir pourquoi il est comme ça). Les changements suivants s'ajoutent en bas, datés.
+
+---
+
+# CLAUDE.md — kinou.fr
+
+## Contexte du projet
+
+kinou.fr est le site d'une agence de cinématographes parisienne.
+Environ 70 directeurs de la photographie (DPs) référencés.
+Stack : HTML/CSS/JS vanilla, zéro framework, données JSON statiques.
+Hébergement : Netlify (déploiement automatique sur push GitHub).
+Repo : github.com/Kinou-DoP/site
+
+La référence visuelle de départ est le prototype `reference/prototype.html`. Depuis, Gus a demandé
+des évolutions (police Satoshi, blanc cassé, en-tête, fonds et survols) : elles sont décrites dans
+les règles visuelles ci-dessous et priment sur le prototype.
+
+## ⚠️ Hébergement actuel : GitHub Pages seulement (Netlify bloqué)
+
+Depuis le 21/10/2026 vers 14 h 30, **les crédits Netlify sont épuisés** : plus aucune mise en ligne Netlify n'est
+possible. On travaille **uniquement sur GitHub** :
+- Site (beta) : **GitHub Pages** https://kinou-dop.github.io/site/ (branche `beta`) — en ligne ~1 min après un push.
+- Admin : GitHub Pages https://kinou-dop.github.io/admin/ (branche `beta` du repo admin).
+- Données : `data/` de la branche `main` du repo admin, lues par le site via `https://beta--kinou-test.netlify.app/api/data/`.
+- Les **fonctions Netlify** (`/api/data`, `/api/dp`, `/api/bundle`, `/api/stills`, `/api/reel`, `/api/refresh`) répondent
+  toujours sur `beta--kinou-test.netlify.app`, mais **figées dans leur version du 21/10** (avant le commit 37b726a) :
+  toute modification de `netlify/functions/` poussée depuis **n'est pas en ligne**. Le site et l'admin les appellent quand même.
+- Donc : ne pas compter sur un changement de `netlify/functions/` pour une fonctionnalité ; passer par le site (app.js),
+  l'admin, ou le robot GitHub de l'admin (Actions, gratuit : `tools/fill-home.mjs`, lit Slate directement).
+  Slate n'autorise pas la lecture depuis le navigateur (pas de CORS) : l'admin ne peut pas lire Slate lui-même.
+
+**Depuis le 30/10, les fonctions Netlify ne répondent plus du tout** (503 « Usage exceeded ») :
+- le site (GitHub Pages) lit les données **directement dans le dépôt admin public** (`DATA_BASE` =
+  `https://raw.githubusercontent.com/Kinou-DoP/admin/main/data/`, cache 5 min, pas de vidage possible) ; `/api/dp` n'est plus
+  appelé hors Netlify (`ON_NETLIFY`) : la copie des clips enregistrée dans la fiche par l'admin fait foi ;
+- l'admin fait lire Slate par le **robot GitHub** (`tools/ask.mjs` + `.github/workflows/slate-ask.yml` du dépôt admin, `data/ask/`,
+  environ 1 min par lecture) dès que Netlify répond 503 : import / « Relire le bundle », liens de stills et vidéos sous un film,
+  extrait au survol, bande de l'accueil. `tools/slate.mjs` de l'admin = copie de `netlify/functions/slate.mjs` (garder identiques).
+
+**Panne de shots / Slate (depuis le 14/11/2026, sans date de retour ; Gus a eu un mail du support)** : leur site, shots.re et leur
+service d'images `images.slatecdn.net` répondent 503 (les vidéos CloudFront marchent ; vignettes encore servies par certains caches).
+Secours dans app.js (16/11) : `slateRaw(u)` lit l'adresse d'origine écrite en base64 dans l'URL signée (fichier sur
+`s3-us-west-1.amazonaws.com/media-us-westslateappcom/…`, lisible) ; `loadImg` (vignettes, stills du lecteur, présentation vidéo + stills,
+galeries) et un écouteur `error` sur toutes les `<img>` chargent l'original en cas d'erreur (plus lourd : PNG / JPEG non réduits, 1–2,5 Mo).
+Sans effet quand Slate répond. Le robot de l'admin (lecture des bundles) ne marche pas pendant la panne.
+**Retour de Slate (17/11)** : il refuse désormais (403) les demandes **sans User-Agent** ; les fonctions Cloudflare n'en envoient pas →
+« Slate 403 » à l'import d'un bundle. `slate.mjs` envoie donc un User-Agent (`UA`, aussi pour shots.re) ; même chose dans la copie de l'admin.
+**18/11** : l'import par lien court (`/api/bundle/<code shots.re>`, `bundle.mjs`, `functions/api/bundle/[id].js`, `tools/ask.mjs` de l'admin)
+suivait shots.re **sans User-Agent** → « ce lien shots.re ne mène pas à un bundle Slate » (le lien du bundle marchait) ; tous passent
+maintenant par `shortBundle(code)` de `slate.mjs` (User-Agent, en-tête Location lu directement ; la redirection ajoute `?_referer=shortlink…`).
+
+**Essai Cloudflare Pages (16/11)** : projet Cloudflare « kinou » de Gus relié au dépôt (branche de production `beta`, sans commande
+de construction, dossier `/`) → https://kinou-4tv.pages.dev/ (suffixe ajouté par Cloudflare, le nom « kinou » étant déjà pris) ; mis en ligne
+à chaque push sur `beta`, en même temps que GitHub Pages. Le site y marche tel quel (racine `/`, `404.html` renvoie vers `/#<chemin>`).
+**Fonctions Cloudflare** (`functions/`, Pages Functions, 16/11 ; partagé : `functions/_shared.js`, lecture de Slate = `netlify/functions/slate.mjs`) :
+`/api/data/<chemin>` (dernier commit de `main` de l'admin lu par git `info/refs` (sans clé, gardé 10 s), puis fichier de ce commit sur
+raw.githubusercontent.com : **publication visible en ~10 s** au lieu de 5 min ; le site sur `*.pages.dev` y lit les JSON, `JSON_BASE` / `ON_CF`
+dans app.js ; images et CV toujours en direct sur raw), `/api/bundle/<id>`, `/api/stills`, `/api/reel` (pour l'admin, `SITE` de admin.js),
+`/api/refresh/<slug>` (vérifie la clé GitHub, rien à vider). Pas de `/api/dp` (le site n'appelle Slate qu'à travers les fiches publiées).
+Quota gratuit : 100 000 appels de fonctions par jour (≈ 3 à 7 JSON par visite) ; 10 ms de calcul par appel (gros bundle : peut échouer → robot).
+À faire pour la bascule : brancher kinou.fr sur Cloudflare (DNS chez OVH), `IMG_CDN` / `thumb()` vers le redimensionnement d'images de
+Cloudflare (seulement sur un domaine à soi), `SITE_URL` de `tools/share-pages.mjs`, mentions légales (hébergeur), puis admin.
+
+Contournements en place (à retirer ou simplifier au retour sur Netlify) :
+- Vidéo ajoutée sous un film (`extras`) : `/api/stills` figé ne lit que les images ; l'admin lit alors la page comme une
+  bande (`/api/reel`, 1er film : titre, extrait, vignette, **sans `full`**). Le robot GitHub de l'admin ajoute le `full`
+  après chaque publication (fiches et accueil). Sans `full`, le site joue l'extrait.
+- Film complet des slides de l'accueil : ajouté par le même robot (`/api/reel` figé ne renvoie pas `full`).
+- Projet en images seulement (type « illustration » sur Slate) : `/api/dp` figé ne renvoie pas ses images ; le robot GitHub
+  de l'admin les lit sur le bundle et les écrit dans `overrides[<id>].images` de la fiche (à chaque publication de la fiche ;
+  toutes les fiches au lancement manuel). Le site les affiche en galerie directe (`p.images`, comme `stills`).
+- Vignettes : le service d'images Netlify (`/.netlify/images`, `thumb()` dans app.js, `IMG_CDN`) n'est utilisé que sur
+  `*.netlify.app` / `kinou.fr` : sur GitHub Pages, les vignettes sont les images Slate d'origine (non réduites).
+
+### À faire au retour sur Netlify (crédits rechargés ou plan payant)
+1. Relier Netlify au dépôt **`Kinou-DoP/site`** (le dépôt a été déplacé depuis `kinou-agency/site` : GitHub répond
+   « This repository moved » à chaque push ; installer l'appli Netlify sur l'organisation Kinou-DoP si besoin).
+2. Remettre en ligne la **beta** (`beta--kinou-test.netlify.app`, branch deploy de `beta`) : les fonctions reprennent alors
+   le code du repo — `/api/stills` lit aussi les vidéos (`full`), `/api/dp` les images des projets « illustration »
+   (`stills`), `/api/reel` le `full`. Vérifier : `/api/stills?link=https://shots.re/19c405` doit renvoyer `full`.
+3. **Compression des vignettes** : servir le site depuis Netlify (ou étendre `IMG_CDN` à l'adresse utilisée) pour que
+   `thumb()` passe par `/.netlify/images` (WebP réduit) ; l'admin « chauffe » déjà ces vignettes (`warmThumbs`).
+4. Décider où vit le site : GitHub Pages (actuel) ou Netlify ; mettre à jour `DATA_BASE`, `IMG_CDN` (app.js) et `SITE`
+   (admin.js) en conséquence ; le contournement `/api/reel` de l'admin (`importStills`) peut rester (sans effet).
+5. **Photos (catégorie de photos, projets en images)** : rien d'obligatoire. Le robot GitHub tourne indépendamment de Netlify
+   et continue d'écrire `overrides[<id>].images` + `ratios` ; le site les préfère (`photosOf`) aux `stills` que `/api/dp`
+   renverra à nouveau. Option (pour ne plus dépendre du robot) : faire calculer les proportions par `readBundle`
+   (`slate.mjs`, même lecture des 64 premiers Ko que `ratiosOf` dans `admin/tools/fill-home.mjs`) → `ratios` sur le clip,
+   et faire préférer `stills` + `ratios` du bundle (toujours à jour) aux `images` du robot. Sans `ratios`, le site mesure
+   les photos lui-même avant de les placer (≤ 4 s, toutes les photos de l'onglet chargées d'un coup) : ça marche, en plus lent.
+6. **Mentions légales** (admin → contact → « Mentions légales », `legal` de `data/contact.json`) : vérifier qu'elles sont à jour,
+   surtout la rubrique « Hébergement » (depuis le 18/11 : Cloudflare Pages + GitHub Pages, et une rubrique « Services tiers » : Slate / Amazon CloudFront pour vidéos et images, Fontshare pour la police) → mettre Netlify, Inc. si le site y est servi
+   (et kinou.fr), et la rubrique « Cookies » si on ajoute une mesure d'audience.
+7. Puis seulement, après validation de Gus : fusion `beta` → `main` (production kinou.fr, ≈ 15 crédits par mise en ligne).
+
+**Étude en cours (19/11) : remplacer Slate** par notre propre hébergement des vidéos (Amazon S3 + CloudFront) : tout est dans le
+dépôt privé notes, `etudes/remplacer-slate.md` (mesures, coûts, risques, étapes). À lire avant de toucher à ce sujet.
+
+## Architecture des données
+
+Les données vivent dans le repo `Kinou-DoP/admin` (dossier `data/`). Le site officiel **et** la beta
+les chargent via `/api/data/<chemin>` (`netlify/functions/data.mjs`), qui les lit **directement dans GitHub**
+avec la clé en lecture seule `GITHUB_DATA_TOKEN` (variable d'environnement Netlify du site), cache CDN 5 min
+vidé à chaque publication (`/api/refresh`). Sans cette clé (ou si GitHub refuse) : le même fichier lu sans clé
+(dépôt admin public, `raw.githubusercontent.com/Kinou-DoP/admin/main/data/`).
+Les tokens GitHub (organisation Kinou-DoP) sont créés sans expiration.
+Ainsi une publication de l'admin ne déclenche **aucune mise en ligne Netlify** (économie de crédits).
+On les modifie avec l'interface d'admin (https://kinou-dop.github.io/admin/, GitHub Pages), pas dans ce repo.
+
+```
+data/
+├── home.json              # slideshow de l'accueil (PROJECTS) + durée ; importé d'une bande Slate dans l'admin
+├── site.json              # réglages (logo image : { logo: "brand/logo.png", logoHeight: 36 }) ; le site réduit le logo
+│                          # (8 × la hauteur affichée) et le garde dans le navigateur (localStorage « kinou-logo »)
+└── dps/
+    ├── index.json         # liste ordonnée des DPs : [{ slug, name, img?, hidden?, gender? }] (hidden = page cachée, voir plus bas ; gender "f" | "x" = femme / autre, absent = homme : mails de récupération de l'admin, pas utilisé par le site)
+    ├── <slug>.json        # une fiche par DP (clips + about)
+    └── img/               # portraits ABOUT
+```
+
+Chaque DP a :
+- Un slug unique (adresse de la page, comme sur kinou.fr) : `prenom-nom-cinematographer` (ex. `lara-perrotte-boucard-cinematographer`)
+- Une liste de clips avec catégories (chargée dans `WORK[slug]`)
+- Un ordre d'affichage des catégories (chargé dans `CATS_BY[slug]`)
+
+Fiche d'un DP (`data/dps/<slug>.json`) :
+```json
+{
+  "slug": "lara-perrotte-boucard-cinematographer",
+  "name": "Lara Perrotte Boucard",
+  "hue": 210,
+  "categories": ["FEATURED", "MUSIC VIDEO", "FASHION"],
+  "clips": [
+    {
+      "title": "Titre du projet",
+      "sub": "Réalisateur\nProduction",
+      "video": "https://d1ko11x0ybxl0h.cloudfront.net/kinou/production/clips/{id}/{uuid}.mp4",
+      "full": "https://d1ko11x0ybxl0h.cloudfront.net/kinou/production/clips/{uuid}-0x1080.5000.mp4",
+      "img": "https://images.slatecdn.net/{path}",
+      "cat": "MUSIC VIDEO",
+      "featured": true,
+      "featuredOrder": 1,
+      "open": true,
+      "stills": ["url1", "url2"],
+      "slate": 10716
+    }
+  ],
+  "about": { "bio": ["…"], "bioEn": ["…"], "cv": "", "instagram": "", "website": "", "img": "img/<slug>.webp", "pos": "center 30%", "shade": "…" }
+}
+```
+- `video` : extrait d'aperçu Slate (10 s, sans son) — slideshow et survol des vignettes.
+- `full` : film complet Slate (1080p, avec son) — joué dans le lecteur. Sans `full`, le lecteur joue `video`.
+- `slate` : identifiant du clip dans Slate (traçabilité).
+- `hue` : teinte de base (0–360) des fonds de remplacement ; la teinte de chaque clip vaut `(index * 47 + hue) % 360` (ou `h` si fourni sur le clip).
+- `featured` / `featuredOrder` : clip du showreel FEATURED et son rang.
+- `open` : clip présélectionné quand on arrive sur la page depuis l'accueil.
+- `stills` : galerie de stills (optionnelle), affichée sous le film dans le lecteur (3 colonnes, 2 sur téléphone), agrandie au clic.
+  Projet en images seulement (type « illustration » sur Slate, sans vidéo) : ses images deviennent `stills` à la lecture du bundle
+  (pas encore en ligne : fonctions Netlify figées ; en attendant, le robot de l'admin les met dans `overrides[<id>].images`) ;
+  le lecteur n'a pas de grande image (`.nostage`) : la galerie directement sous le titre et les crédits.
+  **Une seule image** (ex. The Conjuring 5 chez Julien Ramirez Hernan, Gus 03/11) : elle s'affiche en grand à la place du film
+  (`solo` dans `openPlayer`, `img.pbig` à sa forme, clic = plein écran), pas en galerie d'une case.
+- `hover` (dans `overrides[<id>]` d'un projet en stills, case « Extrait vidéo au survol » de l'admin) : `{ link, title, video, img? }`,
+  extrait d'une autre vidéo Slate (court métrage qu'on ne peut pas montrer en entier, sans bande-annonce) ; `register()` le
+  met dans `p.video` avec `p.nosnip` : il joue au survol (et au repère sur téléphone), jamais dans le lecteur (galerie au clic).
+- `extras` (dans `overrides[<id>]` d'une fiche ou dans une slide de l'accueil) : ce qui s'affiche sous le film dans le lecteur,
+  dans l'ordre de l'admin : `[{ link, title, stills: [...] } | { link, title, full, video, img }]` — galeries (3 colonnes, 2 sur
+  téléphone) et vidéos à la taille du film (montée en fondu comme les stills ; une seule vidéo joue à la fois ; titre de la vidéo
+  en blanc au-dessus, en haut à gauche, comme celui du film : `.pxv .ptitle`, Gus 13/11).
+  Remplace l'ancien `stills` + `stillsLink` des overrides (toujours lu s'il n'y a pas d'`extras`).
+  **Vidéos en colonnes** (Gus 18/11) : `cols: { d, m }` sur une vidéo des `extras` (admin, « + ») = 1 à 3 colonnes sur ordinateur (`d`) et sur
+  téléphone ≤ 700px (`m`) ; les vidéos suivantes sans `cols` vont dans la même grille (`.pxrow`, `--xd` / `--xm`), jusqu'à des stills ou une vidéo
+  avec son propre `cols` (1·1 = de nouveau en grand) ; titres plus petits, fins (400) et gris (60 %) dans une grille de plusieurs colonnes (Gus 18/11).
+- **Catégorie de photos** (ex. showreel `#photography` du bundle contenant la page Slate « illustration » des photos,
+  `kinou.slateapp.com/work/<…>-photography`) : quand tous les projets d'un onglet (hors FEATURED) sont en images seulement,
+  `renderPhotos` les affiche en colonnes (3, 2 sur téléphone), chaque photo à son ratio d'origine (jamais recadrée), montée en
+  fondu, clic = photo en grand (`openPhoto`, sans le lecteur ; flèches = toutes les photos de l'onglet). Plusieurs séries :
+  titre au-dessus de chacune. Images : `overrides[<id>].images` (robot, après « Relire le bundle » + Publier), proportions
+  `overrides[<id>].ratios` (largeur/hauteur, robot) : colonnes remplies en JS dans l'ordre (colonne la moins haute), chaque case
+  a déjà la forme de sa photo → rien ne bouge au chargement (avant, colonnes CSS = photos qui sautaient). Sans `ratios` : le site
+  lit la taille des photos avant de les placer (≤ 4 s).
+- Galeries (lecteur et catégorie de photos) : images chargées **dans l'ordre de la bande**, 4 d'avance au plus, et affichées dans
+  l'ordre (une image n'apparaît que quand toutes celles d'avant sont là : `orderedLoad`, Gus 03/11) — plus de « trous ».
+- `info` (dans `overrides[<id>]`, bloc « Infos du film » de l'admin, Gus 04/11) : `{ year, episodes, runtime, ratio, platforms, camera,
+  lenses, awards, synopsis, synopsisEn }` (texte libre ; `runtime` seul chiffre → « 90 min » ; `awards` une ligne par prix / sélection (lignes ajoutées aussi par l'admin depuis « Nos sélections », `info.awardsFrom` = suivi de l'admin, `info.awardsHidden` = lignes masquées dans l'admin ; tous deux ignorés par le site),
+  en une seule colonne ; `synopsis` = français, `synopsisEn` = anglais, paragraphes séparés par une ligne vide ; un seul rempli = lui
+  seul, les deux = anglais d'abord + choix EN / FR comme les bios, même mémoire `kinou-lang`). Lecteur (`fillInfo`, `.pinfo` sous les crédits) : à gauche « 2025 | 8 episodes · 45 min |
+  1.85 | Netflix » (`specOf`, plateformes de la fiction à défaut) puis STARRING (`starring`, acteurs, Gus 18/11) et CAMERA / LENSES ; à droite les prix (blanc, alignés sur le bord
+  droit de la vidéo comme « NARRATIVE · FEATURE FILM » ; **ordinateur : toujours remontés à la hauteur des crédits réal / prod** (rien au-dessus d'eux dans leur colonne), sous les types,
+  `.pi-up` flottant dans `.pcap`, Gus 17/11 puis 18/11 : même avec des infos à gauche, qui restent sous les crédits (`.pi-a.pi-in` mis dans `.pcap`) ; **téléphone et tablette**, aussi en paysage (≤ 900px ou écran tactile) : une seule colonne collée à gauche, prix juste sous réal / prod puis année, durée, caméra…, Gus 17/11) ; synopsis dessous
+  (gris) ; **prix groupés par festival** (Gus 18/11) : festival + année en petites capitales grises, prix en blanc, puis nominations et sélections
+  plus discrètes avec une petite étiquette « Nominee » / « Official Selection » / « Shortlist » (lignes lues au format `awLine` de l'admin ; autre forme = ligne telle quelle ; tirets longs « – » « — » toujours affichés « • », Gus 18/11) ; une colonne sur téléphone. Présentation vidéo + stills : la même ligne sous les crédits (`.sc-spec`).
+- `about.links` : liens en plus dans l'onglet About (`[{ label, url }]`, admin « + Ajouter un lien » : IMDb, Vimeo…), après CV / INSTAGRAM /
+  WEBSITE, nom en majuscules + ↗ ; lien sans nom ou sans adresse ignoré, `https://` ajouté s'il manque.
+- **Page cachée** (`hidden: true` dans l'entrée de `dps/index.json`, interrupteur « En ligne sur le site » de l'admin, Gus 10/11) :
+  absente de la liste et de la roulette, adresse directe sans effet, nom sans lien (accueil, spotlight, fiction : `dpByName` ne la
+  trouve pas), pas de page d'aperçu de lien (`tools/share-pages.mjs` la saute et supprime l'ancienne).
+- `about.img` : chemin relatif au dossier `data/dps/`.
+- Exception de mise en page = ajouter `"template": "special"` dans le JSON.
+
+### Synchronisation Slate en temps réel
+Une fiche peut contenir `"bundle": "https://kinou.slateapp.com/bundles/<uuid>"`. Le site lit alors ses clips
+via la fonction Netlify `/api/dp/<slug>` (`netlify/functions/dp.mjs` + `slate.mjs`), qui lit le bundle Slate
+(cache CDN 10 min). `categories` et `clips` de la fiche ne servent plus que de copie de secours
+(API en erreur ou > 2,5 s). Un même film peut figurer dans plusieurs catégories (une entrée par catégorie). Champs propres à ces fiches :
+- `open` : id Slate du clip présélectionné depuis l'accueil.
+- `overrides` : corrections par id Slate, appliquées par-dessus Slate, ex. `{"10903": {"title": "…"}, "534": {"hidden": true}}`.
+- Stills d'un film : dans l'admin, sous le film, lien d'une page Slate `https://kinou.slateapp.com/work/<adresse>` (ou shots.re).
+  Une page Slate de vidéo est aussi acceptée (→ `full`, `video`, `img`) : vidéo de plus sous le film (`extras`).
+  L'admin lit les images via `/api/stills?link=…` (`netlify/functions/stills.mjs`, `readStills` de `slate.mjs` :
+  `data-media` → `images[].image_player_url`, URLs signées copiées telles quelles) et les enregistre dans
+  `overrides[<id>].stills` (+ `stillsLink`). Recoller le lien pour reprendre les changements faits sur Slate.
+
+Accueil (`home.json`) : `{ duration, reel, overrides, slides: [{ slate, film, song, legend, video, full, img, dps: [{ name, slug }], start?, phoneX?, zoom?, zoomPos? }] }`.
+L'admin importe les 10 premiers films d'une bande Slate (`/api/reel?link=…`, `readReel` de `slate.mjs`) ; les chefs op crédités
+sont reliés à leur page par leur nom (liste des DPs) ; `overrides` (par id Slate) garde les textes corrigés au rafraîchissement.
+Ancien format accepté : `{ dp, slug }` par slide.
+
+Convention des bundles : un showreel `#featured` (ordre du FEATURED) et un showreel par catégorie
+(`#automotive`, `#commercial`, `#music video`…). L'ordre des showreels dans le bundle = ordre des onglets.
+Le nom de l'onglet est le texte après `#`, en majuscules (`#clips` → CLIPS).
+Plusieurs chefs op crédités sur un film : la page est celle du chef op crédité sur le plus de films du bundle
+(chaque film compté une fois) ; les autres sont ajoutés en dernière ligne des crédits (« co-DoP Nom »).
+
+### Spotlight (`data/spotlight.json`, rubrique « spotlight » de l'admin, adresse `#spotlight`)
+`{ reel, categories: ["COMMERCIAL", "MUSIC VIDEO", "ART VIDEO"], overrides, films, readAt, readError? }`. Une bande Slate
+(films de plusieurs chefs op) lue **en entier par le robot GitHub de l'admin** (`films` : `slate, title, sub, video, full, img,
+cats` = types de contenu Slate, `artists`, et pour un projet en images `images` + `ratios`) — les fonctions Netlify figées n'en
+lisent que 10, sans catégories. Le site (`spotToDP` dans app.js) en fait une page comme celle d'un chef op (`slug` « spotlight ») :
+onglet ALL (= FEATURED interne, libellé par `catLabel`, tous les films dans l'ordre de la bande, arrivée par défaut) puis un
+onglet par catégorie (un film va dans chaque catégorie dont le nom figure dans ses types de contenu Slate, « Art Film » comptant comme ART VIDEO ; sans catégorie
+reconnue : seulement dans ALL) ; chefs op crédités en dernière ligne des crédits (« DoP Nom », noms en blanc cassé = liens vers leur page, reliés par le nom à la liste
+sans accents ni « , AFC », `dpByName` / `dpLine` / `toDP` ; vignette et lecteur ; le bouton retour revient au spotlight) ; pas d'onglet ABOUT ;
+`overrides` de l'admin comme une fiche (titres, masquer, recadrage, stills et vidéos sous le film…).
+Ouverture : lien « spotlight » de l'en-tête et du menu du téléphone (`openSpot`, le mot devient le titre) ou `#spotlight[/cat]`.
+`body.spot` : sur ordinateur, titre « Spotlight » **à gauche** (pages de chef op : à droite), onglets **en ligne au-dessus** des films (grille sur toute la largeur) ; ordinateur (> 900px) : boutons grille / colonne en bas à
+droite du bandeau (grille à l'arrivée, colonne centrée de 1100px max, adresse `/feed` ; spotlight et fiction, Gus 30/10) ; extraits **toujours en boucle** (`liveOn`), sur ordinateur comme sur téléphone.
+
+### Fiction (`data/fiction.json`, rubrique « fiction » de l'admin, adresse `#fiction`)
+`{ reel, overrides, films, readAt, readAsk }` : comme le spotlight (bande Slate lue en entier par le robot GitHub, `films`), mais
+les onglets se règlent **à la main** dans l'admin, film par film (`overrides[<id>]`) : `status` `new` | `soon` | `past` (défaut past),
+`genre` (FEATURE FILM, SERIES, DOCUMENTARY, SHORT FILM ; films sortis), `date` (AAAA-MM-JJ), `poster` (affiche déposée dans l'admin →
+`data/fiction/<id>-<horodatage>.webp`, lue via `DATA_BASE`). `ficToDP` (app.js) : NEW RELEASES = FEATURED interne (`catLabel`),
+COMING SOON, PAST RELEASES (tous les films sortis) ; **Coming soon → New release tout seul le jour de la sortie, dès 9 h heure de Paris** (`ficStatus` / `ficOut`, Gus 18/11 ; compté dans les 9 New releases ; l'admin l'écrit aussi, `ficAutoOut`) ; **NEW RELEASES : 9 films au plus** (Gus 04/11) : au-delà, les plus anciens
+(date de sortie ; sans date = tout juste ajouté, gardé ; même date : ordre de la bande) passent d'eux-mêmes en PAST RELEASES (`keepNew`
+dans `ficToDP` ; l'admin écrit aussi le changement, `ficCapNew`) ; les genres (`.sub`) n'apparaissent, plus petits, à la suite des onglets que
+quand PAST RELEASES ou un genre est ouvert (`.cats.past`) ; genres sans film absents. **Tous les longs / tous les courts** (Gus 16/11, liens « Nos longs métrages » / « Nos courts métrages » du suivi des festivals
+de l'admin) : onglets `FEATURE FILMS` / `SHORT FILMS` (`FIC_ALL`, films du genre quel que soit le statut), adresse `fiction/feature-films` /
+`fiction/short-films`, visibles seulement quand ils sont ouverts (`.cats .only`). Genre + plateformes (`platforms`, admin) en haut à gauche de la vignette (« FEATURE FILM · NETFLIX », `.ctag`, gris sans ombre, tous les onglets,
+au survol / film sélectionné sur téléphone, Gus 29/10). Date de sortie : carré blanc « 16 Oct » (mois en anglais) **en haut à droite** de la
+vignette au survol (`.cdate`, toujours visible sur écran tactile), seulement dans NEW RELEASES et COMING SOON
+(posée sur la carte, pas sur la vignette qui s'agrandit au survol). Téléphone : date seulement sur le film sélectionné (`.card.focus`, Gus 28/10).
+Téléphone, genres de PAST RELEASES : 2e ligne sous les onglets (`#subcats`, boutons relais remplis par `subRow`, les vrais genres
+de `.cats` cachés), qui descendent un à un en sortant du flou (`subIn`) ; la bande s'abaisse (`body.subs-on` → `--kinou-zm`). Ordinateur : genres qui arrivent de côté, comme sortant de PAST RELEASES (`subSide`).
+Arrivée des onglets en cascade (`subIn`, Gus 28/10) : partout, téléphone et ordinateur (chefs op, spotlight, fiction)
+(`--i` rang posé par `buildTabs`, `--td` délai d'apparition posé par `tabsIn`). Date sur téléphone : petit fondu (0,6 s). COMING SOON : films dans l'ordre inverse de la bande (prochaine sortie en premier). Chefs op crédités :
+« DoP Nom » cliquable comme au spotlight (`MULTI` = pages de plusieurs chefs op). Pas d'extraits en boucle (comportement normal).
+Lecteur : avec affiche (`#player.has-poster`), affiche à gauche du film à la même hauteur (6fr / 16fr), stills dessous ; sans
+affiche, comme ailleurs ; téléphone : affiche en petit (92px) à gauche des crédits (`.pposter-s`). Première version calquée sur
+l'ancien site Squarespace (Gus 27/10) ; idées à essayer ensuite : affiches en vignettes, petite affiche au survol.
+**ESSAI (28/10)** : vignettes de la fiction en cinémascope 2,39:1 (`body.fic .still`, `.card`, `.shade i`, fin de main.css) ;
+pour revenir au 16:9, supprimer ces lignes (marquées « ESSAI »). Cadrage réglé dans l'admin, **séparément** pour la vignette
+(`overrides[<id>].thumbCrop`) et l'extrait (`snipCrop`) = `{ z, x, y }` (z ≥ 1 agrandissement, x / y 0–100 position, absent =
+centre) ; `scopeCrop` (app.js) : vignette = background-size z × 100 % + background-position x % y % ; extrait = vidéo 16:9 de
+largeur z × 100 %, décalée (`--cw`, `--cx`, `--cy`). Le `zoom` / `zoomPos` ordinaire n'est pas utilisé sur la fiction (le cadre
+2,39 enlève déjà les bandes noires des bandes-annonces en scope).
+Extrait affiché (toutes les pages) : l'image fixe dessous est retirée 0,25 s après (`.still.vidon`, `snip`) : sinon liseré clair
+autour de l'extrait quand la page est zoomée. Remise dès que la vidéo s'arrête ou se vide, et quand la page est cachée
+(`visibilitychange`) : sinon vignettes noires au retour sur un onglet resté ouvert. Dégradé des titres (spotlight, fiction) qui déborde de 3px. Cartes du spotlight et de la fiction : fond noir + liseré
+sombre de 3px autour (`box-shadow`), contre la fine ligne claire au zoom.
+Extrait de la fiction : 1px de plus de chaque côté (sinon bord de l'image fixe visible derrière, page zoomée). Vignettes du
+spotlight et de la fiction en `will-change: transform` (sinon elles « descendent » d'un pixel à la fin du zoom de survol).
+Spotlight et fiction (`body.spot`, ordinateur, grille) : titre toujours affiché sur la vignette ; au survol il remonte et les
+crédits apparaissent (Gus 28/10).
+
+### Présentation « vidéo + stills » d'un onglet (`showcase`, Gus 29/10, d'après l'ancien kinou.fr/vadim-narrative)
+Interrupteur dans l'admin, sur l'onglet ouvert d'une fiche → `showcase: ["NARRATIVE", …]` dans la fiche (`SHOW[slug]` dans app.js).
+`renderShow` : par projet, grille de 4 colonnes — vidéo en grand (2 × 2, `.sc-big.still`, triangle de lecture en contour `.sc-play`, caché quand l'extrait joue),
+titre + crédits à côté (`.sc-info`), 2 stills dessous, puis 4 stills ; vidéo à gauche et texte à droite pour tous les projets (l'alternance gauche / droite n'a pas plu ; essayé à droite puis remis à gauche, Gus 30/10) ; type de contenu Slate
+au-dessus (`.sc-type`, `typesOf`) ; trait fin dégradé entre les projets (`.sc-hr`) ; arrivée `riseBlur` ; images et vidéo qui apparaissent en grandissant (94 % → 100 %, fondu) quand elles entrent à l'écran, une à une (`.pop.in`, `popSeen`, comme l'ancien Squarespace, Gus 30/10). Téléphone : titre, 2 stills,
+la vidéo, 4 stills, type dessous. Stills = `galleryOf(p)` (images du projet, puis toutes les galeries `extras`) : les 6 premiers ;
+projet sans vidéo : 1re image en grand + les 6 suivantes ; sans stills (`.bare`) : vidéo + titre seuls. Clic vidéo = lecteur
+(flèches : films de l'onglet) ; clic image = `openShowStill` : lecteur avec l'image en grand (`img.pbig`, clic = plein écran,
+flèches = toute la galerie), toute la galerie dessous, puis le film du projet et les autres vidéos ajoutées sous le film (ordre de l'admin).
+Clic vidéo : lecteur habituel (stills et vidéos ajoutés sous le film, dans l'ordre de l'admin). Ordinateur : boutons grille / colonne
+visibles ; « feed » = cette présentation (par défaut sur ces onglets, `showTab`), « grille » = grille habituelle (adresse `/grid`) ; sans choix
+(bouton ou adresse), feed sur ces onglets et grille ailleurs. 
+Téléphone et ordinateur (Gus 30/10) : extrait de la grande vidéo lancé 1,5 s après son arrivée à l'écran (≥ 60 % visible), en fondu de 1,4 s (`slowThumb`,
+`.snip.slow`), arrêté quand elle sort ; ordinateur : la souris passe avant (`slowHover` : survol = extrait tout de suite, ou il continue s'il jouait ; souris partie = vignette, extrait relancé seul 1,5 s après) ; projet au repère (45 % de la hauteur, `scFocus` appelé par `pickFocus`) = « sélectionné » :
+sa vignette (ou 1re image) en fond flouté (Gus 30/10).
+Toute la largeur de l'écran (pas de largeur maximale) ; survol d'une image = cette image en fond flouté (`showProj`).
+Types : les mots « Trailer » / « Bande-annonce » sont retirés aussi à l'intérieur d'un type (« Short Film Trailer » → « Short Film »), puis dédoublonnés.
+
+### Bandes envoyées aux producteurs (`b/index.html`, Gus 19/11, 1re version)
+Page indépendante du reste du site, adresse `b/?<code>` : lit `data/bandes/<code>.json` (composée dans la bibliothèque de l'admin ;
+sur `*.pages.dev` par `/api/data`, ailleurs sur raw.githubusercontent.com) : logo (`site.json`), titre, description, sections, grille
+de 1 à 3 colonnes (`cols` ; 2 au plus sous 900px, 1 sur téléphone), titre en haut à gauche de chaque vignette, extrait au survol ; clic =
+lecteur (film complet avec le son, sinon l'extrait ; suite d'images = galerie), crédits (réal, prod, DoP, types : cachables, `hide`),
+« Télécharger » si `download`, flèches et Échap ; mot de passe (`pw` = { salt, hash } SHA-256, retenu le temps de l'onglet) ; date
+d'expiration (`expires`) dépassée = « plus disponible ». `noindex`.
+
+### Contact (`data/contact.json`, page « contact » de l'admin, adresse `#contact`)
+`{ team: [{ role, name, email, phone }], address: [lignes], newsletter, newsletterLabel, social: { instagram, vimeo, imdb, facebook }, legal }`.
+Ouverte comme le spotlight (`openPage`, `PAGES`, `from: "spot"`, le mot « contact » de l'en-tête devient le titre, à gauche sur
+ordinateur ; `body.cpage`, pas d'onglets, `--kinou-zm` plus court). `showContact` / `renderContact` dans app.js, dans `.work`
+(`contact-mode` : films, onglets et About cachés ; films de la page d'avant vidés). Présentation « générique de fin » : rôle à
+droite d'un axe central (petites capitales grises, écrit sur chaque ligne, même identique à celui du dessus : Gus 27/10), prénom en grand à gauche,
+e-mail (`mailto:`) et téléphone (`tel:`) dessous ; lignes qui montent l'une après l'autre en sortant d'un léger flou (`riseBlur`) ; noms toujours en blanc
+(pas d'estompage au survol : Gus 27/10). Puis adresse (lien vers Google Maps), « [ Subscribe to the newsletter ] »
+(texte `newsletterLabel` ; crochets qui s'écartent au survol), réseaux remplis, « Mentions légales » tout en bas en tout petit (9px ;
+texte déplié sur place, si `legal` ; paragraphes séparés par une ligne vide, une ligne seule courte sans « : », point ni chiffre = titre).
+Fond flouté (`showProj`, comme une page de chef op) : depuis l'accueil, le film en cours, là où il en était (`HomeAPI.current`,
+passage HD compris) ; sinon un film de l'accueil au hasard. Téléphone : une colonne centrée.
+
+## Règles visuelles — à respecter absolument
+
+1. **Pas de framework CSS** — tout en CSS vanilla ; les tokens de design globaux sont des variables `--kinou-*`
+   (`--kinou-bg`, `--kinou-fg`, `--kinou-body`, `--kinou-sans`, `--kinou-hero-top`, `--kinou-hero-h`, `--kinou-tabs-top`, `--kinou-zm`).
+   Les variables posées par app.js sur les éléments (`--h`, `--img`, `--i`, `--d`, `--near`) gardent leur nom court.
+2. **Palette** : fond noir pur (#000), texte blanc cassé `#FFFCEB` (`--kinou-fg`), textes secondaires en `rgba(255,252,235,…)` ; teinte HSL par clip pour les fonds de remplacement.
+3. **Typographie** : **Satoshi** (Fontshare) partout — 300 pour la liste des DPs ; titres 600 (rendu en 700), interlettrage serré ; étiquettes 11–13px, `letter-spacing: .14em`, majuscules.
+4. **Grille clips** : galerie 3 colonnes 16:9 à toutes les tailles (gap 6px, 4px mobile) ; mode feed en 1 colonne.
+5. **Overlay** : plein écran, fermeture sur Escape, croix ou clic hors zone ; lecteur sur fond « verre dépoli »
+   (page floutée 36px, voile noir 62 %), image agrandie sur fond noir 98 %.
+6. **Animations** : arrivée des films en grandissant (94 % → 100 % + fondu, quand ils entrent à l'écran, `.card.pop.in`, `popSeen` ;
+   en cascade au 1er affichage, puis par rangée ; grille : la carte et son ombre `.shade i` ; colonne : la vignette) sur les pages
+   de chef op en grille, le spotlight et la fiction (toutes présentations), comme l'ancien Squarespace (Gus 30/10) ; feed d'un chef op
+   (et téléphone) : montée habituelle `rise`. Puis celles du prototype (révélation circulaire 1,15s, morphing du nom 1000ms (léger flou au départ, net dès ~60 % du trajet : `heroBlur`, aller et retour, Gus 28/10) — les onglets apparaissent juste
+   après, `view.t0` + `ANIM` → `transitionDelay` de `.cats`, etc.) + le voile
+   lumineux au survol d'un film (blanc 10 % depuis le 23/10, avant 15 % ; montée rapide, retour en 1 s). Ne pas en ajouter d'autres sans demande.
+8. **En-tête** : logo « kinou » au centre ; à gauche Instagram puis « spotlight », « fiction », « press » (à venir), « contact »,
+   masqués sous 700px (dans le menu du téléphone) ; à droite « cinematographers ».
+10. **Catégorie du film** (onglet FEATURED seulement, gris, non gras ; films Narrative : suivie des types de contenu Slate, « NARRATIVE · SHORT FILM »,
+   et ces types seuls dans l'onglet Narrative ; « Stills », « Fiction », « Trailer », « Bande-annonce » jamais affichés ; aussi dans le lecteur, en bas à droite de la vidéo, `.ptypes` — `narrTypes`, `overrides[<id>].types` écrit par le robot de l'admin, Gus 29/10) : en bas à droite au survol (galerie) ; sur téléphone (≤ 700px) les pages de chef op sont
+   toujours en feed (pas de choix d'affichage) et la catégorie est en haut à droite de la vignette.
+11. **Accueil** : un lien par chef op crédité (« Nom & Nom », « & » fin et plus petit ; plusieurs chefs op = noms plus petits) ; pas de fond coloré de remplacement (noir) ;
+   on arrive sur un film au hasard parmi les 10, puis l'ordre de la bande.
+   Extrait HD (admin) : si la slide a `start` (secondes) et `full`, l'accueil lit le film complet de `start` pendant
+   `duration` (sans le son), au lieu de l'extrait Slate ; le suivant se précharge ; film illisible → extrait Slate.
+   `phoneX` de la slide = cadrage horizontal sur téléphone (`--pp`, object-position), comme le fond de la liste.
+   Le passage HD ne dépasse jamais `start` + `duration` : accueil en pause ou slide cachée → la vidéo s'arrête et revient au
+   début du passage ; reprise (`HomeAPI.resume`) dans le passage ; fond de la page contact = ce passage en boucle (`projvid._seg`).
+12. **Recadrage** : `zoom` (1 à 2,5, réglé dans l'admin, dans `overrides[<id>]` d'une fiche ou d'une slide de l'accueil)
+   agrandit l'extrait pour enlever les bandes noires, vers la position `zoomPos` ("X% Y%", absent = centre ; cadre rouge
+   déplacé dans l'admin → `--zp` = transform-origin / background-position) ; la vignette aussi si `zoomThumb` (case dans l'admin) ;
+   jamais dans le lecteur.
+13. **Téléphone** (≤ 700px) : en-tête = burger à gauche (volet flou sur la moitié de l'écran : spotlight, fiction, instagram,
+   contact), logo réduit (texte « kinou » sans logo image : 28px), « DOP » en gras à droite (au lieu de « cinematographers », même hauteur que le logo), les trois centrés sur la même ligne ;
+   écart identique (≈ 15px depuis le 23/10, avant ≈ 10–14px) entre nom, onglets et bande ;
+   **ESSAI en cours (22/10)** : nom du chef op (`.hero`) **centré** sur téléphone. Ancienne position, à remettre si Gus revient
+   en arrière : collé à droite comme sur ordinateur (`right: 32px`, 24px sous 560px, `text-align: right`) — il suffit de
+   supprimer la ligne `.hero { left: 0; right: 0; text-align: center; }` (marquée « ESSAI ») dans `main.css` ;
+   accueil : glisser gauche/droite ou haut/bas = projet suivant/précédent ; page d'un chef op : la zone qui défile
+   commence sous la bande (`.work { top: var(--kinou-zm) }`), le film au milieu de l'écran (40 %) joue comme au survol,
+   les onglets qui dépassent défilent lentement en boucle (une copie des onglets, `aria-hidden`, ajoutée par `marquee` ;
+   retirée et recalculée à chaque passage et au redimensionnement : sinon onglets en double après rotation de l'écran).
+   Petit espace sous le dernier film (6vh) : en bas de page le repère descend vers le dernier film (comme en haut vers le 1er),
+   qui peut donc être sélectionné ; voile lumineux sur le film sélectionné ;
+   perspective (« roulette ») : les films loin du repère rapetissent (au plus -13 %, propriété `scale` posée par `pickFocus`
+   dès l'affichage puis au défilement ; pas `transform`, que l'animation d'arrivée écraserait).
+15. **Roulette des chefs op** (téléphone en portrait, remplace la liste) : noms en boucle, le nom au repère (38 %)
+   grand (26px) et blanc, les autres plus petits et estompés ; élan au doigt, arrivée calculée pile sur un nom ;
+   le nom au centre affiche en fond l'extrait de son 1er film FEATURED (cadrage horizontal sur téléphone : `phoneX` de
+   l'admin → `--pp` = object-position de `#bgvid`) ; toucher un nom l'amène au centre, toucher
+   le nom au centre ouvre sa page. Commence sous l'en-tête (coupe nette). Arrivée sur la liste : un nom au hasard au centre.
+16. **Historique** : accueil, liste et page d'un chef op sont des entrées d'historique (`pushPage`) : le bouton retour
+   revient à la page précédente (le nom repart à sa place) ; lecteur et image agrandie se ferment d'abord.
+17. **Accueil → lecteur** : clic sur la vidéo = le film **complet avec le son** dans le lecteur (jamais l'extrait ; flèches = films
+   de l'accueil) ; film complet et stills de la slide (`full`, importé avec la bande), sinon ceux du même film (id Slate)
+   dans la fiche d'un chef op crédité, puis la page fiction et le spotlight (`homeItem`, Gus 17/11) : aussi infos du film, prix, types,
+   plateformes, stills et vidéos dessous (tout sauf l'affiche). Zone de l'en-tête (90 px du haut) exclue ; boutons de l'en-tête avec zone de clic agrandie.
+   Sous le film : nom du ou des chefs op en blanc (liens vers leur page). Pendant une vidéo, fond noir (pas la vignette).
+14. **Lecteur** : flèches ‹ › tout en bas de l'écran (films de l'onglet affiché, aussi au clavier) ; images agrandies : flèches en bas, glisser,
+   pavé tactile ; le bouton retour du téléphone ferme l'image puis le lecteur (`history.pushState`).
+9. **Fonds** : liste → nom survolé en blanc et en gras (700), extrait vidéo du 1er film FEATURED du chef op ; page d'un chef op → fond du
+   film survolé très flouté et assombri, ombre noire (55 %) derrière chaque vignette (extrait des vignettes débordant de 1px : sinon liseré clair de la vignette sur le bord) ; sous le nom, coupe nette sur toute la largeur (pas de dégradé ; sur ordinateur, juste un fondu de 4px depuis le 26/10).
+   Sur ordinateur, en arrivant sur un onglet (page d'un chef op ou changement d'onglet), le 1er film est déjà « survolé »
+   (extrait + fond flou, `autoFirst`) ; dès qu'on survole un film, fonctionnement normal (`dropAuto`). Pas si on arrive
+   de l'accueil sur un film présélectionné (`selCard`).
+   Portrait de l'onglet About : en noir et blanc (`filter: grayscale(1)` sur `#aboutbg`), sauf si l'interrupteur « Noir et blanc sur le
+   site » est décoché dans l'admin (`about.color: true` → couleur).
+   Cadrage : `about.pos` (background-position) ; zoom `about.zoom` = `transform: scale` avec `transform-origin` = pos.
+7. **Pas de dépendances npm** pour le repo `site` — HTML/CSS/JS direct.
+
+## À faire (noté par Gus)
+- **Idées pour plus tard (Gus 04/11)** :
+  - bouton dans l'admin qui **préremplit les infos d'un film** (année, durée, épisodes, synopsis FR / EN) depuis **TMDB** (themoviedb.org,
+    clé API gratuite à créer), à partir du titre ; reste à vérifier et à compléter caméra, optiques, prix ;
+  - **traduction automatique** des bios et des synopsis (FR ↔ EN) dans l'admin, à relire avant publication.
+- **Vignettes du spotlight / de la fiction qui sautent de quelques pixels** (à la fin du zoom de survol, page zoomée) : `will-change`
+  déjà essayé (28/10), pas suffisant d'après Gus (29/10) ; à reprendre plus tard.
+- **Clés GitHub de l'admin à modifier** (Gus, pas encore fait au 28/10) : sur github.com → Settings → Developer settings →
+  Fine-grained tokens, ajouter le dépôt **Kinou-DoP/site** (Contents : Read and write) à la clé de chaque personne qui publie.
+  Sans ça, `sharePage` (admin) ne peut pas écrire `<slug>/index.html` : les liens partagés d'un chef op n'affichent pas sa
+  photo / son nom à jour (la fiche est publiée quand même). Le workflow `share-pages.yml` (push sur `beta`) les refait aussi.
+- **Extrait qui se mélange à la vignette au survol** (mis de côté, Gus 28/10) : l'extrait apparaît encore un instant par-dessus
+  l'image fixe (ex. fiction, COMING SOON, Ghost Soldier : vignette sombre, extrait clair, cadrages différents). Déjà essayé :
+  fondu raccourci 0,5 s → 0,2 s, extrait affiché à sa première image peinte (`requestVideoFrameCallback` dans `snip`) : pas suffisant.
+  Pistes : couper l'image fixe au même moment (fond `.still` retiré quand `.snip.on`), ou image de départ de l'extrait = vignette.
+- **Téléphone en paysage et tablette** : mise en page dédiée à prévoir (aujourd'hui : roulette en portrait seulement,
+  sinon la mise en page ordinateur ou téléphone selon la largeur).
+- Vignettes animées (extrait en boucle à la place de l'image) : essayé le 22/10/2026, Gus préfère les vignettes fixes
+  sur le site normal. **Version « live »** (23/10) : https://kinou-dop.github.io/site/live (simple renvoi `live/index.html`
+  → `../?live`, garde le `#slug`) = le même site avec toutes les vignettes qui jouent leur extrait en boucle (`LIVE`,
+  `liveThumb` dans app.js, seulement les vignettes à l'écran). Un seul site : ne rien dupliquer, ne pas modifier `live/`.
+  **Sur téléphone (≤ 700px), c'est toujours le cas** (24/10, `liveOn()` = `?live` ou téléphone) ; l'ordinateur garde les
+  vignettes fixes (extrait au survol).
+
+## Branches et mise en ligne
+
+- `main` = site officiel (kinou.fr). Netlify publie `main` en production (aujourd'hui bloqué : voir plus haut).
+- `beta` = version de test : GitHub Pages https://kinou-dop.github.io/site/ (et, quand Netlify marchait,
+  branch deploy `beta--kinou-test.netlify.app`, figé depuis le 21/10).
+- On travaille et on pousse sur `beta` (ou une branche de travail fusionnée dans `beta`).
+- On ne fusionne `beta` dans `main` qu'après validation explicite de Gus.
+- Pour l'instant seule la beta compte : le site `main` (kinou-test.netlify.app) n'est pas suivi et peut ne plus
+  savoir lire les données publiées par l'admin (ex. nouveau format de `home.json`) ; pas de compatibilité à maintenir.
+
+### Crédits Netlify (plan gratuit : 300 crédits / mois)
+- Chaque mise en ligne d'un site **de production** coûte environ 15 crédits : chaque push sur `main` du site,
+  et chaque push sur `main` du repo `admin` qui touche autre chose que `data/`.
+- Les déploiements de la beta (branch deploys) ne coûtent rien d'après le plan gratuit (« unlimited deploy previews »).
+- Les publications de l'admin (commits dans `admin/data/`) **ne déclenchent pas de mise en ligne** (règle `ignore`
+  du `netlify.toml` de l'admin) : le site lit ces données dans GitHub via `/api/data`.
+- Donc : travailler sur `beta`, regrouper les changements avant de fusionner dans `main`, et regrouper les
+  modifications du code de l'admin en un minimum de pushs.
+
+## Règles de code
+
+- Toujours lire les fichiers existants avant de modifier
+- Ne jamais inventer d'URLs CloudFront ou Slate — elles viennent des bundles Slate réels
+- Les URLs d'images Slate (`images.slatecdn.net/<signature>/<options>/<source>`) sont signées :
+  les copier telles quelles depuis le bundle, sans changer taille, options ni source (sinon erreur 403)
+- Les slugs ne se renomment que dans l'admin (champ « Adresse de la page »), pour reprendre les adresses de kinou.fr
+- Commit atomique par DP ajouté ou fonctionnalité implémentée
+- Message de commit en français : "Ajout [Prénom Nom]" ou "Fix [description]"
+
+## URLs de référence
+
+- CDN vidéo : `https://d1ko11x0ybxl0h.cloudfront.net/kinou/production/clips/{id}/{uuid}.mp4`
+- Images Slate : `https://images.slatecdn.net/` (pas de CORS, accès libre)
+- Bundles Slate : `https://kinou.slateapp.com/bundles/{uuid}` (HTML public)
+- Embed Slate : `https://kinou.slateapp.com/embed/clip/{embedId}?autoplay=1`
+
+## Source des données d'un nouveau DP
+
+Pour ajouter un DP, aller chercher son bundle Slate :
+1. URL du bundle : trouvée via shots.re/{code} ou directement sur kinou.slateapp.com
+2. Fetcher les sous-pages /0, /1, /2… pour avoir tous les clips
+3. Extraire depuis la playlist du lecteur (attribut `data-media` de chaque page) : title, director/production (→ sub),
+   snippets.small (→ video), le stream 1080 (→ full), id (→ slate) ; et l'image signée de la grille (→ img).
+   Télécharger les pages avec `curl --compressed` (sinon la page est tronquée).
+4. Identifier les clips "featured" avec le client ou son beau-frère
+5. Créer `data/dps/<slug>.json` et ajouter le DP dans `data/dps/index.json`
+
+## Structure du repo `site`
+
+```
+site/
+├── index.html          # structure HTML seule (accueil + liste + page DP), aucune donnée en dur
+├── assets/
+│   ├── css/main.css    # tout le CSS
+│   └── js/app.js       # chargement JSON + logique + template unique des pages DP
+├── netlify/functions/  # API : /api/data (données), /api/dp (clips Slate), /api/bundle + /api/stills + /api/reel (import admin), /api/refresh
+├── reference/
+│   └── prototype.html  # prototype d'origine, référence visuelle
+├── CLAUDE.md
+└── README.md
+```
+
+À chaque modification de `main.css` ou `app.js`, mettre à jour le numéro `?v=` dans `index.html` (date-heure) :
+sinon les navigateurs (cache de 10 min de GitHub Pages, Safari surtout) gardent l'ancienne version.
+
+**Adresses des pages (27/10)** : `<racine>/<slug>/` (comme kinou.fr), `<racine>/<slug>/<categorie>` ouvre directement un onglet
+(ex. `…/lara-perrotte-boucard-cinematographer/fashion`, `…/music-video`, `…/about`), `/feed` à la fin = une colonne ; idem
+`spotlight/`, `fiction/`, `contact/`. Écrites par `pageURL` (app.js, `ROOT` = dossier de app.js), lues par `route()` ; changer
+d'onglet met l'adresse à jour (`replaceState`, sans étape de plus pour le bouton retour).
+**Adresse d'un film** (Gus 30/10) : ouvrir un film dans le lecteur met l'adresse `<slug>/<onglet>/<titre>` (`filmURL`, `filmSlug` = titre
+sans accents ; `featured` pour l'onglet d'arrivée : ALL du spotlight, NEW RELEASES de la fiction ; flèches = `replaceState`) ; fermer
+(croix, Échap, retour) remet celle de la page. Arrivée par cette adresse : la page sur son onglet puis le lecteur sur le film
+(`openFilmLater` ; titre inconnu = la page seule). Films de l'accueil et images cliquées : adresse inchangée. Aperçu du lien : générique
+(« kinou », l'adresse passe par 404.html) ; à faire si Gus le demande : pages d'aperçu par film (titre + vignette). Les anciennes adresses `#<slug>…`
+marchent toujours et sont réécrites. Le site reste une seule page : `<slug>/index.html` est une **page d'aperçu de lien**
+(nom + photo du chef op en balises Open Graph, pour WhatsApp, iMessage, Slack… qui ne lisent ni le JavaScript ni le « # »),
+qui renvoie en JavaScript vers `../#<slug>` ; fabriquée par `tools/share-pages.mjs` (photo = `about.og`, portrait en JPEG noir et
+blanc, ou couleur si « Noir et blanc sur le site » est décoché, fabriqué par l'admin à la publication, `makeOg`, Gus 06/11 ; sinon
+portrait About, sinon vignette du 1er film FEATURED ; spotlight / fiction / contact : leur nom), lancé par `.github/workflows/share-pages.yml` à chaque push sur
+`beta` (ou à la main, onglet Actions) ; **et écrite par l'admin à chaque publication d'une fiche** (`sharePage` dans admin.js, même
+contenu : garder les deux identiques ; clé GitHub de la personne avec accès en écriture au dépôt site). Pas de passage régulier
+(il faudrait le workflow sur `main` : écarté, Gus 27/10). En attendant un aperçu, l'adresse d'un chef op marche quand même. Ne pas modifier ces dossiers à la main. Adresse sans page (onglet, chef op pas encore
+généré) : `404.html` renvoie vers `<racine>/#<chemin>` (sur `*.github.io`, la racine = 1er dossier). Accueil : titre « kinou »
+(`<title>` + og:title) ; titre de l'onglet du navigateur = « Nom — kinou » sur une page.
+Au retour sur Netlify : `SITE_URL` du générateur (adresse publique, ex. https://kinou.fr/), et la règle de racine de `404.html`
+(sur Netlify, `_redirects` peut remplacer 404.html). Les portraits sont en WebP (og:image) : bien lu par iMessage, WhatsApp
+récent, Facebook ; si un service ne l'affiche pas, faire produire un JPEG au générateur.
+Boutons grille / colonne (`.modes`) : sur ordinateur (> 900px) dans le bandeau, au-dessus de la coupe, alignés sur la grille
+(les films commencent juste sous le bandeau ; catégories de gauche alignées sur le haut des films) ; 701–900px : au-dessus des films.
+Sur ordinateur (> 900px), `placeModes` les sort de `.work` (dans `body`) : le haut de `.work` a un fondu très court (4px,
+`mask-image`, demande de Gus 26/10 : l'ombre des vignettes n'est plus coupée net) qui les effacerait sinon.
+Affichage (ordinateur) dans l'adresse : `/feed` à la fin = une colonne (`#<slug>/feed`, `#<slug>/fashion/feed`) ; rien
+(ou `/grid`) = grille. Les boutons grille / colonne mettent l'adresse à jour ; sur téléphone, toujours une colonne (`wantMode`).
+Ordinateur : la molette au-dessus du bandeau (nom, en-tête, onglets qui ne défilent pas) fait défiler les films (`wheel` → `work.scrollBy`).
+Pour tester en local, servir le dossier (fetch ne marche pas en `file://`) :
+`python3 -m http.server` puis http://localhost:8000.
+
+## Ce que Claude NE doit PAS faire
+
+- Modifier le design sans que ce soit demandé explicitement
+- Ajouter des librairies externes sans accord
+- Réécrire du code existant qui fonctionne (sauf bug avéré)
+- Inventer des données de clips (toujours vérifier sur le bundle Slate réel)
+- Changer les noms de variables globales (WORK, CATS_BY, PROJECTS, ABOUT)
+
+## Particularités connues du prototype (conservées volontairement)
+
+- Dans `main.css`, la règle `#home {` n'est pas refermée tout de suite : les règles
+  suivantes (`.slide`, `.info`, `.name`…) y sont imbriquées (CSS nesting natif) jusqu'à
+  une `}` isolée. Ne pas « corriger » : cela changerait la spécificité.
+
+---
+
+**Note** : le CLAUDE.md du repo `admin` aura des instructions supplémentaires
+sur l'API GitHub (lecture/écriture des JSON) et les tokens.
+
+---
+
+## Après le 21/11/2026
+
