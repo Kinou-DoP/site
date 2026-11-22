@@ -542,3 +542,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 22/11 (bandes, Gus) : lecteur de la bande repris de celui du site : fond en verre dépoli, clic dans le vide pour fermer, stills chargés
   dans l'ordre (plus de trous), image agrandie avec flèches, prix groupés par festival.
 - 22/11 (bandes) : recadrage `crop.t` : faux = seulement l'extrait (comme `zoomThumb` absent sur le site).
+- 22/11 (bandes) : crédits avec rôle : le cinematographer d'abord (« DoP »), puis nos chefs op avec leur rôle (`roles`).

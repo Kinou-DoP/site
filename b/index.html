@@ -466,10 +466,14 @@
     if (!h.dir && it.dir) lines.push("Directed by " + it.dir);
     if (!h.prod && it.prod) lines.push(it.prod);
     var p = el("p", {}, [lines.join("\n")]);
-    if (!h.dop && it.dops && it.dops.length) {
-      p.appendChild(document.createTextNode((lines.length ? "\n" : "") + "DoP "));
-      it.dops.forEach(function (d, j) { if (j) p.appendChild(document.createTextNode(" & ")); var sl = dpSlug({ dps: DPS }, d); p.appendChild(sl ? el("a", { href: ROOT + sl + "/", text: d }) : document.createTextNode(d)); });
-    }
+    // Chefs op : le cinematographer d'abord (« DoP »), puis les autres avec leur rôle (« Camera operator Nom », Gus 22/11).
+    var ds = (it.dops || []).filter(Boolean), ro = it.roles || {}, groups = [];
+    var mainD = ds.filter(function (d) { return !ro[d]; }); if (mainD.length) groups.push(["DoP", mainD]);
+    ds.forEach(function (d) { if (!ro[d]) return; var g = groups.filter(function (x) { return x[0] === ro[d]; })[0]; if (g) g[1].push(d); else groups.push([ro[d], [d]]); });
+    if (!h.dop) groups.forEach(function (g, gi) {
+      p.appendChild(document.createTextNode((lines.length || gi ? "\n" : "") + g[0] + " "));
+      g[1].forEach(function (d, j) { if (j) p.appendChild(document.createTextNode(" & ")); var sl = dpSlug({ dps: DPS }, d); p.appendChild(sl ? el("a", { href: ROOT + sl + "/", text: d }) : document.createTextNode(d)); });
+    });
     cap.appendChild(p);
     if (aw && !wide) cap.appendChild(aw);
     pin.appendChild(cap); P.appendChild(pin);
