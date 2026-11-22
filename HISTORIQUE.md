@@ -536,3 +536,5 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
   « See more projects »), lien court `b/<code>` impossible à deviner (chez Slate les numéros se suivent), contenu chiffré dans le dépôt
   public (avant : lisible en clair, mot de passe contournable), retouches propres à la bande (vignette, extrait, recadrage, crédits),
   prix et stills / vidéos sous les films, téléchargement direct sans nouvel onglet (`/api/media`) et « Download all ».
+- 22/11 (bandes, retours de Gus) : toute la largeur quand il n'y a pas de sections, noms des chefs op sur une ligne (rétrécis), trait
+  et espace entre les sections, « Download all » après le nom = un zip, « Download » du lecteur en haut à droite.

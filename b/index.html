@@ -30,29 +30,33 @@
   #app { position: relative; z-index: 1; }
   /* En-tête */
   header { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: calc(env(safe-area-inset-top, 0px) + 28px) 32px 0; }
-  header .bt { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; color: var(--kinou-fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  header .bt { display: flex; align-items: center; gap: 18px; min-width: 0; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; color: var(--kinou-fg); }
+  header .bt > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   header .nav { justify-self: end; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; transition: opacity .2s; }
   header .nav:hover { opacity: .6; }
   .logo { justify-self: center; font-weight: 600; font-size: 30px; letter-spacing: -0.03em; line-height: 1; }
   .logo img { display: block; height: 30px; width: auto; }
   /* Nom du chef op, en grand à droite (comme sur sa page) */
-  .hero { margin: 26px 32px 0; text-align: right; font-weight: 600; font-size: clamp(30px, 5vw, 84px); letter-spacing: -0.04em; line-height: 1; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; }
+  .hero { margin: 26px 32px 0; white-space: nowrap; overflow: hidden; text-align: right; font-weight: 600; font-size: clamp(30px, 5vw, 84px); letter-spacing: -0.04em; line-height: 1; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; }
   .hero a { display: inline-block; transition: opacity .2s; }
   .hero a:hover { opacity: .75; }
   .hero .amp { opacity: .5; }
   .wrap { display: grid; grid-template-columns: 208px 1fr; gap: 0; padding: 40px 32px 0; }
+  .wrap.full { grid-template-columns: 1fr; } .wrap.full .side { display: none; } /* pas de sections : toute la largeur (Gus 22/11) */
   .side { position: sticky; top: 28px; align-self: start; padding-right: 24px; }
   .side .cats { display: flex; flex-direction: column; gap: 10px; }
   .side .cats button { padding: 0; border: 0; background: none; color: var(--kinou-fg); font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; text-align: left; opacity: .4; cursor: pointer; transition: opacity .2s; }
   .side .cats button:hover { opacity: .8; }
   .side .cats button.on { opacity: 1; }
   .desc { margin: 0 0 28px; max-width: 560px; color: rgba(255,252,235,.85); font-size: 16px; line-height: 1.55; white-space: pre-line; animation: rise .7s .2s cubic-bezier(.2, .7, .2, 1) both; }
-  .dlall { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 22px; padding: 0; border: 0; background: none; color: var(--kinou-fg); font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; opacity: .7; transition: opacity .2s; }
+  .dlall { flex: none; display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 0; border: 0; background: none; color: var(--kinou-fg); font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; opacity: .7; transition: opacity .2s; }
+  .dlall:disabled { opacity: .35; cursor: default; }
   .dlall:hover { opacity: 1; }
-  .dlall svg { width: 16px; height: 16px; }
-  .dlmsg { margin: -12px 0 22px; color: var(--dim); font-size: 12px; }
-  .sec { margin: 44px 0 14px; font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; scroll-margin-top: 30px; }
-  .sec:first-child { margin-top: 0; }
+  .dlall svg { width: 15px; height: 15px; }
+  .dlmsg { position: fixed; z-index: 9; left: 32px; bottom: 24px; max-width: min(440px, calc(100vw - 64px)); padding: 12px 16px; background: rgba(20,20,20,.92); border: 1px solid var(--faint); color: rgba(255,252,235,.85); font-size: 12px; line-height: 1.5; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); animation: rise .4s ease both; }
+  .dlmsg .bar { height: 2px; margin-top: 8px; background: var(--faint); } .dlmsg .bar i { display: block; height: 100%; width: 0; background: var(--kinou-fg); transition: width .3s; }
+  .sec { margin: 72px 0 18px; padding-top: 26px; border-top: 1px solid var(--faint); font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; scroll-margin-top: 30px; } /* sections : séparateur + espace (Gus 22/11) */
+  main > .sec:first-child, .desc + .sec { margin-top: 0; padding-top: 0; border-top: 0; }
   .grid { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 6px; }
   .grid.c1 { gap: 64px; } .grid.c2 { gap: 6px; }
   .card { position: relative; overflow: hidden; aspect-ratio: 16 / 9; cursor: pointer; animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 70ms + 200ms); }
@@ -81,7 +85,7 @@
   footer .soc a { margin: 0 8px; transition: opacity .2s; } footer .soc a:hover { opacity: .6; }
   @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
   @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } .side { position: static; padding: 0 0 18px; } .side .cats { flex-direction: row; flex-wrap: wrap; gap: 8px 18px; } .grid { grid-template-columns: repeat(min(var(--cols, 3), 2), 1fr); } }
-  @media (max-width: 560px) { header { padding: calc(env(safe-area-inset-top, 0px) + 22px) 20px 0; grid-template-columns: 1fr auto; } header .bt { display: none; } header .logo { justify-self: start; font-size: 26px; } .hero { margin: 28px 20px 0; font-size: clamp(28px, 9vw, 44px); } .wrap { padding: 28px 10px 0; } .grid { grid-template-columns: 1fr; gap: 10px; } .desc { padding: 0 10px; } .dlall, .dlmsg, .sec { margin-left: 10px; } .side { padding: 0 10px 14px; } }
+  @media (max-width: 560px) { header { padding: calc(env(safe-area-inset-top, 0px) + 22px) 20px 0; grid-template-columns: 1fr auto; } header .bt > span { display: none; } header .logo { justify-self: start; font-size: 26px; } .hero { margin: 28px 20px 0; font-size: clamp(28px, 9vw, 44px); } .wrap { padding: 28px 10px 0; } .grid { grid-template-columns: 1fr; gap: 10px; } .desc { padding: 0 10px; } .sec { margin-left: 10px; } .dlmsg { left: 12px; right: 12px; bottom: 12px; max-width: none; } .side { padding: 0 10px 14px; } }
   /* Messages (mot de passe, lien invalide) */
   .msg { max-width: 420px; margin: 18vh auto; padding: 0 24px; text-align: center; color: var(--dim); line-height: 1.6; animation: rise .6s ease both; }
   .msg .logo { display: block; margin-bottom: 40px; color: var(--kinou-fg); font-size: 30px; }
@@ -106,7 +110,8 @@
   #player .pcap p a { transition: opacity .2s; } #player .pcap p a:hover { opacity: .7; }
   #player .pr { text-align: right; }
   #player .ptypes { font-size: 11px; line-height: 1.7; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.6); }
-  #player .pdl { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; transition: opacity .2s; }
+  #player .phead { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
+  #player .pdl { flex: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; transition: opacity .2s; }
   #player .pdl:hover { opacity: 1; }
   #player .pdl svg { width: 14px; height: 14px; }
   #player .pclose { position: fixed; z-index: 3; top: calc(env(safe-area-inset-top, 0px) + 20px); right: 28px; width: 40px; height: 40px; padding: 0; border: 0; background: none; color: var(--kinou-fg); cursor: pointer; opacity: .7; transition: opacity .2s; }
@@ -201,7 +206,12 @@
     document.title = (b.title || "Bande") + " — kinou";
     var site = ctx.site, h = b.hide || {};
     var logo = el("a", { class: "logo", href: ROOT }, [site.logo ? el("img", { src: RAW + site.logo, alt: "kinou" }) : "kinou"]);
-    app.appendChild(el("header", {}, [el("div", { class: "bt", text: b.title || "" }), logo, el("a", { class: "nav", href: ROOT + "cinematographers/", text: "cinematographers" })]));
+    var films = [], dls = [];
+    (b.items || []).forEach(function (it) { if (it.section === undefined) films.push(it); });
+    if (b.download) dls = films.filter(function (it) { return it.full; });
+    // « Download all » juste après le nom de la bande (Gus 22/11) : un seul fichier zip.
+    var bt = el("div", { class: "bt" }, [el("span", { text: b.title || "" }), dls.length > 1 ? el("button", { class: "dlall", on: { click: function (e) { zipAll(dls, b.title, e.currentTarget); } } }, [svg(I_DL), "Download all"]) : null]);
+    app.appendChild(el("header", {}, [bt, logo, el("a", { class: "nav", href: ROOT + "cinematographers/", text: "cinematographers" })]));
     // Chefs op : ceux de la bande (réglages de l'admin, sinon détectés dans les films), chacun lié à sa page sur le site.
     var arts = (Array.isArray(b.artists) ? b.artists : String(b.artists || "").split(/\s*,\s*/)).filter(Boolean);
     if (!arts.length) (b.items || []).forEach(function (it) { (it.dops || []).forEach(function (d) { if (arts.indexOf(d) < 0) arts.push(d); }); });
@@ -213,18 +223,14 @@
         var s = dpSlug(ctx, n); hero.appendChild(s ? el("a", { href: ROOT + s + "/", text: n }) : el("span", { text: n }));
       });
       app.appendChild(hero);
+      // Toujours sur une ligne : plus petit si les noms dépassent (Gus 22/11).
+      var fit = function () { hero.style.fontSize = ""; var w = hero.clientWidth, sw = hero.scrollWidth; if (sw > w + 1) hero.style.fontSize = Math.max(16, parseFloat(getComputedStyle(hero).fontSize) * w / sw * .98) + "px"; };
+      fit(); addEventListener("resize", fit); if (document.fonts) document.fonts.ready.then(fit);
     }
     var wrap = el("div", { class: "wrap" }), side = el("aside", { class: "side" }), main = el("main");
     wrap.appendChild(side); wrap.appendChild(main); app.appendChild(wrap);
     if (b.description) main.appendChild(el("p", { class: "desc", text: b.description }));
-    var films = [], grid = null, secs = [];
-    (b.items || []).forEach(function (it) { if (it.section === undefined) films.push(it); });
-    var dls = b.download ? films.filter(function (it) { return it.full; }) : [];
-    if (dls.length > 1) { // tout télécharger d'un coup (Gus 22/11)
-      var dm = el("p", { class: "dlmsg", hidden: "" });
-      main.appendChild(el("button", { class: "dlall", on: { click: function () { dlAll(dls, dm); } } }, [svg(I_DL), "Download all (" + dls.length + ")"]));
-      main.appendChild(dm);
-    }
+    var grid = null, secs = [];
     var k = 0;
     (b.items || []).forEach(function (it) {
       if (it.section !== undefined) { if (it.section) { var s = el("h2", { class: "sec", id: "s" + secs.length, text: it.section }); secs.push(s); main.appendChild(s); } grid = null; return; }
@@ -238,7 +244,7 @@
       var bs = cats.querySelectorAll("button");
       function spy() { var j = 0; secs.forEach(function (s, i) { if (s.getBoundingClientRect().top < innerHeight * .4) j = i; }); bs.forEach(function (x, i) { x.classList.toggle("on", i === j); }); }
       addEventListener("scroll", spy, { passive: true }); spy();
-    }
+    } else wrap.classList.add("full");
     // « See more projects » : page du chef op sur le site
     var more = el("div", { class: "more" });
     arts.forEach(function (n) { var s = dpSlug(ctx, n); if (s) more.appendChild(el("a", { href: ROOT + s + "/", text: arts.length > 1 ? "More projects by " + n : "See more projects" })); });
@@ -274,11 +280,78 @@
     }
     return c;
   }
-  function dlAll(l, m) { // un fichier après l'autre (le navigateur peut demander d'autoriser plusieurs téléchargements)
-    m.hidden = false; var i = 0;
+  // « Download all » = un seul fichier zip (Gus 22/11), sans compression (des MP4), écrit au fil de l'eau : Chrome / Edge l'écrivent
+  // directement sur le disque (fenêtre « Enregistrer sous »), les autres navigateurs le préparent en mémoire (jusqu'à ~1,5 Go, sinon
+  // un fichier après l'autre). Vidéos lues par /api/media (autorisation CORS). ZIP64 au-delà de 4 Go.
+  var CRC_T = (function () { var t = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crcUp(c, u) { c = (c ^ 0xFFFFFFFF) >>> 0; for (var i = 0; i < u.length; i++) c = CRC_T[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function bin(n) { var u = new Uint8Array(n); return { u: u, v: new DataView(u.buffer), o: 0, w16: function (x) { this.v.setUint16(this.o, x, true); this.o += 2; return this; }, w32: function (x) { this.v.setUint32(this.o, x >>> 0, true); this.o += 4; return this; }, w64: function (x) { this.v.setUint32(this.o, x % 4294967296, true); this.v.setUint32(this.o + 4, Math.floor(x / 4294967296), true); this.o += 8; return this; }, b: function (a) { this.u.set(a, this.o); this.o += a.length; return this; } }; }
+  function fileName(t, used) {
+    var n = String(t || "video").replace(/[\\/:*?"<>|\u0000-\u001f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 100) || "video", f = n + ".mp4", k = 2;
+    while (used[f.toLowerCase()]) f = n + " (" + (k++) + ").mp4";
+    used[f.toLowerCase()] = 1; return f;
+  }
+  function zipAll(l, title, btn) {
+    var big = 0xFFFFFFFF, zipName = fileName(title || "kinou", {}).replace(/\.mp4$/, ".zip");
+    var fsPick = window.showSaveFilePicker ? showSaveFilePicker({ suggestedName: zipName, types: [{ description: "Zip", accept: { "application/zip": [".zip"] } }] }) : null;
+    var box = document.querySelector(".dlmsg") || el("div", { class: "dlmsg" }), txt = el("div"), bar = el("div", { class: "bar" }, [el("i")]);
+    box.textContent = ""; box.appendChild(txt); box.appendChild(bar);
+    function say(t, p) { txt.textContent = t; if (p !== undefined) bar.firstChild.style.width = Math.round(p * 100) + "%"; }
+    var parts = [], writer = null, pos = 0, cd = [], used = {}, now = new Date();
+    var dt = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)), dd = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate());
+    function put(x) { pos += x.size !== undefined && !(x instanceof Uint8Array) ? x.size : x.length; return writer ? writer.write(x) : (parts.push(x), Promise.resolve()); }
+    return (fsPick || Promise.resolve(null)).then(function (h) { return h ? h.createWritable() : null; }).then(async function (w) {
+      writer = w; btn.disabled = true; document.body.appendChild(box);
+      for (var i = 0; i < l.length; i++) {
+        var it = l[i], name = new TextEncoder().encode(fileName(it.title, used));
+        say("Downloading " + (i + 1) + " / " + l.length + " — " + (it.title || ""), i / l.length);
+        var r = await fetch(FN + "/api/media?u=" + encodeURIComponent(it.full));
+        if (!r.ok) throw new Error("video " + (i + 1) + " : " + r.status);
+        var size = +r.headers.get("content-length") || 0, off = pos, z64 = size >= big || off >= big;
+        if (!writer && pos + size > 1.5e9) throw { tooBig: true };
+        var lh = bin(30 + name.length + (z64 ? 20 : 0));
+        lh.w32(0x04034b50).w16(z64 ? 45 : 20).w16(0x0808).w16(0).w16(dt).w16(dd).w32(0).w32(z64 ? big : 0).w32(z64 ? big : 0).w16(name.length).w16(z64 ? 20 : 0).b(name);
+        if (z64) lh.w16(1).w16(16).w64(0).w64(0);
+        await put(lh.u);
+        var crc = 0, n = 0, rd = r.body.getReader(), c;
+        while (!(c = await rd.read()).done) { crc = crcUp(crc, c.value); n += c.value.length; await put(c.value); if (size) say("Downloading " + (i + 1) + " / " + l.length + " — " + (it.title || "") + " (" + Math.round(n / size * 100) + " %)", (i + n / size) / l.length); }
+        var z = z64 || n >= big, dsc = bin(z ? 24 : 16); dsc.w32(0x08074b50).w32(crc); if (z) dsc.w64(n).w64(n); else dsc.w32(n).w32(n);
+        await put(dsc.u);
+        cd.push({ name: name, crc: crc, n: n, off: off, z: z });
+      }
+      var cdOff = pos, cdSize = 0;
+      for (var j = 0; j < cd.length; j++) {
+        var e = cd[j], ex = (e.n >= big ? 16 : 0) + (e.off >= big ? 8 : 0), ch = bin(46 + e.name.length + (ex ? 4 + ex : 0));
+        ch.w32(0x02014b50).w16(45).w16(e.z ? 45 : 20).w16(0x0808).w16(0).w16(dt).w16(dd).w32(e.crc).w32(e.n >= big ? big : e.n).w32(e.n >= big ? big : e.n)
+          .w16(e.name.length).w16(ex ? 4 + ex : 0).w16(0).w16(0).w16(0).w32(0).w32(e.off >= big ? big : e.off).b(e.name);
+        if (ex) { ch.w16(1).w16(ex); if (e.n >= big) ch.w64(e.n).w64(e.n); if (e.off >= big) ch.w64(e.off); }
+        cdSize += ch.u.length; await put(ch.u);
+      }
+      if (cdOff >= big || cdSize >= big || cd.some(function (e) { return e.z; })) {
+        var z64e = pos, r64 = bin(56 + 20);
+        r64.w32(0x06064b50).w64(44).w16(45).w16(45).w32(0).w32(0).w64(cd.length).w64(cd.length).w64(cdSize).w64(cdOff);
+        r64.w32(0x07064b50).w32(0).w64(z64e).w32(1);
+        await put(r64.u);
+      }
+      var eo = bin(22); eo.w32(0x06054b50).w16(0).w16(0).w16(Math.min(cd.length, 0xFFFF)).w16(Math.min(cd.length, 0xFFFF)).w32(Math.min(cdSize, big)).w32(Math.min(cdOff, big)).w16(0);
+      await put(eo.u);
+      if (writer) await writer.close();
+      else { var a = el("a", { href: URL.createObjectURL(new Blob(parts, { type: "application/zip" })), download: zipName }); document.body.appendChild(a); a.click(); a.remove(); parts = []; }
+      say("Done — " + l.length + " films in " + zipName, 1);
+      btn.disabled = false; setTimeout(function () { box.remove(); }, 6000);
+    }).catch(function (e) {
+      btn.disabled = false; parts = [];
+      if (writer) try { writer.abort(); } catch (x) {}
+      if (e && e.name === "AbortError") { box.remove(); return; } // fenêtre « Enregistrer sous » fermée
+      if (e && e.tooBig) return dlEach(l, box, say); // trop lourd pour la mémoire de ce navigateur : un fichier après l'autre
+      document.body.appendChild(box); say("The zip could not be made (" + (e && e.message || e) + "). Downloading the films one by one…"); setTimeout(function () { dlEach(l, box, say); }, 1500);
+    });
+  }
+  function dlEach(l, box, say) { // secours : un fichier après l'autre (le navigateur peut demander d'autoriser plusieurs téléchargements)
+    document.body.appendChild(box); var i = 0;
     (function next() {
-      if (i >= l.length) { m.textContent = l.length + " films téléchargés (ou en cours) — si rien ne vient, autorisez les téléchargements multiples pour ce site."; return; }
-      m.textContent = "Download " + (i + 1) + " / " + l.length + " : " + (l[i].title || "");
+      if (i >= l.length) { say(l.length + " films downloaded — if nothing comes, allow multiple downloads for this site.", 1); setTimeout(function () { box.remove(); }, 8000); return; }
+      say("Downloading " + (i + 1) + " / " + l.length + " — " + (l[i].title || ""), i / l.length);
       var a = el("a", { href: dlURL(l[i]), download: "" }); document.body.appendChild(a); a.click(); a.remove();
       i++; setTimeout(next, 1800);
     })();
@@ -301,7 +374,9 @@
       P.appendChild(el("button", { class: "parrow l", "aria-label": "Précédent", on: { click: function () { openPlayer(cur - 1); } } }, [svg('<path d="M15 5l-7 7 7 7"/>')]));
       P.appendChild(el("button", { class: "parrow r", "aria-label": "Suivant", on: { click: function () { openPlayer(cur + 1); } } }, [svg('<path d="M9 5l7 7-7 7"/>')]));
     }
-    var pin = el("div", { class: "pin" }, [el("h2", { class: "ptitle", text: it.title || "" })]);
+    // Téléchargement à l'unité : en haut à droite, à côté du titre (Gus 22/11).
+    var pin = el("div", { class: "pin" }, [el("div", { class: "phead" }, [el("h2", { class: "ptitle", text: it.title || "" }),
+      band.download && it.full ? el("a", { class: "pdl", href: dlURL(it), download: "" }, [svg(I_DL), "Download"]) : null])]);
     if (it.full || it.video) { var v = el("video", { controls: "", autoplay: "", playsinline: "", poster: it.img || null }); v.src = it.full || it.video; pin.appendChild(el("div", { class: "pstage" }, [v])); }
     var lines = [];
     if (!h.dir && it.dir) lines.push("Directed by " + it.dir);
@@ -314,8 +389,7 @@
     var types = !h.types ? (it.types || it.cats || []).filter(function (c) { return !/^(stills|trailer|bande-annonce|featured)$/i.test(c); }) : [];
     var aw = !h.awards ? String(it.awards || "").split(/\n+/).map(function (x) { return x.replace(/\s*[–—]\s*/g, " • ").trim(); }).filter(Boolean) : [];
     var r = el("div", { class: "pr" }, [types.length ? el("div", { class: "ptypes", text: types.join(" · ") }) : null,
-      aw.length ? el("ul", { class: "paw" }, aw.map(function (x) { return el("li", { text: x }); })) : null,
-      band.download && it.full ? el("a", { class: "pdl", href: dlURL(it), download: "" }, [svg(I_DL), "Download"]) : null]);
+      aw.length ? el("ul", { class: "paw" }, aw.map(function (x) { return el("li", { text: x }); })) : null]);
     pin.appendChild(el("div", { class: "pcap" }, [cap, r]));
     P.appendChild(pin);
     function gal(l) {
