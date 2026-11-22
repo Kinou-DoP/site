@@ -539,3 +539,5 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 22/11 (bandes, retours de Gus) : toute la largeur quand il n'y a pas de sections, noms des chefs op sur une ligne (rétrécis), trait
   et espace entre les sections, « Download all » après le nom = un zip, « Download » du lecteur en haut à droite.
 - 22/11 (bandes, Gus) : une section sans nom (cas des bandes de Gus) n'affichait rien : elle sépare maintenant par un trait et de l'espace.
+- 22/11 (bandes, Gus) : lecteur de la bande repris de celui du site : fond en verre dépoli, clic dans le vide pour fermer, stills chargés
+  dans l'ordre (plus de trous), image agrandie avec flèches, prix groupés par festival.
