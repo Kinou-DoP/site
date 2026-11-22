@@ -42,11 +42,11 @@ bloqué (crédits épuisés), plus utilisé.
 | `index.html` | squelette de la page unique (accueil, liste, page d'un chef op, lecteur) ; `?v=` = version des JS / CSS (cache) |
 | `assets/js/app.js` | tout le comportement (~1 900 lignes, une IIFE) |
 | `assets/css/main.css` | tout le style ; règle `#home {` volontairement ouverte (CSS imbriqué) |
-| `b/index.html` | page autonome des bandes envoyées aux producteurs (`b/?<code>`) |
+| `b/index.html` | page autonome des bandes envoyées aux producteurs (`b/<code>`, données chiffrées `data/b/`) ; `_redirects` (Cloudflare) réécrit `/b/<code>` |
 | `404.html` | renvoie une adresse inconnue vers `<racine>/#<chemin>` (GitHub Pages / Cloudflare) |
 | `<slug>/index.html`, `spotlight/`, `fiction/`, `contact/` | pages d'aperçu de lien (Open Graph), **générées** par `tools/share-pages.mjs` et l'admin |
 | `live/index.html` | renvoi vers `../?live` (vignettes animées) |
-| `functions/` | fonctions Cloudflare Pages : `api/data/[[path]].js`, `api/bundle/[id].js`, `api/stills.js`, `api/reel.js`, `api/refresh/`, `_shared.js` |
+| `functions/` | fonctions Cloudflare Pages : `api/data/[[path]].js`, `api/bundle/[id].js`, `api/stills.js`, `api/reel.js`, `api/media.js` (relais vidéo CloudFront : capture d'image, téléchargement), `api/refresh/`, `_shared.js` |
 | `netlify/functions/slate.mjs` | **lecture de Slate** (bundles, pages, bandes : attribut `data-media`, User-Agent obligatoire), utilisée par les fonctions Cloudflare et copiée dans l'admin (`tools/slate.mjs`) ; le reste de `netlify/` n'est plus en ligne |
 | `tools/share-pages.mjs` + `.github/workflows/share-pages.yml` | fabrique les pages d'aperçu à chaque push sur `beta` |
 | `reference/prototype.html` | prototype d'origine (référence visuelle) |

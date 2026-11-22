@@ -80,10 +80,16 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
   (seulement par adresse) ; vignettes en cinémascope 2,39 (fin de `main.css`), affiche à
   gauche du film dans le lecteur.
 - **Contact** : présentation « générique de fin », mentions légales dépliables, fond = film de l'accueil.
-- **Bandes envoyées aux producteurs** (`b/index.html`, adresse `b/?<code>`, page indépendante) : lit `data/bandes/<code>.json`
-  (composée dans la bibliothèque de l'admin) : logo, titre, description, sections, grille de 1 à 3 colonnes, extrait au survol,
-  lecteur avec crédits (cachables), téléchargement si permis, mot de passe (`pw` = { salt, hash } SHA-256 : protection légère),
-  expiration. `noindex`.
+- **Bandes envoyées aux producteurs** (`b/index.html`, page indépendante, `noindex`) : adresse **`b/<code>`** (réécrite par `_redirects`
+  sur Cloudflare ; `404.html` renvoie vers `b/?<code>` sur GitHub Pages). Lit `data/b/<empreinte>.json` **chiffré** (même calcul que
+  `bandSeal` de l'admin : PBKDF2-SHA256 du code → nom du fichier + clé AES-GCM ; mot de passe → clé tirée de code + mot de passe, un
+  mauvais mot de passe ne déchiffre rien) ; anciennes bandes en clair `data/bandes/<code>.json`. Mise en page des pages de chef op :
+  nom(s) en grand à droite (liens vers leur page), sections à gauche, grille 1 à 3 colonnes, voile lumineux et fond flouté au survol,
+  recadrage `crop`, extrait choisi `snip` (film complet à partir de `s`), lecteur avec crédits (cachables), types, prix (`awards`),
+  stills / vidéos dessous (`extras`), « See more projects ». Téléchargement si permis : direct par `/api/media?u=…&dl=<titre>` (sans
+  ouvrir d'onglet) + « Download all ». Expiration : message « plus disponible ».
+- **`/api/media?u=<vidéo CloudFront Slate>[&dl=nom]`** (`functions/api/media.js`) : relais limité à notre CloudFront Slate, avec CORS
+  (capture d'une image pour les vignettes des bandes dans l'admin) ou en téléchargement direct.
 - **Version live** (`live/` → `?live`) : vignettes qui jouent leur extrait en boucle ; toujours le cas sur téléphone (`liveOn`).
 
 ## Règles visuelles — à respecter absolument

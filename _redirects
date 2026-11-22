@@ -1,0 +1,2 @@
+# Cloudflare Pages : lien court d'une bande kinou.fr/b/<code> → page des bandes (l'adresse reste affichée telle quelle).
+/b/:code  /b/  200

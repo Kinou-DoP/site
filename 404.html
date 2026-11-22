@@ -7,5 +7,7 @@
   var p = location.pathname.split("/").filter(Boolean);
   // GitHub Pages d'un dépôt (kinou-dop.github.io/site/…) : le 1er segment est le dossier du site.
   var root = /\.github\.io$/.test(location.hostname) && p.length ? "/" + p.shift() + "/" : "/";
-  location.replace(root + location.search + (p.length ? "#" + p.join("/") : ""));
+  // Lien court d'une bande (b/<code>) sans réécriture (GitHub Pages) : page des bandes avec ?<code>.
+  if (p[0] === "b" && p[1]) location.replace(root + "b/?" + p[1]);
+  else location.replace(root + location.search + (p.length ? "#" + p.join("/") : ""));
 </script>

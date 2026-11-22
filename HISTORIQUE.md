@@ -532,3 +532,7 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 ## Après le 21/11/2026
 
 - 22/11/2026 : Gus valide les deux essais : nom du chef op centré sur téléphone et vignettes de la page fiction en cinémascope (2,39). Ce ne sont plus des essais (commentaires « ESSAI » retirés de `main.css`, aucun changement visible).
+- 22/11 : **page des bandes, 2e version** (Gus) : aspect des pages de chef op (nom en grand cliquable, voile et fond flouté au survol,
+  « See more projects »), lien court `b/<code>` impossible à deviner (chez Slate les numéros se suivent), contenu chiffré dans le dépôt
+  public (avant : lisible en clair, mot de passe contournable), retouches propres à la bande (vignette, extrait, recadrage, crédits),
+  prix et stills / vidéos sous les films, téléchargement direct sans nouvel onglet (`/api/media`) et « Download all ».

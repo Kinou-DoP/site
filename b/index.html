@@ -4,135 +4,333 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
 <title>kinou</title>
-<!-- Bande envoyée à un producteur (Gus 19/11, 1re version) : composée dans la bibliothèque de l'admin, données dans
-     data/bandes/<code>.json du dépôt admin ; adresse b/?<code>. Page indépendante du reste du site. -->
+<!-- Bande envoyée à un producteur (Gus 19/11 ; 2e version 22/11) : composée dans la bibliothèque de l'admin. Adresse b/<code>
+     (lien court, réécrit par _redirects sur Cloudflare, par 404.html sur GitHub Pages) ou b/?<code>.
+     Données CHIFFRÉES dans data/b/<empreinte>.json du dépôt admin : PBKDF2-SHA256 (150 000 tours) du code → nom du fichier + clé
+     AES-GCM ; avec un mot de passe, clé tirée de « code + mot de passe ». Même calcul que bandSeal dans l'admin.
+     Anciennes bandes (19/11, en clair) : data/bandes/<code>.json.
+     Mise en page reprise des pages des chefs op du site : nom en grand (lien vers sa page), voile lumineux et fond flouté au
+     survol, grille 16:9, lecteur plein écran, « See more projects ». Page indépendante du reste du site. -->
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap">
 <style>
-  :root { --kinou-bg: #000; --kinou-fg: #FFFCEB; --dim: rgba(255,252,235,.55); --faint: rgba(255,252,235,.18); --kinou-sans: "Satoshi", -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  :root { --kinou-bg: #000; --kinou-fg: #FFFCEB; --dim: rgba(255,252,235,.55); --faint: rgba(255,252,235,.18); --kinou-sans: "Satoshi", -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--kinou-bg); color: var(--kinou-fg); font-family: var(--kinou-sans); -webkit-font-smoothing: antialiased; }
-  a { color: inherit; }
-  header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 34px 40px 26px; }
-  header .bt { font-size: 13px; color: var(--dim); }
-  .logo { justify-self: center; font-weight: 700; font-size: 44px; letter-spacing: -0.04em; line-height: 1; text-decoration: none; }
-  .logo img { display: block; height: 44px; width: auto; }
-  .desc { max-width: 760px; margin: 0 auto 30px; padding: 0 24px; color: var(--dim); font-size: 15px; line-height: 1.55; text-align: center; white-space: pre-line; }
-  main { padding: 0 24px 80px; }
-  .sec { margin: 34px 4px 14px; font-weight: 700; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
-  .grid { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 10px; }
-  @media (max-width: 900px) { .grid { grid-template-columns: repeat(min(var(--cols, 3), 2), 1fr); } }
-  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } header { padding: 24px 18px 18px; grid-template-columns: 1fr; text-align: center; } header .bt { order: 2; } main { padding: 0 10px 60px; } }
-  .card { position: relative; aspect-ratio: 16 / 9; background: #0a0a0a center / cover no-repeat; overflow: hidden; cursor: pointer; }
-  .card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .3s; }
-  .card video.on { opacity: 1; }
-  .card .t { position: absolute; left: 14px; top: 12px; right: 14px; font-size: 13px; text-shadow: 0 1px 8px rgba(0,0,0,.7); }
-  .card .n { position: absolute; right: 12px; bottom: 10px; font-size: 11px; color: var(--dim); }
-  .card::after { content: ""; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background 1s; }
-  .card:hover::after { background: rgba(255,255,255,.08); transition: background .2s; }
-  footer { padding: 30px 24px 50px; text-align: center; color: var(--dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
-  footer .logo { display: inline-block; font-size: 28px; letter-spacing: -0.04em; text-transform: none; color: var(--kinou-fg); margin-bottom: 14px; }
-  footer .soc a { margin: 0 8px; text-decoration: none; }
-  .msg { max-width: 420px; margin: 18vh auto; padding: 0 24px; text-align: center; color: var(--dim); line-height: 1.6; }
-  .msg input { display: block; width: 100%; margin: 18px 0 12px; padding: 10px 0; border: 0; border-bottom: 1px solid var(--faint); background: none; color: var(--kinou-fg); font: 400 18px var(--kinou-sans); text-align: center; outline: none; }
-  .btn { display: inline-block; padding: 10px 20px; border: 1px solid var(--faint); background: none; color: var(--kinou-fg); font: 700 11px var(--kinou-sans); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; cursor: pointer; }
+  html { background: var(--kinou-bg); scrollbar-gutter: stable; }
+  body { margin: 0; background: var(--kinou-bg); color: var(--kinou-fg); font-family: var(--kinou-sans); font-weight: 400; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+  /* Fonds au survol : image du film très floutée et assombrie, puis son extrait */
+  #projbg, #projvid { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .45s ease; pointer-events: none; transform: scale(1.15); }
+  #projbg { background: center / cover no-repeat; filter: blur(30px) brightness(.45); }
+  #projvid { object-fit: cover; filter: blur(30px) brightness(.4); }
+  body.proj-on #projbg, body.proj-on #projvid.on { opacity: 1; }
+  #app { position: relative; z-index: 1; }
+  /* En-tête */
+  header { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: calc(env(safe-area-inset-top, 0px) + 28px) 32px 0; }
+  header .bt { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; color: var(--kinou-fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  header .nav { justify-self: end; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; transition: opacity .2s; }
+  header .nav:hover { opacity: .6; }
+  .logo { justify-self: center; font-weight: 600; font-size: 30px; letter-spacing: -0.03em; line-height: 1; }
+  .logo img { display: block; height: 30px; width: auto; }
+  /* Nom du chef op, en grand à droite (comme sur sa page) */
+  .hero { margin: 26px 32px 0; text-align: right; font-weight: 600; font-size: clamp(30px, 5vw, 84px); letter-spacing: -0.04em; line-height: 1; animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; }
+  .hero a { display: inline-block; transition: opacity .2s; }
+  .hero a:hover { opacity: .75; }
+  .hero .amp { opacity: .5; }
+  .wrap { display: grid; grid-template-columns: 208px 1fr; gap: 0; padding: 40px 32px 0; }
+  .side { position: sticky; top: 28px; align-self: start; padding-right: 24px; }
+  .side .cats { display: flex; flex-direction: column; gap: 10px; }
+  .side .cats button { padding: 0; border: 0; background: none; color: var(--kinou-fg); font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; text-align: left; opacity: .4; cursor: pointer; transition: opacity .2s; }
+  .side .cats button:hover { opacity: .8; }
+  .side .cats button.on { opacity: 1; }
+  .desc { margin: 0 0 28px; max-width: 560px; color: rgba(255,252,235,.85); font-size: 16px; line-height: 1.55; white-space: pre-line; animation: rise .7s .2s cubic-bezier(.2, .7, .2, 1) both; }
+  .dlall { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 22px; padding: 0; border: 0; background: none; color: var(--kinou-fg); font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; opacity: .7; transition: opacity .2s; }
+  .dlall:hover { opacity: 1; }
+  .dlall svg { width: 16px; height: 16px; }
+  .dlmsg { margin: -12px 0 22px; color: var(--dim); font-size: 12px; }
+  .sec { margin: 44px 0 14px; font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; scroll-margin-top: 30px; }
+  .sec:first-child { margin-top: 0; }
+  .grid { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 6px; }
+  .grid.c1 { gap: 64px; } .grid.c2 { gap: 6px; }
+  .card { position: relative; overflow: hidden; aspect-ratio: 16 / 9; cursor: pointer; animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 70ms + 200ms); }
+  .still { position: absolute; inset: 0; overflow: hidden; background: #0c0c0c; transition: transform .6s ease; }
+  .card:hover .still { transform: scale(1.05); }
+  .still .in { position: absolute; inset: 0; background: center / cover no-repeat; }
+  .still video { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); object-fit: cover; opacity: 0; transition: opacity .2s ease; }
+  .still video.on { opacity: 1; }
+  /* Voile lumineux au survol (comme sur le site) */
+  .still::after { content: ""; position: absolute; inset: 0; background: var(--kinou-fg); opacity: 0; pointer-events: none; }
+  .card:hover .still::after { animation: glow 1.25s ease-out; }
+  @keyframes glow { 0% { opacity: 0; } 20% { opacity: .1; } 100% { opacity: 0; } }
+  .meta { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; padding: 36px 16px 14px; background: linear-gradient(transparent, rgba(0,0,0,.78)); opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .card:hover .meta { opacity: 1; }
+  .meta h3 { margin: 0; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; line-height: 1.2; }
+  .meta .ty { font-weight: 600; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.6); white-space: nowrap; }
+  .meta .n { font-size: 11px; color: var(--dim); }
+  @media (hover: none) { .meta { opacity: 1; } }
+  .more { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 40px; padding: 90px 32px 30px; }
+  .more a { font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+  .more a::before, .more a::after { display: inline-block; font-weight: 300; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
+  .more a::before { content: "["; margin-right: .5em; } .more a::after { content: "]"; margin-left: .5em; }
+  .more a:hover::before { transform: translateX(-6px); } .more a:hover::after { transform: translateX(6px); }
+  footer { padding: 40px 24px 50px; text-align: center; color: var(--dim); font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+  footer .logo { display: inline-block; font-size: 26px; letter-spacing: -0.03em; text-transform: none; color: var(--kinou-fg); margin-bottom: 12px; }
+  footer .soc a { margin: 0 8px; transition: opacity .2s; } footer .soc a:hover { opacity: .6; }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } .side { position: static; padding: 0 0 18px; } .side .cats { flex-direction: row; flex-wrap: wrap; gap: 8px 18px; } .grid { grid-template-columns: repeat(min(var(--cols, 3), 2), 1fr); } }
+  @media (max-width: 560px) { header { padding: calc(env(safe-area-inset-top, 0px) + 22px) 20px 0; grid-template-columns: 1fr auto; } header .bt { display: none; } header .logo { justify-self: start; font-size: 26px; } .hero { margin: 28px 20px 0; font-size: clamp(28px, 9vw, 44px); } .wrap { padding: 28px 10px 0; } .grid { grid-template-columns: 1fr; gap: 10px; } .desc { padding: 0 10px; } .dlall, .dlmsg, .sec { margin-left: 10px; } .side { padding: 0 10px 14px; } }
+  /* Messages (mot de passe, lien invalide) */
+  .msg { max-width: 420px; margin: 18vh auto; padding: 0 24px; text-align: center; color: var(--dim); line-height: 1.6; animation: rise .6s ease both; }
+  .msg .logo { display: block; margin-bottom: 40px; color: var(--kinou-fg); font-size: 30px; }
+  .msg h1 { margin: 0 0 6px; color: var(--kinou-fg); font-weight: 600; font-size: 22px; letter-spacing: -0.02em; }
+  .msg input { display: block; width: 100%; margin: 26px 0 14px; padding: 10px 0; border: 0; border-bottom: 1px solid var(--faint); background: none; color: var(--kinou-fg); font: 400 18px var(--kinou-sans); text-align: center; outline: none; transition: border-color .2s; }
+  .msg input:focus { border-color: var(--kinou-fg); }
+  .msg .shake { animation: shake .4s; }
+  @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+  .btn { display: inline-block; padding: 10px 22px; border: 1px solid var(--faint); background: none; color: var(--kinou-fg); font: 600 11px var(--kinou-sans); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; transition: border-color .2s; }
   .btn:hover { border-color: var(--kinou-fg); }
-  /* Lecteur */
-  .lb { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 5vw 90px; background: rgba(0,0,0,.94); overflow-y: auto; }
-  .lb[hidden] { display: none; }
-  .lb video { width: 100%; max-width: 1400px; max-height: calc(100vh - 220px); background: #000; }
-  .lb .cap { width: 100%; max-width: 1400px; display: flex; justify-content: space-between; gap: 20px; margin-top: 14px; }
-  .lb .cap h2 { margin: 0 0 6px; font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
-  .lb .cap p { margin: 0; color: var(--dim); font-size: 13px; line-height: 1.6; }
-  .lb .cap .ty { text-align: right; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
-  .lb .x { position: fixed; top: 18px; right: 24px; border: 0; background: none; color: var(--kinou-fg); font-size: 30px; cursor: pointer; }
-  .lb .nav { position: fixed; bottom: 22px; left: 0; right: 0; display: flex; justify-content: center; gap: 40px; }
-  .lb .nav button { border: 0; background: none; color: var(--kinou-fg); font-size: 28px; cursor: pointer; opacity: .7; }
-  .lb .nav button:hover { opacity: 1; }
-  .lb .gal { width: 100%; max-width: 1400px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  @media (max-width: 700px) { .lb .gal { grid-template-columns: repeat(2, 1fr); } .lb { padding: 56px 10px 90px; } }
-  .lb .gal img { width: 100%; display: block; cursor: zoom-in; }
-  .lb .gal.one { grid-template-columns: 1fr; }
-  .lb .gal.one img { max-height: calc(100vh - 220px); object-fit: contain; cursor: zoom-out; }
+  .wait { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--faint); border-top-color: var(--kinou-fg); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  /* Lecteur plein écran (comme sur le site) */
+  #player { position: fixed; inset: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; padding: 56px 32px 24px; overflow-y: auto; overscroll-behavior: contain; background: rgba(0,0,0,.98); opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s; }
+  #player.on { opacity: 1; visibility: visible; }
+  #player .pin { --pw: min(100%, 1400px, calc((100vh - 220px) * 16 / 9)); width: var(--pw); margin: auto 0; flex: none; }
+  #player .ptitle { margin: 0 0 14px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+  #player .pstage { width: 100%; aspect-ratio: 16 / 9; background: #000; }
+  #player .pstage video { display: block; width: 100%; height: 100%; object-fit: contain; background: transparent; }
+  #player .pcap { display: flex; justify-content: space-between; gap: 20px; margin-top: 18px; }
+  #player .pcap p { margin: 0; white-space: pre-line; font-size: 11px; line-height: 1.7; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.55); }
+  #player .pcap p a { transition: opacity .2s; } #player .pcap p a:hover { opacity: .7; }
+  #player .pr { text-align: right; }
+  #player .ptypes { font-size: 11px; line-height: 1.7; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.6); }
+  #player .pdl { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; transition: opacity .2s; }
+  #player .pdl:hover { opacity: 1; }
+  #player .pdl svg { width: 14px; height: 14px; }
+  #player .pclose { position: fixed; z-index: 3; top: calc(env(safe-area-inset-top, 0px) + 20px); right: 28px; width: 40px; height: 40px; padding: 0; border: 0; background: none; color: var(--kinou-fg); cursor: pointer; opacity: .7; transition: opacity .2s; }
+  #player .pclose:hover { opacity: 1; }
+  #player .parrow { position: fixed; z-index: 3; top: 50%; width: 48px; height: 64px; margin-top: -32px; padding: 0; border: 0; background: none; color: var(--kinou-fg); cursor: pointer; opacity: .45; transition: opacity .2s; }
+  #player .parrow:hover { opacity: 1; }
+  #player .parrow.l { left: 6px; } #player .parrow.r { right: 6px; }
+  #player .paw { list-style: none; margin: 14px 0 0; padding: 0; font-size: 13px; line-height: 1.5; color: rgba(255,252,235,.85); }
+  #player .paw li + li { margin-top: 4px; }
+  #player .pxv { width: min(100%, 1400px); margin-top: 64px; }
+  #player .pxv video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+  #player .pxv .pgal { margin-top: 0; padding-bottom: 0; }
+  #player .pgal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; width: min(100%, 1800px); margin-top: 48px; padding-bottom: 12vh; }
+  #player .pgal img { display: block; width: 100%; cursor: zoom-in; }
+  #player .pgal.one { grid-template-columns: 1fr; } #player .pgal.one img { max-height: calc(100vh - 160px); object-fit: contain; cursor: zoom-out; }
+  @media (max-width: 700px) { #player { padding: 56px 12px 24px; } #player .pgal { grid-template-columns: 1fr 1fr; gap: 8px; } #player .parrow { display: none; } #player .pcap { flex-direction: column; } #player .pr { text-align: left; } }
 </style>
 </head>
 <body>
-<div id="app"><p class="msg">…</p></div>
+<div id="projbg"></div><video id="projvid" muted playsinline loop></video>
+<div id="app"><p class="msg"><span class="wait"></span></p></div>
 <script>
 (function () {
   var RAW = "https://raw.githubusercontent.com/Kinou-DoP/admin/main/data/";
-  var BASE = /\.pages\.dev$/.test(location.hostname) ? location.origin + "/api/data/" : RAW; // Cloudflare : dernière version (~10 s)
-  var code = (location.search.slice(1) || location.hash.slice(1)).replace(/[^a-z0-9]/gi, "");
+  var CF = /\.pages\.dev$|(^|\.)kinou\.fr$/.test(location.hostname);
+  var BASE = CF ? location.origin + "/api/data/" : RAW; // Cloudflare : dernière version (~10 s)
+  var FN = CF ? location.origin : "https://kinou-4tv.pages.dev"; // fonctions du site (téléchargement direct)
+  // Code : /b/<code>, b/?<code> ou b/#<code>. Racine du site (liens vers les pages des chefs op) : ce qui précède « /b/ ».
+  var pm = location.pathname.match(/^(.*\/)b\/([a-z0-9]+)\/?$/i);
+  var ROOT = (pm ? pm[1] : location.pathname.replace(/b\/(index\.html)?$/, ""));
+  var code = ((pm && pm[2]) || location.search.slice(1) || location.hash.slice(1)).replace(/[^a-z0-9]/gi, "").toLowerCase();
   var app = document.getElementById("app");
   function el(t, a, k) { var e = document.createElement(t); for (var x in a || {}) { if (x === "text") e.textContent = a[x]; else if (x === "on") for (var ev in a.on) e.addEventListener(ev, a.on[ev]); else if (a[x] != null && a[x] !== false) e.setAttribute(x, a[x]); } (k || []).forEach(function (c) { if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); }); return e; }
-  function get(p) { return fetch(BASE + p, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
-  function msg(t, kids) { app.textContent = ""; app.appendChild(el("div", { class: "msg" }, [el("p", { text: t })].concat(kids || []))); }
-  function sha(t) { return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function (b) { return Array.from(new Uint8Array(b)).map(function (x) { return x.toString(16).padStart(2, "0"); }).join(""); }); }
-  if (!code) return msg("Lien incomplet.");
-  Promise.all([get("bandes/" + code + ".json"), get("site.json").catch(function () { return {}; }), get("contact.json").catch(function () { return {}; })]).then(function (r) {
-    var b = r[0], site = r[1], contact = r[2];
-    var today = new Date().toISOString().slice(0, 10);
-    if (b.expires && today > b.expires) return msg("Cette bande n'est plus disponible.");
-    document.title = (b.title || "Bande") + " — kinou";
-    if (!b.pw) return show(b, site, contact);
-    var key = "kinou-b-" + code;
-    try { if (sessionStorage.getItem(key) === b.pw.hash) return show(b, site, contact); } catch (e) {}
-    var inp = el("input", { type: "password", placeholder: "Mot de passe", autofocus: "" }), err = el("p", { text: "" });
-    function tryPw() { sha(b.pw.salt + inp.value).then(function (h) { if (h === b.pw.hash) { try { sessionStorage.setItem(key, h); } catch (e) {} show(b, site, contact); } else err.textContent = "Mot de passe incorrect."; }); }
-    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") tryPw(); });
-    msg(b.title || "", [inp, el("button", { class: "btn", text: "Voir", on: { click: tryPw } }), err]);
-  }, function () { msg("Cette bande n'existe pas (ou plus)."); });
-
-  function show(b, site, contact) {
-    app.textContent = "";
-    var logo = el("a", { class: "logo", href: "../" }, [site.logo ? el("img", { src: RAW + site.logo, alt: "kinou" }) : "kinou"]);
-    app.appendChild(el("header", {}, [el("div", { class: "bt", text: b.title || "" }), logo, el("div")]));
-    if (b.description) app.appendChild(el("p", { class: "desc", text: b.description }));
-    var main = el("main"), grid = null, films = [];
-    (b.items || []).forEach(function (it) {
-      if (it.section !== undefined) { if (it.section) main.appendChild(el("div", { class: "sec", text: it.section })); grid = null; return; }
-      if (!grid) { grid = el("div", { class: "grid" }); grid.style.setProperty("--cols", b.cols || 3); main.appendChild(grid); }
-      var i = films.length; films.push(it);
-      var c = el("div", { class: "card", on: { click: function () { open(i); } } }, [el("div", { class: "t", text: it.title || "" }), it.images && !it.full && !it.video ? el("div", { class: "n", text: it.images.length + " images" }) : null]);
-      if (it.img) c.style.backgroundImage = 'url("' + it.img + '")';
-      var v = null;
-      if (it.video && matchMedia("(hover: hover)").matches) {
-        c.addEventListener("mouseenter", function () { if (!v) { v = el("video", { muted: "", loop: "", playsinline: "", autoplay: "" }); v.muted = true; v.src = it.video; c.insertBefore(v, c.firstChild); v.addEventListener("playing", function () { v && v.classList.add("on"); }); } });
-        c.addEventListener("mouseleave", function () { if (v) { v.remove(); v = null; } });
+  function svg(d) { var s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("fill", "none"); s.setAttribute("stroke", "currentColor"); s.setAttribute("stroke-width", "1.6"); s.innerHTML = d; return s; }
+  var I_DL = '<path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/>';
+  function get(p) { return fetch(BASE + p, { cache: "no-store" }).then(function (r) { if (r.status === 404) return null; if (!r.ok) throw new Error(r.status); return r.json(); }); }
+  function msg(title, text, kids) { app.textContent = ""; app.appendChild(el("div", { class: "msg" }, [el("a", { class: "logo", href: ROOT, text: "kinou" }), title ? el("h1", { text: title }) : null, text ? el("p", { text: text }) : null].concat(kids || []))); }
+  // ---- Déchiffrement (même calcul que bandSeal dans l'admin) ----
+  var SALT = "kinou-bande-v1", IT = 150000;
+  function b64u8(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function pbkdf(text, salt, bits) {
+    var enc = new TextEncoder();
+    return crypto.subtle.importKey("raw", enc.encode(text), "PBKDF2", false, ["deriveBits"]).then(function (k) {
+      return crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: typeof salt === "string" ? enc.encode(salt) : salt, iterations: IT }, k, bits);
+    }).then(function (b) { return new Uint8Array(b); });
+  }
+  function open(f, raw) {
+    return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]).then(function (key) {
+      return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64u8(f.iv) }, key, b64u8(f.d));
+    }).then(function (d) { return JSON.parse(new TextDecoder().decode(d)); });
+  }
+  if (!code || !window.crypto || !crypto.subtle) { msg("Lien incomplet", "Vérifiez l'adresse reçue."); return; }
+  var today = new Date().toISOString().slice(0, 10);
+  pbkdf(code, SALT, 384).then(function (b) {
+    var id = Array.from(b.slice(0, 16)).map(function (x) { return x.toString(16).padStart(2, "0"); }).join(""), key = b.slice(16, 48);
+    return Promise.all([get("b/" + id + ".json"), get("site.json").catch(function () { return {}; }), get("contact.json").catch(function () { return {}; }), get("dps/index.json").catch(function () { return {}; })]).then(function (r) {
+      var f = r[0], ctx = { site: r[1] || {}, contact: r[2] || {}, dps: (r[3] && r[3].dps) || [] };
+      if (!f) return get("bandes/" + code + ".json").then(function (old) { // ancienne bande (19/11, en clair)
+        if (!old) return msg("Lien introuvable", "Cette bande n'existe pas (ou plus).");
+        if (old.expires && today > old.expires) return msg("Bande expirée", "Cette bande n'est plus disponible.");
+        show(old, ctx);
+      });
+      if (f.exp && today > f.exp) return msg("Bande expirée", "Cette bande n'est plus disponible. Contactez-nous pour en recevoir une nouvelle.");
+      if (!f.pw) return open(f, key).then(function (d) { show(d, ctx); });
+      // Mot de passe : la clé vient du code + mot de passe ; un mauvais mot de passe ne déchiffre rien.
+      var sk = "kinou-b-" + code;
+      function tryPw(pw, inp, err) {
+        return pbkdf(code + "\n" + pw, b64u8(f.pw.s), 256).then(function (raw) { return open(f, raw); }).then(function (d) {
+          try { sessionStorage.setItem(sk, pw); } catch (e) {}
+          show(d, ctx);
+        }, function () { if (!inp) return ask(); err.textContent = "Mot de passe incorrect."; inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); inp.select(); });
       }
-      grid.appendChild(c);
+      function ask() {
+        var inp = el("input", { type: "password", placeholder: "Mot de passe", autofocus: "", autocomplete: "off" }), err = el("p", { text: "" });
+        function go() { err.textContent = "…"; tryPw(inp.value, inp, err); }
+        inp.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+        msg("Bande privée", "Entrez le mot de passe reçu avec le lien.", [inp, el("button", { class: "btn", text: "Voir", on: { click: go } }), err]);
+        setTimeout(function () { inp.focus(); }, 50);
+      }
+      var saved = null; try { saved = sessionStorage.getItem(sk); } catch (e) {}
+      if (saved) tryPw(saved, null, null); else ask();
     });
-    app.appendChild(main);
-    var so = (contact && contact.social) || {}, soc = el("div", { class: "soc" });
-    [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"], ["facebook", "Facebook"]].forEach(function (s) { if (so[s[0]]) soc.appendChild(el("a", { href: so[s[0]], target: "_blank", rel: "noopener", text: s[1] })); });
-    app.appendChild(el("footer", {}, [el("a", { class: "logo", href: "../", text: "kinou" }), el("div", { text: "cinematographer agency" }), soc.childNodes.length ? el("p", {}, [soc]) : null]));
+  }).catch(function () { msg("Oups", "La bande ne s'affiche pas. Réessayez dans un instant."); });
 
-    // Lecteur : film complet avec le son (sinon l'extrait), ou la galerie d'une suite d'images ; flèches = films de la bande.
-    var lb = el("div", { class: "lb", hidden: "" }), cur = -1;
-    document.body.appendChild(lb);
-    function close() { lb.hidden = true; lb.textContent = ""; cur = -1; document.body.style.overflow = ""; }
-    function open(i) {
-      cur = (i + films.length) % films.length; var it = films[cur]; lb.textContent = ""; lb.hidden = false; document.body.style.overflow = "hidden";
-      lb.appendChild(el("button", { class: "x", text: "×", "aria-label": "Fermer", on: { click: close } }));
-      if (it.full || it.video) { var v = el("video", { controls: "", autoplay: "", playsinline: "" }); v.src = it.full || it.video; lb.appendChild(v); }
-      if (it.images && it.images.length) {
-        var g = el("div", { class: "gal" });
-        it.images.forEach(function (u) { g.appendChild(el("img", { src: u, loading: "lazy", on: { click: function (e) { var one = g.classList.toggle("one"); g.querySelectorAll("img").forEach(function (x) { x.hidden = one && x !== e.target; }); } } })); });
-        if (it.full || it.video) g.style.marginTop = "24px";
-        lb.appendChild(g);
-      }
-      var h = b.hide || {}, lines = [];
-      if (!h.dir && it.dir) lines.push("Directed by " + it.dir);
-      if (!h.prod && it.prod) lines.push(it.prod);
-      if (!h.dop && it.dops && it.dops.length) lines.push("DoP " + it.dops.join(" & "));
-      var right = el("div", { class: "ty" }, [!h.types && it.cats ? it.cats.filter(function (c) { return !/^(stills|trailer|bande-annonce)$/i.test(c); }).join(" · ") : "",
-        b.download && it.full ? el("p", {}, [el("a", { class: "btn", href: it.full, download: "", target: "_blank", rel: "noopener", text: "Télécharger" })]) : null]);
-      lb.appendChild(el("div", { class: "cap" }, [el("div", {}, [el("h2", { text: it.title || "" })].concat(lines.map(function (l) { return el("p", { text: l }); }))), right]));
-      if (films.length > 1) lb.appendChild(el("div", { class: "nav" }, [el("button", { text: "‹", "aria-label": "Précédent", on: { click: function () { open(cur - 1); } } }), el("button", { text: "›", "aria-label": "Suivant", on: { click: function () { open(cur + 1); } } })]));
+  function dpSlug(ctx, name) { var n = String(name).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim(); var d = ctx.dps.filter(function (x) { return String(x.name).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim() === n; })[0]; return d && d.slug; }
+  function dlURL(it) { return FN + "/api/media?u=" + encodeURIComponent(it.full) + "&dl=" + encodeURIComponent((it.title || "kinou").trim()); }
+
+  var DPS = []; // chefs op du site (liens du lecteur)
+  function ctxDps() { return DPS; }
+  function show(b, ctx) {
+    DPS = ctx.dps; app.textContent = "";
+    document.title = (b.title || "Bande") + " — kinou";
+    var site = ctx.site, h = b.hide || {};
+    var logo = el("a", { class: "logo", href: ROOT }, [site.logo ? el("img", { src: RAW + site.logo, alt: "kinou" }) : "kinou"]);
+    app.appendChild(el("header", {}, [el("div", { class: "bt", text: b.title || "" }), logo, el("a", { class: "nav", href: ROOT + "cinematographers/", text: "cinematographers" })]));
+    // Chefs op : ceux de la bande (réglages de l'admin, sinon détectés dans les films), chacun lié à sa page sur le site.
+    var arts = (Array.isArray(b.artists) ? b.artists : String(b.artists || "").split(/\s*,\s*/)).filter(Boolean);
+    if (!arts.length) (b.items || []).forEach(function (it) { (it.dops || []).forEach(function (d) { if (arts.indexOf(d) < 0) arts.push(d); }); });
+    if (!Array.isArray(b.artists) || !b.artists.length) { var ours = arts.filter(function (n) { return dpSlug(ctx, n); }); if (ours.length) arts = ours; }
+    if (arts.length) {
+      var hero = el("h1", { class: "hero" });
+      arts.forEach(function (n, i) {
+        if (i) hero.appendChild(el("span", { class: "amp", text: i === arts.length - 1 ? " & " : ", " }));
+        var s = dpSlug(ctx, n); hero.appendChild(s ? el("a", { href: ROOT + s + "/", text: n }) : el("span", { text: n }));
+      });
+      app.appendChild(hero);
     }
-    lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
-    document.addEventListener("keydown", function (e) { if (cur < 0) return; if (e.key === "Escape") close(); else if (e.key === "ArrowRight") open(cur + 1); else if (e.key === "ArrowLeft") open(cur - 1); });
+    var wrap = el("div", { class: "wrap" }), side = el("aside", { class: "side" }), main = el("main");
+    wrap.appendChild(side); wrap.appendChild(main); app.appendChild(wrap);
+    if (b.description) main.appendChild(el("p", { class: "desc", text: b.description }));
+    var films = [], grid = null, secs = [];
+    (b.items || []).forEach(function (it) { if (it.section === undefined) films.push(it); });
+    var dls = b.download ? films.filter(function (it) { return it.full; }) : [];
+    if (dls.length > 1) { // tout télécharger d'un coup (Gus 22/11)
+      var dm = el("p", { class: "dlmsg", hidden: "" });
+      main.appendChild(el("button", { class: "dlall", on: { click: function () { dlAll(dls, dm); } } }, [svg(I_DL), "Download all (" + dls.length + ")"]));
+      main.appendChild(dm);
+    }
+    var k = 0;
+    (b.items || []).forEach(function (it) {
+      if (it.section !== undefined) { if (it.section) { var s = el("h2", { class: "sec", id: "s" + secs.length, text: it.section }); secs.push(s); main.appendChild(s); } grid = null; return; }
+      if (!grid) { grid = el("div", { class: "grid c" + (b.cols || 3) }); grid.style.setProperty("--cols", b.cols || 3); main.appendChild(grid); }
+      grid.appendChild(card(it, films.indexOf(it), k++, h));
+    });
+    if (secs.length > 1) { // sections : liste à gauche, comme les onglets d'une page de chef op
+      var cats = el("div", { class: "cats" });
+      secs.forEach(function (s, i) { cats.appendChild(el("button", { text: s.textContent, on: { click: function () { s.scrollIntoView({ behavior: "smooth" }); } } })); });
+      side.appendChild(cats);
+      var bs = cats.querySelectorAll("button");
+      function spy() { var j = 0; secs.forEach(function (s, i) { if (s.getBoundingClientRect().top < innerHeight * .4) j = i; }); bs.forEach(function (x, i) { x.classList.toggle("on", i === j); }); }
+      addEventListener("scroll", spy, { passive: true }); spy();
+    }
+    // « See more projects » : page du chef op sur le site
+    var more = el("div", { class: "more" });
+    arts.forEach(function (n) { var s = dpSlug(ctx, n); if (s) more.appendChild(el("a", { href: ROOT + s + "/", text: arts.length > 1 ? "More projects by " + n : "See more projects" })); });
+    if (more.childNodes.length) app.appendChild(more);
+    var so = (ctx.contact && ctx.contact.social) || {}, soc = el("div", { class: "soc" });
+    [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"], ["facebook", "Facebook"]].forEach(function (s) { if (so[s[0]]) soc.appendChild(el("a", { href: so[s[0]], target: "_blank", rel: "noopener", text: s[1] })); });
+    app.appendChild(el("footer", {}, [el("a", { class: "logo", href: ROOT, text: "kinou" }), el("div", { text: "cinematographer agency" }), soc.childNodes.length ? el("p", {}, [soc]) : null]));
+    initPlayer(films, b);
+  }
+
+  // Vignette : image (recadrée si besoin), extrait au survol (ou passage choisi du film), voile lumineux, fond flouté.
+  var bg = document.getElementById("projbg"), bgv = document.getElementById("projvid"), hover = matchMedia("(hover: hover)").matches;
+  function card(it, fi, i, h) {
+    var inn = el("div", { class: "in" }), still = el("div", { class: "still" }, [inn]);
+    if (it.img) inn.style.backgroundImage = 'url("' + it.img + '")';
+    var cr = it.crop; if (cr) { inn.style.transform = "scale(" + cr.z + ")"; inn.style.transformOrigin = cr.x + "% " + cr.y + "%"; }
+    var types = !h.types ? (it.types || it.cats || []).filter(function (c) { return !/^(stills|trailer|bande-annonce|featured)$/i.test(c); }) : [];
+    var c = el("div", { class: "card", style: "--i:" + Math.min(i, 12) }, [still, el("div", { class: "meta" }, [el("h3", { text: it.title || "" }),
+      it.images && !it.full && !it.video ? el("span", { class: "n", text: it.images.length + " images" }) : el("span", { class: "ty", text: types.slice(0, 2).join(" · ") })])]);
+    c.addEventListener("click", function () { openPlayer(fi); });
+    var v = null, src = it.snip && it.full ? it.full : it.video;
+    if (hover) {
+      c.addEventListener("mouseenter", function () {
+        if (it.img) { bg.style.backgroundImage = 'url("' + it.img + '")'; document.body.classList.add("proj-on"); }
+        if (!src || v) return;
+        v = el("video", { muted: "", loop: it.snip ? null : "", playsinline: "", autoplay: "", preload: "auto" }); v.muted = true;
+        v.src = src + (it.snip ? "#t=" + it.snip.s : "");
+        if (it.snip) v.addEventListener("timeupdate", function () { if (v && v.currentTime > it.snip.s + (it.snip.d || 10)) v.currentTime = it.snip.s; });
+        v.addEventListener("playing", function () { if (!v) return; v.classList.add("on"); if (!it.snip) { bgv.src = src; bgv.play().catch(function () {}); bgv.classList.add("on"); } });
+        inn.appendChild(v);
+      });
+      c.addEventListener("mouseleave", function () { if (v) { v.remove(); v = null; } document.body.classList.remove("proj-on"); bgv.classList.remove("on"); });
+    }
+    return c;
+  }
+  function dlAll(l, m) { // un fichier après l'autre (le navigateur peut demander d'autoriser plusieurs téléchargements)
+    m.hidden = false; var i = 0;
+    (function next() {
+      if (i >= l.length) { m.textContent = l.length + " films téléchargés (ou en cours) — si rien ne vient, autorisez les téléchargements multiples pour ce site."; return; }
+      m.textContent = "Download " + (i + 1) + " / " + l.length + " : " + (l[i].title || "");
+      var a = el("a", { href: dlURL(l[i]), download: "" }); document.body.appendChild(a); a.click(); a.remove();
+      i++; setTimeout(next, 1800);
+    })();
+  }
+
+  // ---- Lecteur ----
+  var P = null, cur = -1, list = [], band = null;
+  function initPlayer(films, b) {
+    list = films; band = b;
+    P = el("div", { id: "player" }); document.body.appendChild(P);
+    P.addEventListener("click", function (e) { if (e.target === P) closePlayer(); });
+    document.addEventListener("keydown", function (e) { if (cur < 0) return; if (e.key === "Escape") closePlayer(); else if (e.key === "ArrowRight") openPlayer(cur + 1); else if (e.key === "ArrowLeft") openPlayer(cur - 1); });
+  }
+  function closePlayer() { P.classList.remove("on"); cur = -1; document.body.style.overflow = ""; var v = P.querySelector("video"); if (v) v.pause(); setTimeout(function () { if (cur < 0) P.textContent = ""; }, 350); }
+  function openPlayer(i) {
+    cur = (i + list.length) % list.length; var it = list[cur], h = band.hide || {};
+    P.textContent = ""; P.classList.add("on"); document.body.style.overflow = "hidden"; P.scrollTop = 0;
+    P.appendChild(el("button", { class: "pclose", "aria-label": "Fermer", on: { click: closePlayer } }, [svg('<path d="M6 6l12 12M18 6 6 18"/>')]));
+    if (list.length > 1) {
+      P.appendChild(el("button", { class: "parrow l", "aria-label": "Précédent", on: { click: function () { openPlayer(cur - 1); } } }, [svg('<path d="M15 5l-7 7 7 7"/>')]));
+      P.appendChild(el("button", { class: "parrow r", "aria-label": "Suivant", on: { click: function () { openPlayer(cur + 1); } } }, [svg('<path d="M9 5l7 7-7 7"/>')]));
+    }
+    var pin = el("div", { class: "pin" }, [el("h2", { class: "ptitle", text: it.title || "" })]);
+    if (it.full || it.video) { var v = el("video", { controls: "", autoplay: "", playsinline: "", poster: it.img || null }); v.src = it.full || it.video; pin.appendChild(el("div", { class: "pstage" }, [v])); }
+    var lines = [];
+    if (!h.dir && it.dir) lines.push("Directed by " + it.dir);
+    if (!h.prod && it.prod) lines.push(it.prod);
+    var cap = el("p", {}, [lines.join("\n")]);
+    if (!h.dop && it.dops && it.dops.length) { // chef op : lien vers sa page sur le site
+      cap.appendChild(document.createTextNode((lines.length ? "\n" : "") + "DoP "));
+      it.dops.forEach(function (d, j) { if (j) cap.appendChild(document.createTextNode(" & ")); var s = dpSlug({ dps: ctxDps() }, d); cap.appendChild(s ? el("a", { href: ROOT + s + "/", text: d }) : document.createTextNode(d)); });
+    }
+    var types = !h.types ? (it.types || it.cats || []).filter(function (c) { return !/^(stills|trailer|bande-annonce|featured)$/i.test(c); }) : [];
+    var aw = !h.awards ? String(it.awards || "").split(/\n+/).map(function (x) { return x.replace(/\s*[–—]\s*/g, " • ").trim(); }).filter(Boolean) : [];
+    var r = el("div", { class: "pr" }, [types.length ? el("div", { class: "ptypes", text: types.join(" · ") }) : null,
+      aw.length ? el("ul", { class: "paw" }, aw.map(function (x) { return el("li", { text: x }); })) : null,
+      band.download && it.full ? el("a", { class: "pdl", href: dlURL(it), download: "" }, [svg(I_DL), "Download"]) : null]);
+    pin.appendChild(el("div", { class: "pcap" }, [cap, r]));
+    P.appendChild(pin);
+    function gal(l) {
+      var g = el("div", { class: "pgal" });
+      l.forEach(function (u) { g.appendChild(el("img", { src: u, loading: "lazy", on: { click: function (e) { var one = g.classList.toggle("one"); g.querySelectorAll("img").forEach(function (x) { x.hidden = one && x !== e.target; }); if (one) e.target.scrollIntoView({ block: "center" }); } } })); });
+      return g;
+    }
+    if (it.images && it.images.length) P.appendChild(gal(it.images));
+    // Sous le film (comme sur le site) : galeries de stills et autres vidéos ajoutées dans l'admin.
+    (it.extras || []).forEach(function (x) {
+      var box = el("div", { class: "pxv" }, [x.title ? el("h3", { class: "ptitle", text: x.title }) : null]);
+      if (x.stills && x.stills.length) box.appendChild(gal(x.stills));
+      else if (x.full || x.video) { var xv = el("video", { controls: "", playsinline: "", preload: "none", poster: x.img || null }); xv.src = x.full || x.video; box.appendChild(xv); }
+      P.appendChild(box);
+    });
   }
 })();
 </script>
