@@ -77,7 +77,7 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 - **Spotlight** : page de films de plusieurs chefs op, onglet ALL puis catégories (types de contenu Slate), « DoP Nom » cliquable,
   extraits toujours en boucle. **Fiction** : NEW RELEASES (9 au plus, les plus anciens passent seuls en PAST), COMING SOON (passe seul
   en New release le jour de la sortie dès 9 h, heure de Paris), PAST RELEASES + genres, onglets FEATURE FILMS / SHORT FILMS
-  (seulement par adresse) ; vignettes en cinémascope 2,39 (**ESSAI**, lignes marquées « ESSAI » à la fin de `main.css`), affiche à
+  (seulement par adresse) ; vignettes en cinémascope 2,39 (fin de `main.css`), affiche à
   gauche du film dans le lecteur.
 - **Contact** : présentation « générique de fin », mentions légales dépliables, fond = film de l'accueil.
 - **Bandes envoyées aux producteurs** (`b/index.html`, adresse `b/?<code>`, page indépendante) : lit `data/bandes/<code>.json`
@@ -97,8 +97,7 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 6. Animations existantes seulement (arrivée des films en grandissant 94 % → 100 %, révélation circulaire, morphing du nom avec léger
    flou, onglets en cascade, voile lumineux blanc 10 % au survol) : **ne pas en ajouter sans demande**.
 7. En-tête : logo au centre ; à gauche Instagram, spotlight, fiction, press, contact ; à droite cinematographers ; téléphone (≤ 700px) :
-   burger à gauche, logo réduit, « DOP » à droite ; nom du chef op **centré** sur téléphone (**ESSAI** : supprimer la ligne
-   `.hero { left: 0; right: 0; text-align: center; }` marquée ESSAI pour revenir à droite).
+   burger à gauche, logo réduit, « DOP » à droite ; nom du chef op **centré** sur téléphone.
 8. Catégorie du film en gris (onglet FEATURED ; Narrative suivie des types Slate) ; jamais « Stills », « Fiction », « Trailer »,
    « Bande-annonce ».
 9. Recadrage `zoom` seulement sur l'extrait (et la vignette si `zoomThumb`), jamais dans le lecteur.

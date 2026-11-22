@@ -531,3 +531,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 
 ## Après le 21/11/2026
 
+- 22/11/2026 : Gus valide les deux essais : nom du chef op centré sur téléphone et vignettes de la page fiction en cinémascope (2,39). Ce ne sont plus des essais (commentaires « ESSAI » retirés de `main.css`, aucun changement visible).

@@ -41,7 +41,7 @@ bloqué (crédits épuisés), plus utilisé.
 |---|---|
 | `index.html` | squelette de la page unique (accueil, liste, page d'un chef op, lecteur) ; `?v=` = version des JS / CSS (cache) |
 | `assets/js/app.js` | tout le comportement (~1 900 lignes, une IIFE) |
-| `assets/css/main.css` | tout le style ; règle `#home {` volontairement ouverte (CSS imbriqué) ; lignes « ESSAI » = essais en cours |
+| `assets/css/main.css` | tout le style ; règle `#home {` volontairement ouverte (CSS imbriqué) |
 | `b/index.html` | page autonome des bandes envoyées aux producteurs (`b/?<code>`) |
 | `404.html` | renvoie une adresse inconnue vers `<racine>/#<chemin>` (GitHub Pages / Cloudflare) |
 | `<slug>/index.html`, `spotlight/`, `fiction/`, `contact/` | pages d'aperçu de lien (Open Graph), **générées** par `tools/share-pages.mjs` et l'admin |
