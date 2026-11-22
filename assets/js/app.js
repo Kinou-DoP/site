@@ -11,6 +11,10 @@
     var p = location.pathname;
     return p.indexOf(ROOT_PATH) === 0 ? p.slice(ROOT_PATH.length).replace(/index\.html$/, "").replace(/^\/+|\/+$/g, "") : "";
   }
+  // Ctrl / Cmd / Maj + clic (ou clic molette) sur un lien : on laisse le navigateur l'ouvrir dans un nouvel onglet (Gus 22/11).
+  function newTab(e) { return e.metaKey || e.ctrlKey || e.shiftKey || (e.button || 0) !== 0; }
+  // Adresse de la liste des chefs op (Gus 22/11).
+  var LIST = "cinematographers";
   function pageURL(r) { return ROOT + (r ? r.replace(/^\/+/, "") + (r.indexOf("/") < 0 ? "/" : "") : "") + location.search; }
   // Arrivée directe sur la page d'un chef op (lien, rechargement) : accueil et liste masqués le temps qu'elle s'ouvre
   // (sinon on les voit passer une fraction de seconde).
@@ -215,7 +219,7 @@
       if (window.Site && Site.playHome) Site.playHome(PROJECTS, cur);
     });
     name.addEventListener("click", function (e) {
-      var a = e.target.closest("a"); if (!a) return;
+      var a = e.target.closest("a"); if (!a || newTab(e)) return;
       e.preventDefault(); if (active && window.Site && a.dataset.slug) Site.fromHome(PROJECTS[cur], a);
     });
     window.HomeAPI = {
@@ -417,7 +421,7 @@
         var a = document.createElement(d.slug ? "a" : "span"); a.textContent = split(d.name).main;
         if (d.slug) {
           a.href = pageURL(d.slug);
-          a.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); toDP(d, a, fromPlayer); });
+          a.addEventListener("click", function (e) { e.stopPropagation(); if (newTab(e)) return; e.preventDefault(); toDP(d, a, fromPlayer); });
         }
         who.appendChild(a);
       });
@@ -503,7 +507,9 @@
       openView(o);
     }
     document.querySelectorAll("[data-spot], [data-contact], [data-fiction]").forEach(function (a) {
+      a.setAttribute("href", pageURL(a.hasAttribute("data-contact") ? CONTACT : a.hasAttribute("data-fiction") ? FIC : SPOT));
       a.addEventListener("click", function (e) {
+        if (newTab(e)) return;
         e.preventDefault();
         if (document.body.classList.contains("menu-on")) menu(false);
         openPage(a.hasAttribute("data-contact") ? CONTACT : a.hasAttribute("data-fiction") ? FIC : SPOT, a);
@@ -698,6 +704,8 @@
       if (slug === FIC && cat === "COMING SOON") l.reverse(); // fiction : ordre inverse de la bande (prochaine sortie en premier)
       return l;
     }
+    // Ctrl / Cmd + clic (ou clic molette) sur un film : son adresse dans un nouvel onglet.
+    function filmTab(p) { var u = filmURL(p); if (u) window.open(u, "_blank", "noopener"); }
     function filmURL(p) {
       if (!view || !WORK[view.o.slug] || tabFilms(view.o.slug, curCat).indexOf(p) < 0) return null;
       return pageURL(view.o.slug + "/" + catSlug(curCat) + "/" + filmSlug(p));
@@ -721,11 +729,11 @@
     function wantMode() { return phone.matches ? "feed" : (view && view.o.mode) || "gallery"; }
     // Pages du site dans l'historique (accueil, liste, page d'un chef op) : le bouton retour revient à la précédente.
     function pushPage(st) {
-      try { history.pushState(st, "", pageURL(st.k === "dp" ? st.slug : "")); } catch (e) {}
+      try { history.pushState(st, "", pageURL(st.k === "dp" ? st.slug : st.k === "list" ? LIST : "")); } catch (e) {}
     }
     function restorePage(st) {
       if (st && st.kinou) return; // entrée du lecteur (bouton « suivant » du navigateur) : rien à faire
-      if (!st || !st.k) st = route() ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat, film: parseHash().film, mode: parseHash().mode } : { k: "home" };
+      if (!st || !st.k) st = route() === LIST ? { k: "list" } : route() ? { k: "dp", slug: parseHash().slug, cat: parseHash().cat, film: parseHash().film, mode: parseHash().mode } : { k: "home" };
       if (st.k === "dp") {
         if (view && view.o.slug === st.slug) { // même page, autre onglet ou autre affichage (adresse modifiée à la main)
           var tb = st.cat && [].filter.call(cats.querySelectorAll("button"), function (x) { return catSlug(x.dataset.cat) === st.cat; })[0];
@@ -792,7 +800,7 @@
         p.dps.forEach(function (d, k) {
           if (k) who.appendChild(document.createTextNode(" & "));
           var a = document.createElement(d.slug ? "a" : "span"); a.textContent = split(d.name).main;
-          if (d.slug) { a.href = pageURL(d.slug); a.addEventListener("click", function (e) { e.preventDefault(); dpFromPlayer(d, a, p); }); }
+          if (d.slug) { a.href = pageURL(d.slug); a.addEventListener("click", function (e) { if (newTab(e)) return; e.preventDefault(); dpFromPlayer(d, a, p); }); }
           who.appendChild(a);
         });
         pcap.appendChild(who);
@@ -1233,7 +1241,8 @@
         d._p = p;
         d.addEventListener("mouseenter", function (e) { if (!inZone(e)) return; dropAuto(d); showProj(p); snip(st, p, true); });
         d.addEventListener("mouseleave", function () { snip(st, p, false); if (selCard) showProj(selCard._p, 0); else document.body.classList.remove("proj-on"); });
-        d.addEventListener("click", function (e) { if (!inZone(e)) return; openPlayer(p); });
+        d.addEventListener("click", function (e) { if (!inZone(e)) return; if (newTab(e)) { filmTab(p); return; } openPlayer(p); });
+        d.addEventListener("auxclick", function (e) { if (e.button === 1 && inZone(e)) filmTab(p); });
       });
       // Ombre noire des vignettes (galerie) : calque fixe, sans video, derriere la grille ; calcule une fois par affichage.
       if (mode === "gallery") {
@@ -1667,6 +1676,7 @@
     }
     document.querySelectorAll("li a[data-view]").forEach(function (a) {
       a.addEventListener("click", function (e) {
+        if (newTab(e)) return;
         e.preventDefault();
         var t = a.textContent;
         openView({ text: t, slug: a.dataset.view, from: "list", a: a, rect: nameRect(a, split(t).main) });
@@ -1811,11 +1821,15 @@
     // Liens de l'en-tete pas encore actifs (fiction, press).
     document.querySelectorAll("[data-soon]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); }); });
     window.Site = { prefetch: warmThumbs, playHome: playHome, fromHome: function (p, a) { openView({ text: a.dataset.name, slug: a.dataset.slug, from: "home", rect: homeNameRect(a), film: p }); } };
+    document.querySelector(".logo").setAttribute("href", pageURL(""));
+    document.querySelector(".nav-btn").setAttribute("href", pageURL(LIST));
     document.querySelector(".logo").addEventListener("click", function (e) {
+      if (newTab(e)) return;
       e.preventDefault(); if (!view && document.body.classList.contains("is-home")) return;
       closeView(true); show("home"); pushPage({ k: "home" });
     });
     document.querySelector(".nav-btn").addEventListener("click", function (e) {
+      if (newTab(e)) return;
       e.preventDefault();
       if (view && view.o.from === "home") {
         // arrive depuis l'accueil : la liste prend la place, et le nom y retourne en reduisant
@@ -1829,6 +1843,7 @@
     // Liens directs : page-du-site#slug-du-chef-op ouvre directement sa page.
     function routeFromHash() {
       var h = parseHash(), slug = h.slug;
+      if (slug === LIST && h.cat === "") { show("list"); undeep(); return; } // liste des chefs op
       if (PAGES[slug] && !view) { openPage(slug, null, { noHistory: true, cat: h.cat, mode: h.mode }); if (h.film) openFilmLater(slug, h.film); undeep(700); return; }
       var a = slug && document.querySelector('li a[data-view="' + slug + '"]');
       if (!a || view) { undeep(); return; }
@@ -1841,8 +1856,9 @@
     if (f0) r0 = r0.split("/").slice(0, 2).join("/"); // adresse d'un film : la page dessous garde l'adresse de son onglet
     if (r0) routeFromHash(); else undeep();
     // Adresse réécrite sous sa forme définitive (ancienne adresse en #… ou arrivée par une page d'aperçu) : c'est elle qu'on partage.
-    try { history.replaceState(view ? { k: "dp", slug: view.o.slug } : { k: "home" }, "", view ? pageURL(r0) : pageURL("")); } catch (e) {}
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (plight.classList.contains("on")) closeStill(); else if (player.classList.contains("on")) closePlayer(); else closeView(); } });
+    var onList = !view && document.body.classList.contains("is-list");
+    try { history.replaceState(view ? { k: "dp", slug: view.o.slug } : { k: onList ? "list" : "home" }, "", view ? pageURL(r0) : pageURL(onList ? LIST : "")); } catch (e) {}
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (plight.classList.contains("on")) closeStill(); else if (player.classList.contains("on")) closePlayer(); else if (view) { closeView(); pushPage({ k: document.body.classList.contains("is-home") ? "home" : "list" }); } } }); // Échap : l'adresse suit (accueil ou liste)
   }
 
   // Logo (data/site.json, onglet « contact » de l'admin) : image à la place du texte « kinou ».

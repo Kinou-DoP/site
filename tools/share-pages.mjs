@@ -6,7 +6,7 @@
 import fs from "fs";
 var DATA = "https://raw.githubusercontent.com/Kinou-DoP/admin/main/data/";
 var SITE = process.env.SITE_URL || "https://kinou-dop.github.io/site/";
-var PAGES = { spotlight: "Spotlight", fiction: "Fiction", contact: "Contact" };
+var PAGES = { spotlight: "Spotlight", fiction: "Fiction", contact: "Contact", cinematographers: "Cinematographers" };
 async function get(path) { var r = await fetch(DATA + path); if (!r.ok) throw new Error(r.status + " " + path); return r.json(); }
 function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
 function page(slug, title, image, desc) {

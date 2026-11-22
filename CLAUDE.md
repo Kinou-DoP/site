@@ -58,8 +58,9 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
   films, les autres en « co-DoP Nom ».
 
 ## Pages et comportements
-- **Adresses** : `<racine>/<slug>/[<catégorie>][/feed]`, `spotlight/…`, `fiction/…`, `contact/`, film ouvert = `<slug>/<onglet>/<titre>`
-  (`pageURL`, `filmURL`, `route`). Les dossiers `<slug>/index.html` sont des **pages d'aperçu de lien** (Open Graph) fabriquées par
+- **Adresses** : `<racine>/<slug>/[<catégorie>][/feed]`, `spotlight/…`, `fiction/…`, `contact/`, liste des chefs op = `cinematographers/`
+  (`LIST`), film ouvert = `<slug>/<onglet>/<titre>` (`pageURL`, `filmURL`, `route`). Tous les liens internes ont leur vraie adresse :
+  **Ctrl / Cmd / Maj + clic ou clic molette** = nouvel onglet (`newTab` : le clic n'est pas intercepté ; sur un film : `filmTab`). Les dossiers `<slug>/index.html` sont des **pages d'aperçu de lien** (Open Graph) fabriquées par
   `tools/share-pages.mjs` (workflow `share-pages.yml` à chaque push sur `beta`) et par l'admin (`sharePage`, contenu identique) :
   ne pas les modifier à la main. `404.html` renvoie les autres adresses vers `<racine>/#<chemin>`.
 - **Accueil** : slideshow des 10 films de la bande de l'accueil (arrivée sur un film au hasard), un lien par chef op crédité ; clic =
