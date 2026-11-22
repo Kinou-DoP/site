@@ -86,13 +86,13 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
   mauvais mot de passe ne déchiffre rien) ; anciennes bandes en clair `data/bandes/<code>.json`. Mise en page des pages de chef op :
   nom(s) en grand à droite sur une seule ligne (plus petits s'ils dépassent ; liens vers leur page), liste des sections à gauche
   seulement s'il y a des sections (sinon toute la largeur), sections séparées par un trait et de l'espace (même une section sans nom), grille 1 à 3 colonnes, voile lumineux et fond flouté au survol,
-  recadrage `crop` (extrait toujours, vignette si `t`), extrait choisi `snip` (film complet à partir de `s`), crédits « DoP » (cinematographer) puis les autres rôles (`roles`, ex. « Camera operator Nom »), lecteur **repris du site** (verre dépoli `#pglass`, clic dans le vide = fermer, flèches ‹ ›, Échap) avec crédits (cachables), types,
+  recadrage `crop` (extrait toujours, vignette si `t`), extrait choisi `snip` (film complet à partir de `s`) ou mp4 importé `snipVideo` (lu par `/api/media`), crédits « DoP » (cinematographer) puis les autres rôles (`roles`, ex. « Camera operator Nom »), lecteur **repris du site** (verre dépoli `#pglass`, clic dans le vide = fermer, flèches ‹ ›, Échap) avec crédits (cachables), types,
   prix groupés par festival (`awards`), stills (images chargées et affichées dans l'ordre, `orderedLoad`, agrandissement `.plight`) et
   vidéos dessous (`extras`), « See more projects ». Téléchargement si permis : « Download » en haut à droite du lecteur,
   direct par `/api/media?u=…&dl=<titre>` (sans ouvrir d'onglet) ; « Download all » après le nom de la bande = **un fichier zip**
   (`zipAll` : sans compression, ZIP64 au-delà de 4 Go ; Chrome / Edge l'écrivent directement sur le disque, les autres en mémoire
   jusqu'à 1,5 Go, sinon un fichier après l'autre). Expiration : message « plus disponible ».
-- **`/api/media?u=<vidéo CloudFront Slate>[&dl=nom]`** (`functions/api/media.js`) : relais limité à notre CloudFront Slate, avec CORS
+- **`/api/media?u=<vidéo CloudFront Slate>[&dl=nom]`** (`functions/api/media.js`) : relais limité à notre CloudFront Slate et aux mp4 de `data/bibli/vid/` du dépôt admin (servis en video/mp4), avec CORS
   (capture d'une image pour les vignettes des bandes dans l'admin) ou en téléchargement direct.
 - **Version live** (`live/` → `?live`) : vignettes qui jouent leur extrait en boucle ; toujours le cas sur téléphone (`liveOn`).
 

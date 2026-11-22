@@ -543,3 +543,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
   dans l'ordre (plus de trous), image agrandie avec flèches, prix groupés par festival.
 - 22/11 (bandes) : recadrage `crop.t` : faux = seulement l'extrait (comme `zoomThumb` absent sur le site).
 - 22/11 (bandes) : crédits avec rôle : le cinematographer d'abord (« DoP »), puis nos chefs op avec leur rôle (`roles`).
+- 22/11 (bandes) : extrait importé (mp4 de l'admin, `snipVideo`) lu par `/api/media`.

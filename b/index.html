@@ -298,15 +298,17 @@
     var c = el("div", { class: "card", style: "--i:" + Math.min(i, 12) }, [still, el("div", { class: "meta" }, [el("h3", { text: it.title || "" }),
       it.images && !it.full && !it.video ? el("span", { class: "n", text: it.images.length + " images" }) : el("span", { class: "ty", text: types.slice(0, 2).join(" · ") })])]);
     c.addEventListener("click", function () { openPlayer(fi); });
-    var v = null, src = it.snip && it.full ? it.full : it.video;
+    // Extrait : mp4 importé dans l'admin (relu par /api/media), sinon passage choisi du film complet, sinon extrait de Slate.
+    var own = it.snipVideo ? FN + "/api/media?u=" + encodeURIComponent(it.snipVideo) : "", v = null, src = own || (it.snip && it.full ? it.full : it.video);
     if (hover) {
       c.addEventListener("mouseenter", function () {
         if (it.img) { bg.style.backgroundImage = 'url("' + it.img + '")'; document.body.classList.add("proj-on"); }
         if (!src || v) return;
-        v = el("video", { muted: "", loop: it.snip ? null : "", playsinline: "", autoplay: "", preload: "auto" }); v.muted = true;
-        v.src = src + (it.snip ? "#t=" + it.snip.s : "");
-        if (it.snip) v.addEventListener("timeupdate", function () { if (v && v.currentTime > it.snip.s + (it.snip.d || 10)) v.currentTime = it.snip.s; });
-        v.addEventListener("playing", function () { if (!v) return; v.classList.add("on"); if (!it.snip) { bgv.src = src; bgv.play().catch(function () {}); bgv.classList.add("on"); } });
+        var cut = !own && it.snip;
+        v = el("video", { muted: "", loop: cut ? null : "", playsinline: "", autoplay: "", preload: "auto" }); v.muted = true;
+        v.src = src + (cut ? "#t=" + it.snip.s : "");
+        if (cut) v.addEventListener("timeupdate", function () { if (v && v.currentTime > it.snip.s + (it.snip.d || 10)) v.currentTime = it.snip.s; });
+        v.addEventListener("playing", function () { if (!v) return; v.classList.add("on"); if (!cut) { bgv.src = src; bgv.play().catch(function () {}); bgv.classList.add("on"); } });
         if (cr && !crAll) { v.style.transform = "scale(" + cr.z + ")"; v.style.transformOrigin = cr.x + "% " + cr.y + "%"; }
         inn.appendChild(v);
       });
