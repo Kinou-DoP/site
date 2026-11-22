@@ -57,6 +57,8 @@
   .dlmsg .bar { height: 2px; margin-top: 8px; background: var(--faint); } .dlmsg .bar i { display: block; height: 100%; width: 0; background: var(--kinou-fg); transition: width .3s; }
   .sec { margin: 72px 0 18px; padding-top: 26px; border-top: 1px solid var(--faint); font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; scroll-margin-top: 30px; } /* sections : séparateur + espace (Gus 22/11) */
   main > .sec:first-child, .desc + .sec { margin-top: 0; padding-top: 0; border-top: 0; }
+  .sec.blank { margin: 64px 0 64px; padding: 0; }
+  main > .sec.blank:first-child, .desc + .sec.blank { margin: 0; }
   .grid { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 6px; }
   .grid.c1 { gap: 64px; } .grid.c2 { gap: 6px; }
   .card { position: relative; overflow: hidden; aspect-ratio: 16 / 9; cursor: pointer; animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 70ms + 200ms); }
@@ -233,7 +235,8 @@
     var grid = null, secs = [];
     var k = 0;
     (b.items || []).forEach(function (it) {
-      if (it.section !== undefined) { if (it.section) { var s = el("h2", { class: "sec", id: "s" + secs.length, text: it.section }); secs.push(s); main.appendChild(s); } grid = null; return; }
+      // Section : trait + espace, avec son nom s'il y en a un (une section sans nom sépare quand même, Gus 22/11).
+      if (it.section !== undefined) { var nm = String(it.section || "").trim(), s = el(nm ? "h2" : "div", { class: "sec" + (nm ? "" : " blank"), id: "s" + secs.length, text: nm }); if (nm) secs.push(s); main.appendChild(s); grid = null; return; }
       if (!grid) { grid = el("div", { class: "grid c" + (b.cols || 3) }); grid.style.setProperty("--cols", b.cols || 3); main.appendChild(grid); }
       grid.appendChild(card(it, films.indexOf(it), k++, h));
     });

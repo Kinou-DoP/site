@@ -85,7 +85,7 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
   `bandSeal` de l'admin : PBKDF2-SHA256 du code → nom du fichier + clé AES-GCM ; mot de passe → clé tirée de code + mot de passe, un
   mauvais mot de passe ne déchiffre rien) ; anciennes bandes en clair `data/bandes/<code>.json`. Mise en page des pages de chef op :
   nom(s) en grand à droite sur une seule ligne (plus petits s'ils dépassent ; liens vers leur page), liste des sections à gauche
-  seulement s'il y a des sections (sinon toute la largeur), sections séparées par un trait, grille 1 à 3 colonnes, voile lumineux et fond flouté au survol,
+  seulement s'il y a des sections (sinon toute la largeur), sections séparées par un trait et de l'espace (même une section sans nom), grille 1 à 3 colonnes, voile lumineux et fond flouté au survol,
   recadrage `crop`, extrait choisi `snip` (film complet à partir de `s`), lecteur avec crédits (cachables), types, prix (`awards`),
   stills / vidéos dessous (`extras`), « See more projects ». Téléchargement si permis : « Download » en haut à droite du lecteur,
   direct par `/api/media?u=…&dl=<titre>` (sans ouvrir d'onglet) ; « Download all » après le nom de la bande = **un fichier zip**
