@@ -541,3 +541,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 22/11 (bandes, Gus) : une section sans nom (cas des bandes de Gus) n'affichait rien : elle sépare maintenant par un trait et de l'espace.
 - 22/11 (bandes, Gus) : lecteur de la bande repris de celui du site : fond en verre dépoli, clic dans le vide pour fermer, stills chargés
   dans l'ordre (plus de trous), image agrandie avec flèches, prix groupés par festival.
+- 22/11 (bandes) : recadrage `crop.t` : faux = seulement l'extrait (comme `zoomThumb` absent sur le site).
