@@ -163,6 +163,7 @@
   #player.single:not(.has-stills) .pin { margin: auto 0; }
   #player.single .pfade { display: none; }
   #player.single .pgal { padding-bottom: 6vh; }
+  .bdesc { margin: 24px 32px 0; } /* description d'un bundle */
 </style>
 </head>
 <body>
@@ -210,7 +211,7 @@
         show(old, ctx);
       });
       if (f.exp && today > f.exp) return msg("Bande expirée", "Cette bande n'est plus disponible. Contactez-nous pour en recevoir une nouvelle.");
-      if (!f.pw) return open(f, key).then(function (d) { show(d, ctx); });
+      if (!f.pw) return open(f, key).then(function (d) { if (d.bundle) showBundle(d, ctx); else show(d, ctx); });
       // Mot de passe : la clé vient du code + mot de passe ; un mauvais mot de passe ne déchiffre rien.
       var sk = "kinou-b-" + code;
       function tryPw(pw, inp, err) {
@@ -274,6 +275,13 @@
     var wrap = el("div", { class: "wrap" }), side = el("aside", { class: "side" }), main = el("main");
     wrap.appendChild(side); wrap.appendChild(main); app.appendChild(wrap);
     if (b.description) main.appendChild(el("p", { class: "desc", text: b.description }));
+    fillMain(b, main, side, wrap, h, films);
+    // « See more projects » : page du chef op sur le site
+    moreFoot(arts, ctx);
+    initPlayer(films, b);
+  }
+  // Grille d'une bande (sections, cartes) dans `main` ; liste des sections à gauche s'il y en a plusieurs (sinon pleine largeur).
+  function fillMain(b, main, side, wrap, h, films) {
     var grid = null, secs = [];
     var k = 0;
     (b.items || []).forEach(function (it) {
@@ -282,6 +290,7 @@
       if (!grid) { grid = el("div", { class: "grid c" + (b.cols || 3) }); grid.style.setProperty("--cols", b.cols || 3); main.appendChild(grid); }
       grid.appendChild(card(it, films.indexOf(it), k++, h));
     });
+    if (!side) return; // bundle : la colonne de gauche liste les bandes
     if (secs.length > 1) { // sections : liste à gauche, comme les onglets d'une page de chef op
       var cats = el("div", { class: "cats" });
       secs.forEach(function (s, i) { cats.appendChild(el("button", { text: s.textContent, on: { click: function () { s.scrollIntoView({ behavior: "smooth" }); } } })); });
@@ -290,14 +299,71 @@
       function spy() { var j = 0; secs.forEach(function (s, i) { if (s.getBoundingClientRect().top < innerHeight * .4) j = i; }); bs.forEach(function (x, i) { x.classList.toggle("on", i === j); }); }
       addEventListener("scroll", spy, { passive: true }); spy();
     } else wrap.classList.add("full");
-    // « See more projects » : page du chef op sur le site
+  }
+  function moreFoot(arts, ctx) { // « See more projects » (page du chef op sur le site) + pied de page
     var more = el("div", { class: "more" });
     arts.forEach(function (n) { var s = dpSlug(ctx, n); if (s) more.appendChild(el("a", { href: ROOT + s + "/", text: arts.length > 1 ? "More projects by " + n : "See more projects" })); });
     if (more.childNodes.length) app.appendChild(more);
     var so = (ctx.contact && ctx.contact.social) || {}, soc = el("div", { class: "soc" });
     [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"], ["facebook", "Facebook"]].forEach(function (s) { if (so[s[0]]) soc.appendChild(el("a", { href: so[s[0]], target: "_blank", rel: "noopener", text: s[1] })); });
     app.appendChild(el("footer", {}, [el("a", { class: "logo", href: ROOT, text: "kinou" }), el("div", { text: "cinematographer agency" }), soc.childNodes.length ? el("p", {}, [soc]) : null]));
-    initPlayer(films, b);
+  }
+  // Bundle (Gus 23/11, comme sur Slate) : plusieurs bandes sous un seul lien. Chaque bande est lue avec son propre code (toujours à
+  // jour), une par onglet à gauche (comme les catégories d'une page de chef op) ; une bande avec mot de passe demande le sien.
+  function showBundle(d, ctx) {
+    DPS = ctx.dps;
+    Promise.all((d.bands || []).map(function (x) {
+      return pbkdf(x.code, SALT, 384).then(function (kb) {
+        var id = Array.from(kb.slice(0, 16)).map(function (y) { return y.toString(16).padStart(2, "0"); }).join("");
+        return get("b/" + id + ".json").then(function (f) {
+          if (!f || (f.exp && today > f.exp)) return null;
+          if (f.pw) return { locked: true, f: f, code: x.code, title: "" };
+          return open(f, kb.slice(16, 48)).then(function (p) { p.code = x.code; return p; });
+        });
+      }).catch(function () { return null; });
+    })).then(function (bands) {
+      bands = bands.filter(Boolean);
+      if (!bands.length) return msg(d.title || "Bundle", "Ce bundle est vide pour l'instant.");
+      app.textContent = ""; document.title = (d.title || "Bundle") + " — kinou";
+      var site = ctx.site, logo = el("a", { class: "logo", href: ROOT }, [site.logo ? el("img", { src: RAW + site.logo, alt: "kinou" }) : "kinou"]);
+      app.appendChild(el("header", {}, [el("div", { class: "bt" }, [el("span", { text: d.title || "" })]), logo, el("a", { class: "nav", href: ROOT + "cinematographers/", text: "cinematographers" })]));
+      var arts = [];
+      bands.forEach(function (b) { (b.artists || []).forEach(function (n) { if (arts.indexOf(n) < 0 && dpSlug(ctx, n)) arts.push(n); }); });
+      if (arts.length) {
+        var hero = el("h1", { class: "hero" });
+        arts.forEach(function (n, i) { if (i) hero.appendChild(el("span", { class: "amp", text: i === arts.length - 1 ? " & " : ", " })); hero.appendChild(el("a", { href: ROOT + dpSlug(ctx, n) + "/", text: n })); });
+        app.appendChild(hero);
+        var fit = function () { hero.style.fontSize = ""; var w = hero.clientWidth, sw = hero.scrollWidth; if (sw > w + 1) hero.style.fontSize = Math.max(16, parseFloat(getComputedStyle(hero).fontSize) * w / sw * .98) + "px"; };
+        fit(); addEventListener("resize", fit); if (document.fonts) document.fonts.ready.then(fit);
+      }
+      var wrap = el("div", { class: "wrap" }), side = el("aside", { class: "side" }), main = el("main");
+      wrap.appendChild(side); wrap.appendChild(main); app.appendChild(wrap);
+      if (d.description) app.insertBefore(el("p", { class: "desc bdesc", text: d.description }), wrap);
+      var cats = el("div", { class: "cats" }); side.appendChild(cats);
+      initPlayer([], bands[0]);
+      function tab(i) {
+        var b = bands[i]; cats.querySelectorAll("button").forEach(function (x, j) { x.classList.toggle("on", j === i); });
+        main.textContent = "";
+        if (b.locked) { // bande avec mot de passe : demandé ici
+          var inp = el("input", { type: "password", placeholder: "Password", autocomplete: "off" }), err = el("p");
+          var go = function () { err.textContent = "…"; pbkdf(b.code + "\n" + inp.value, b64u8(b.f.pw.s), 256).then(function (raw) { return open(b.f, raw); }).then(function (p) { p.code = b.code; bands[i] = p; cats.children[i].textContent = p.title || "Bande"; tab(i); }, function () { err.textContent = "Mot de passe incorrect."; }); };
+          inp.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+          main.appendChild(el("div", { class: "msg", style: "margin:8vh auto" }, [el("p", { text: "Cette bande est protégée par un mot de passe." }), inp, el("button", { class: "btn", text: "Voir", on: { click: go } }), err]));
+          return;
+        }
+        var films = (b.items || []).filter(function (it) { return it.section === undefined; }), h = b.hide || {};
+        var dls = b.download ? films.filter(function (it) { return it.full; }) : [];
+        if (dls.length > 1) main.appendChild(el("button", { class: "dlall", style: "margin:0 0 22px", on: { click: function (e) { zipAll(dls, b.title, e.currentTarget); } } }, [svg(I_DL), "Download all"]));
+        if (b.description) main.appendChild(el("p", { class: "desc", text: b.description }));
+        fillMain(b, main, null, wrap, h, films);
+        list = films; band = b;
+        try { history.replaceState(null, "", location.pathname + location.search + "#" + (i + 1)); } catch (e) {}
+      }
+      bands.forEach(function (b, i) { cats.appendChild(el("button", { text: b.locked ? "🔒 Bande " + (i + 1) : (b.title || "Bande " + (i + 1)), on: { click: function () { tab(i); scrollTo({ top: 0, behavior: "smooth" }); } } })); });
+      var start = Math.max(0, Math.min(bands.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+      tab(start);
+      moreFoot(arts, ctx);
+    });
   }
 
   // Vignette : image (recadrée si besoin), extrait au survol (ou passage choisi du film), voile lumineux, fond flouté.
