@@ -92,7 +92,7 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
   vidéos dessous (`extras`), « See more projects ». Téléchargement si permis : « Download » en haut à droite du lecteur,
   direct par `/api/media?u=…&dl=<titre>` (sans ouvrir d'onglet) ; « Download all » après le nom de la bande = **un fichier zip**
   (`zipAll` : sans compression, ZIP64 au-delà de 4 Go ; Chrome / Edge l'écrivent directement sur le disque, les autres en mémoire
-  jusqu'à 1,5 Go, sinon un fichier après l'autre). Expiration : message « plus disponible ».
+  jusqu'à 1,5 Go, sinon un fichier après l'autre). Expiration : message « plus disponible ». **Film partagé seul** (`single: true`, admin) : le lecteur au centre de la page (`#player.single`, sans croix ni fond flouté), « Download » si permis.
 - **`/api/media?u=<vidéo CloudFront Slate>[&dl=nom]`** (`functions/api/media.js`) : relais limité à notre CloudFront Slate et aux mp4 de `data/bibli/vid/` du dépôt admin (servis en video/mp4), avec CORS
   (capture d'une image pour les vignettes des bandes dans l'admin) ou en téléchargement direct.
 - **Version live** (`live/` → `?live`) : vignettes qui jouent leur extrait en boucle ; toujours le cas sur téléphone (`liveOn`).

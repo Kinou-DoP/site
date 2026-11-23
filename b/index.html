@@ -158,6 +158,11 @@
   @media (max-width: 900px), (hover: none) and (pointer: coarse) { #player .pi-awards { margin-top: 18px; } #player .pi-awards li.aw { align-items: flex-start; } }
   @media (max-width: 560px) { #player { padding-left: 16px; padding-right: 16px; } #player .pgal { gap: 8px; margin-top: 40px; } #player .pxv { margin: 16px 0; } #player .pgrid { grid-template-columns: repeat(2, 1fr); gap: 8px; } #player .plight { padding: 56px 0; } }
   @media (max-width: 700px) { #player:not(.has-stills) .pin { margin: 12vh 0 auto; } }
+  /* Film partagé seul : le lecteur dans la page, au centre, sans croix ni fond flouté */
+  #player.single { position: relative; inset: auto; z-index: 1; min-height: calc(100vh - 100px); overflow: visible; padding-top: 32px; opacity: 1; visibility: visible; animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
+  #player.single:not(.has-stills) .pin { margin: auto 0; }
+  #player.single .pfade { display: none; }
+  #player.single .pgal { padding-bottom: 6vh; }
 </style>
 </head>
 <body>
@@ -238,6 +243,15 @@
     var logo = el("a", { class: "logo", href: ROOT }, [site.logo ? el("img", { src: RAW + site.logo, alt: "kinou" }) : "kinou"]);
     var films = [], dls = [];
     (b.items || []).forEach(function (it) { if (it.section === undefined) films.push(it); });
+    // Film partagé seul (Gus 23/11, comme sur Slate) : le film au centre de la page, téléchargement si permis, pas de grille.
+    if (b.single) {
+      app.appendChild(el("header", {}, [el("div"), logo, el("a", { class: "nav", href: ROOT + "cinematographers/", text: "cinematographers" })]));
+      initPlayer(films, b); P.classList.add("single"); app.appendChild(P); openPlayer(0);
+      var so1 = (ctx.contact && ctx.contact.social) || {}, soc1 = el("div", { class: "soc" });
+      [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"]].forEach(function (s) { if (so1[s[0]]) soc1.appendChild(el("a", { href: so1[s[0]], target: "_blank", rel: "noopener", text: s[1] })); });
+      app.appendChild(el("footer", {}, [el("a", { class: "logo", href: ROOT, text: "kinou" }), el("div", { text: "cinematographer agency" }), soc1.childNodes.length ? el("p", {}, [soc1]) : null]));
+      return;
+    }
     if (b.download) dls = films.filter(function (it) { return it.full; });
     // « Download all » juste après le nom de la bande (Gus 22/11) : un seul fichier zip.
     var bt = el("div", { class: "bt" }, [el("span", { text: b.title || "" }), dls.length > 1 ? el("button", { class: "dlall", on: { click: function (e) { zipAll(dls, b.title, e.currentTarget); } } }, [svg(I_DL), "Download all"]) : null]);
@@ -408,10 +422,10 @@
       if (cur < 0) return; var L = P.querySelector(".plight");
       if (e.key === "Escape") { if (L && L.classList.contains("on")) L.classList.remove("on"); else closePlayer(); return; }
       var k = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!k) return;
-      if (L && L.classList.contains("on")) showStill(stillsI + k); else openPlayer(cur + k);
+      if (L && L.classList.contains("on")) showStill(stillsI + k); else if (!band.single) openPlayer(cur + k);
     });
   }
-  function closePlayer() { if (cur < 0) return; P.classList.remove("on"); G.classList.remove("on"); cur = -1; document.body.style.overflow = ""; [].forEach.call(P.querySelectorAll("video"), function (v) { v.pause(); }); setTimeout(function () { if (cur < 0) P.textContent = ""; }, 350); }
+  function closePlayer() { if (cur < 0 || band.single) return; P.classList.remove("on"); G.classList.remove("on"); cur = -1; document.body.style.overflow = ""; [].forEach.call(P.querySelectorAll("video"), function (v) { v.pause(); }); setTimeout(function () { if (cur < 0) P.textContent = ""; }, 350); }
   // Images d'une galerie chargées dans l'ordre (4 d'avance au plus) et affichées dans l'ordre : pas de « trous ».
   function orderedLoad(items, show, alive) {
     var next = 0, done = 0;
@@ -450,8 +464,8 @@
   }
   function openPlayer(i) {
     cur = (i + list.length) % list.length; var it = list[cur], h = band.hide || {}, run = ++galRun;
-    P.textContent = ""; P.scrollTop = 0; document.body.style.overflow = "hidden";
-    P.appendChild(el("button", { class: "pclose", "aria-label": "Fermer" }, [svg22('<path d="M4 4l14 14M18 4L4 18"/>')]));
+    P.textContent = ""; P.scrollTop = 0;
+    if (!band.single) { document.body.style.overflow = "hidden"; P.appendChild(el("button", { class: "pclose", "aria-label": "Fermer" }, [svg22('<path d="M4 4l14 14M18 4L4 18"/>')])); }
     var src = it.full || it.video;
     var pin = el("div", { class: "pin" }, [el("div", { class: "phead" }, [el("h2", { class: "ptitle", text: it.title || "" }),
       band.download && it.full ? el("a", { class: "pdl", href: dlURL(it), download: "" }, [svg(I_DL), "Download"]) : null])]);
@@ -511,7 +525,7 @@
     L.addEventListener("touchend", function (e) { if (sx === null) return; var dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) { e.preventDefault(); showStill(stillsI + (dx < 0 ? 1 : -1)); } });
     P.appendChild(L);
     orderedLoad(order, function (o) { o.el.style.backgroundImage = 'url("' + o.src + '")'; o.el.classList.add("shown"); }, function () { return run === galRun && cur > -1; });
-    P.classList.add("on"); G.classList.add("on");
+    P.classList.add("on"); if (!band.single) G.classList.add("on");
   }
 })();
 </script>

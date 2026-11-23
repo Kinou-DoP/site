@@ -545,3 +545,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 22/11 (bandes) : crédits avec rôle : le cinematographer d'abord (« DoP »), puis nos chefs op avec leur rôle (`roles`).
 - 22/11 (bandes) : extrait importé (mp4 de l'admin, `snipVideo`) lu par `/api/media`.
 - 22/11/2026 : Ctrl / Cmd + clic (ou clic molette) ouvre dans un nouvel onglet : noms de la liste, noms des chefs op (accueil, lecteur, spotlight), liens de l'en-tête (logo, spotlight, fiction, contact, cinematographers, avec leur vraie adresse) et films (adresse du film, lecteur ouvert). La liste des chefs op a son adresse `cinematographers/` (page d'aperçu ajoutée à `tools/share-pages.mjs`) ; Échap sur une page remet l'adresse de la liste ou de l'accueil (Gus).
+- 23/11 (bandes) : lien d'un film seul (`single`) : le film au centre de la page, comme les liens de film de Slate.
