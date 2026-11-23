@@ -95,6 +95,9 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
   jusqu'à 1,5 Go, sinon un fichier après l'autre). Expiration : message « plus disponible ». **Bundle** (`bundle: true`) : chaque bande lue avec son propre code, une par onglet à gauche (`showBundle`, `fillMain`, adresse `#<n>` = onglet), noms des chefs op de toutes les bandes, mot de passe demandé dans l'onglet d'une bande protégée. **Film partagé seul** (`single: true`, admin) : le lecteur au centre de la page (`#player.single`, sans croix ni fond flouté), « Download » si permis.
 - **`/api/media?u=<vidéo CloudFront Slate>[&dl=nom]`** (`functions/api/media.js`) : relais limité à notre CloudFront Slate et aux mp4 de `data/bibli/vid/` du dépôt admin (servis en video/mp4), avec CORS
   (capture d'une image pour les vignettes des bandes dans l'admin) ou en téléchargement direct.
+- **Test de l'hébergement vidéo** (`test-video/`, `noindex`, étude « remplacer Slate ») : le même film lu depuis Slate puis depuis notre
+  adresse (champ « Notre adresse » ou `?sema=<url>&napoli=<url>`), l'un après l'autre : démarrage, sauts milieu / fin, coupures et
+  avance en mémoire sur 30 s, résumé à copier.
 - **Version live** (`live/` → `?live`) : vignettes qui jouent leur extrait en boucle ; toujours le cas sur téléphone (`liveOn`).
 
 ## Règles visuelles — à respecter absolument

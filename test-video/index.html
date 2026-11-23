@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Test vidéo — kinou</title>
+<!-- Test de performance de l'hébergement des vidéos (étude « remplacer Slate », dépôt notes) : le même film lu depuis Slate
+     (CloudFront de Slate) et depuis notre hébergement (Amazon S3 + CloudFront), mesures identiques, l'un après l'autre (pour ne pas
+     partager la connexion). Page interne, non référencée. Adresse de notre copie : champ « Notre adresse » (gardé dans le navigateur)
+     ou ?sema=<url>&napoli=<url>. -->
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap">
+<style>
+  :root { --bg: #000; --fg: #FFFCEB; --dim: rgba(255,252,235,.55); --faint: rgba(255,252,235,.18); --ok: #8fe3a8; --bad: #ff8a7a; --mid: #ffd27a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15px "Satoshi", -apple-system, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  main { max-width: 1500px; margin: 0 auto; padding: 28px 24px 80px; }
+  h1 { margin: 0 0 6px; font-weight: 700; font-size: 30px; letter-spacing: -0.03em; }
+  .lead { margin: 0 0 22px; color: var(--dim); max-width: 860px; line-height: 1.5; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 22px; }
+  .lab { font-weight: 700; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  button, select { padding: 9px 16px; border: 1px solid var(--faint); background: none; color: var(--fg); font: 700 11px "Satoshi", Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+  button.main { background: var(--fg); color: #000; border-color: var(--fg); }
+  button:disabled { opacity: .4; cursor: default; }
+  select option { color: #000; }
+  input[type=url] { flex: 1 1 420px; min-width: 0; padding: 8px 0; border: 0; border-bottom: 1px solid var(--faint); background: none; color: var(--fg); font: 400 14px "Satoshi", Arial, sans-serif; outline: none; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .col h2 { margin: 0 0 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+  .col h2 small { margin-left: 10px; color: var(--dim); font-weight: 400; font-size: 13px; }
+  video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #0b0b0b; }
+  table { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 14px; }
+  td { padding: 7px 0; border-bottom: 1px solid rgba(255,252,235,.08); }
+  td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .ok { color: var(--ok); } .mid { color: var(--mid); } .bad { color: var(--bad); }
+  .log { margin-top: 10px; min-height: 20px; color: var(--dim); font-size: 13px; }
+  .sum { margin-top: 28px; padding: 18px 20px; border: 1px solid var(--faint); line-height: 1.6; }
+  .sum[hidden] { display: none; }
+  .note { margin-top: 24px; color: var(--dim); font-size: 13px; line-height: 1.6; max-width: 900px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Test vidéo : Slate ou nous ?</h1>
+  <p class="lead">Le même film, lu depuis Slate (à gauche) puis depuis notre hébergement (à droite), avec les mêmes mesures. Les deux
+    tests passent l'un après l'autre pour ne pas se partager la connexion. À refaire sur ordinateur, puis sur téléphone en 4G (Wi-Fi coupé).</p>
+  <div class="bar">
+    <span class="lab">Film</span>
+    <select id="film"></select>
+    <span class="lab">Notre adresse</span>
+    <input type="url" id="ours" placeholder="Adresse du même film chez nous (Amazon) — vide pour l'instant">
+  </div>
+  <div class="bar">
+    <button class="main" id="both">Comparer les deux</button>
+    <button id="onlyS">Tester Slate seul</button>
+    <button id="onlyO">Tester le nôtre seul</button>
+    <button id="copy" hidden>Copier les résultats</button>
+  </div>
+  <div class="cols">
+    <section class="col" id="colS"><h2>Slate <small>CloudFront de Slate</small></h2><video id="vS" playsinline muted controls preload="none"></video><table id="tS"></table><p class="log" id="lS"></p></section>
+    <section class="col" id="colO"><h2>Le nôtre <small>Amazon S3 + CloudFront</small></h2><video id="vO" playsinline muted controls preload="none"></video><table id="tO"></table><p class="log" id="lO"></p></section>
+  </div>
+  <div class="sum" id="sum" hidden></div>
+  <p class="note">Ce qui est mesuré : <b>démarrage</b> (du clic à la première image), <b>saut au milieu</b> et <b>saut vers la fin</b> (comme
+    quand on clique dans la barre de lecture), puis 30 secondes de lecture : <b>coupures</b> (nombre et durée totale où l'image se
+    fige pour charger) et <b>avance en mémoire</b> (combien de secondes le navigateur a déjà chargées devant). Le son est coupé pour que
+    la lecture automatique marche partout. Plus c'est bas, mieux c'est, sauf l'avance en mémoire.</p>
+</main>
+<script>
+(function () {
+  // Films de test (versions web 1080p de Slate, adresses lues dans les fiches) : Sema (Léo Lacan, 1,2 Go), cas extrême Napoli (Vadim, ~3 Go).
+  var FILMS = [
+    { k: "sema", t: "Sema (Short Film) — Léo Lacan · 1,2 Go", slate: "https://d1ko11x0ybxl0h.cloudfront.net/kinou/production/clips/c8b7c5f8-98e3-49a9-bfaf-84b4641b721e-0x1080.5000.mp4" },
+    { k: "napoli", t: "Loris Giuliano – Napoli — Vadim Alsayed · ~3 Go", slate: "https://d1ko11x0ybxl0h.cloudfront.net/kinou/production/clips/e6621937-e7cf-4f0f-a0c7-4b10bf3a041b-0x1080.5000.mp4" }
+  ];
+  var $ = function (id) { return document.getElementById(id); }, film = $("film"), ours = $("ours"), q = new URLSearchParams(location.search), res = {};
+  FILMS.forEach(function (f) { var o = document.createElement("option"); o.value = f.k; o.textContent = f.t; film.appendChild(o); });
+  function key() { return "kinou-test-ours-" + film.value; }
+  function loadOurs() { var v = q.get(film.value) || ""; try { v = v || localStorage.getItem(key()) || ""; } catch (e) {} ours.value = v; }
+  film.addEventListener("change", function () { loadOurs(); res = {}; ["S", "O"].forEach(function (s) { $("t" + s).textContent = ""; $("l" + s).textContent = ""; $("v" + s).removeAttribute("src"); $("v" + s).load(); }); $("sum").hidden = true; $("copy").hidden = true; });
+  ours.addEventListener("input", function () { try { localStorage.setItem(key(), ours.value.trim()); } catch (e) {} });
+  loadOurs();
+  function cur() { return FILMS.filter(function (f) { return f.k === film.value; })[0]; }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function once(v, evs, ms) { // premier des évènements, ou délai dépassé
+    return new Promise(function (ok) {
+      var done = false, t0 = performance.now();
+      function fin(e) { if (done) return; done = true; evs.forEach(function (x) { v.removeEventListener(x, fin); }); clearTimeout(tm); ok({ ev: e ? e.type : "timeout", ms: performance.now() - t0 }); }
+      evs.forEach(function (x) { v.addEventListener(x, fin); }); var tm = setTimeout(fin, ms || 30000);
+    });
+  }
+  function grade(ms, a, b) { return ms < a ? "ok" : ms < b ? "mid" : "bad"; }
+  function sec(ms) { return (ms / 1000).toFixed(2).replace(".", ",") + " s"; }
+  function row(t, label, val, cls) { var tr = document.createElement("tr"), a = document.createElement("td"), b = document.createElement("td"); a.textContent = label; b.textContent = val; if (cls) b.className = cls; tr.appendChild(a); tr.appendChild(b); t.appendChild(tr); }
+  async function seekTest(v, to) { var t0 = performance.now(); v.currentTime = to; await once(v, ["seeked"], 30000); if (v.paused) v.play().catch(function () {}); if (v.readyState < 3) await once(v, ["playing", "canplay"], 30000); return performance.now() - t0; }
+  async function run(side, url) {
+    var v = $("v" + side), t = $("t" + side), log = $("l" + side), r = { url: url };
+    t.textContent = ""; log.textContent = "Préparation…";
+    v.pause(); v.removeAttribute("src"); v.load(); await wait(300);
+    // 1. Démarrage
+    var t0 = performance.now(); v.src = url; v.load(); v.play().catch(function () {});
+    var st = await once(v, ["playing", "error"], 30000);
+    if (st.ev !== "playing") { log.textContent = st.ev === "error" ? "La vidéo ne se lit pas (adresse ?)." : "Rien après 30 s."; r.err = log.textContent; return r; }
+    r.start = performance.now() - t0; row(t, "Démarrage", sec(r.start), grade(r.start, 1000, 2500));
+    var dur = v.duration || 0; r.dur = dur;
+    // 2. Sauts
+    log.textContent = "Saut au milieu…"; await wait(1500);
+    r.mid = await seekTest(v, dur * .5); row(t, "Saut au milieu", sec(r.mid), grade(r.mid, 1000, 2500));
+    log.textContent = "Saut vers la fin…"; await wait(1500);
+    r.end = await seekTest(v, dur * .9); row(t, "Saut vers la fin", sec(r.end), grade(r.end, 1000, 2500));
+    // 3. 30 s de lecture depuis 20 % : coupures et avance en mémoire
+    log.textContent = "30 s de lecture…"; await seekTest(v, dur * .2);
+    var stalls = 0, stallMs = 0, ws = null;
+    function w() { stalls++; ws = performance.now(); } function p() { if (ws) { stallMs += performance.now() - ws; ws = null; } }
+    v.addEventListener("waiting", w); v.addEventListener("playing", p);
+    for (var i = 30; i > 0; i--) { log.textContent = "Lecture… " + i + " s"; await wait(1000); }
+    p(); v.removeEventListener("waiting", w); v.removeEventListener("playing", p);
+    var ahead = 0; for (var k = 0; k < v.buffered.length; k++) if (v.buffered.start(k) <= v.currentTime + .5 && v.buffered.end(k) >= v.currentTime) ahead = v.buffered.end(k) - v.currentTime;
+    r.stalls = stalls; r.stallMs = stallMs; r.ahead = ahead;
+    row(t, "Coupures pendant 30 s", stalls ? stalls + " (" + sec(stallMs) + ")" : "aucune", stalls ? (stallMs > 2000 ? "bad" : "mid") : "ok");
+    row(t, "Avance en mémoire", Math.round(ahead) + " s", ahead > 20 ? "ok" : ahead > 8 ? "mid" : "bad");
+    v.pause(); log.textContent = "Terminé.";
+    return r;
+  }
+  function busy(b) { ["both", "onlyS", "onlyO", "film"].forEach(function (id) { $(id).disabled = b; }); }
+  function summary() {
+    var f = cur(), lines = ["Test vidéo kinou — " + f.t, new Date().toLocaleString("fr-FR") + " · " + (navigator.connection && navigator.connection.effectiveType ? "réseau " + navigator.connection.effectiveType + " · " : "") + (/Mobi/i.test(navigator.userAgent) ? "téléphone" : "ordinateur")];
+    [["S", "Slate"], ["O", "Le nôtre"]].forEach(function (s) {
+      var r = res[s[0]]; if (!r) return;
+      lines.push(s[1] + " : " + (r.err ? r.err : "démarrage " + sec(r.start) + ", milieu " + sec(r.mid) + ", fin " + sec(r.end) + ", coupures " + r.stalls + " (" + sec(r.stallMs) + "), avance " + Math.round(r.ahead) + " s"));
+    });
+    var box = $("sum"); box.textContent = ""; lines.forEach(function (l) { var p = document.createElement("div"); p.textContent = l; box.appendChild(p); });
+    box.hidden = false; $("copy").hidden = false; $("copy").onclick = function () { navigator.clipboard.writeText(lines.join("\n")).then(function () { $("copy").textContent = "Copié ✓"; setTimeout(function () { $("copy").textContent = "Copier les résultats"; }, 1500); }); };
+  }
+  async function go(which) {
+    busy(true); var f = cur(), o = ours.value.trim();
+    if (which !== "O") res.S = await run("S", f.slate);
+    if (which !== "S") { if (!o) { $("lO").textContent = "Pas encore d'adresse chez nous : à remplir quand le film sera sur Amazon."; } else res.O = await run("O", o); }
+    busy(false); summary();
+  }
+  $("both").onclick = function () { go("both"); };
+  $("onlyS").onclick = function () { go("S"); };
+  $("onlyO").onclick = function () { go("O"); };
+})();
+</script>
+</body>
+</html>
