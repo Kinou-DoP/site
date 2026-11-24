@@ -59,8 +59,11 @@
   main > .sec:first-child, .desc + .sec { margin-top: 0; padding-top: 0; border-top: 0; }
   .sec.blank { margin: 64px 0 64px; padding: 0; }
   main > .sec.blank:first-child, .desc + .sec.blank { margin: 0; }
-  .grid { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 6px; }
-  .grid.c1 { gap: 64px; } .grid.c2 { gap: 6px; }
+  /* Grille : la dernière ligne incomplète est centrée (Gus 24/11) ; 2 colonnes moins larges que l'écran, 1 colonne encore moins. */
+  .grid { --cols: 3; --gap: 6px; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); margin: 0 auto; }
+  .grid > .card { flex: 0 0 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols)); }
+  .grid.c2 { --cols: 2; max-width: 1240px; }
+  .grid.c1 { --cols: 1; --gap: 64px; max-width: 1040px; }
   .card { position: relative; overflow: hidden; aspect-ratio: 16 / 9; cursor: pointer; animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 70ms + 200ms); }
   .still { position: absolute; inset: 0; overflow: hidden; background: #0c0c0c; transition: transform .6s ease; }
   .card:hover .still { transform: scale(1.05); }
@@ -87,8 +90,8 @@
   footer .logo { display: inline-block; font-size: 26px; letter-spacing: -0.03em; text-transform: none; color: var(--kinou-fg); margin-bottom: 12px; }
   footer .soc a { margin: 0 8px; transition: opacity .2s; } footer .soc a:hover { opacity: .6; }
   @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } .side { position: static; padding: 0 0 18px; } .side .cats { flex-direction: row; flex-wrap: wrap; gap: 8px 18px; } .grid { grid-template-columns: repeat(min(var(--cols, 3), 2), 1fr); } }
-  @media (max-width: 560px) { header { padding: calc(env(safe-area-inset-top, 0px) + 22px) 20px 0; grid-template-columns: 1fr auto; } header .bt > span { display: none; } header .logo { justify-self: start; font-size: 26px; } .hero { margin: 28px 20px 0; font-size: clamp(28px, 9vw, 44px); } .wrap { padding: 28px 10px 0; } .grid { grid-template-columns: 1fr; gap: 10px; } .desc { padding: 0 10px; } .sec { margin-left: 10px; } .dlmsg { left: 12px; right: 12px; bottom: 12px; max-width: none; } .side { padding: 0 10px 14px; } }
+  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } .side { position: static; padding: 0 0 18px; } .side .cats { flex-direction: row; flex-wrap: wrap; gap: 8px 18px; } .grid.c3 { --cols: 2; } }
+  @media (max-width: 560px) { header { padding: calc(env(safe-area-inset-top, 0px) + 22px) 20px 0; grid-template-columns: 1fr auto; } header .bt > span { display: none; } header .logo { justify-self: start; font-size: 26px; } .hero { margin: 28px 20px 0; font-size: clamp(28px, 9vw, 44px); } .wrap { padding: 28px 10px 0; } .grid, .grid.c2, .grid.c3 { --cols: 1; --gap: 10px; } .desc { padding: 0 10px; } .sec { margin-left: 10px; } .dlmsg { left: 12px; right: 12px; bottom: 12px; max-width: none; } .side { padding: 0 10px 14px; } }
   /* Messages (mot de passe, lien invalide) */
   .msg { max-width: 420px; margin: 18vh auto; padding: 0 24px; text-align: center; color: var(--dim); line-height: 1.6; animation: rise .6s ease both; }
   .msg .logo { display: block; margin-bottom: 40px; color: var(--kinou-fg); font-size: 30px; }
@@ -164,7 +167,21 @@
   #player.single:not(.has-stills) .pin { margin: auto 0; }
   #player.single .pfade { display: none; }
   #player.single .pgal { padding-bottom: 6vh; }
-  .bdesc { margin: 24px 32px 0; } /* description d'un bundle */
+  .bdesc { margin: 24px 32px 0; }
+  /* « Plein écran en haut » (Gus 24/11, comme le Full Bleed de Slate) : le film en grand, son extrait qui joue, titre et crédits dessus. */
+  .bleed { position: relative; height: min(80vh, 56.25vw); margin: 30px 0 0; overflow: hidden; background: #0b0b0b center / cover no-repeat; cursor: pointer; animation: rise .8s cubic-bezier(.2, .7, .2, 1) both; }
+  .bleed video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .4s; }
+  .bleed video.on { opacity: 1; }
+  .bleed::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 55%, rgba(0,0,0,.65)); pointer-events: none; }
+  .bleed .bl-in { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; padding: 0 clamp(20px, 6vw, 120px) clamp(22px, 5vh, 54px); pointer-events: none; }
+  .bleed h2 { margin: 0; max-width: 60%; font-weight: 600; font-size: clamp(26px, 3.6vw, 56px); letter-spacing: -0.03em; line-height: 1.05; }
+  .bleed .bl-cr { display: flex; gap: 0 32px; text-align: center; }
+  .bleed .bl-cr b { display: block; margin-bottom: 4px; font-weight: 700; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,252,235,.55); }
+  .bleed .bl-cr span { font-size: 12px; }
+  .bleed .bl-ar { position: absolute; z-index: 2; top: 50%; margin-top: -30px; width: 60px; height: 60px; padding: 0; border: 0; background: none; color: var(--kinou-fg); opacity: .7; cursor: pointer; transition: opacity .2s; }
+  .bleed .bl-ar:hover { opacity: 1; } .bleed .bl-l { left: clamp(10px, 4vw, 60px); } .bleed .bl-r { right: clamp(10px, 4vw, 60px); }
+  .bleed .bl-ar svg { width: 30px; height: 30px; }
+  @media (max-width: 700px) { .bleed { height: 56.25vw; margin-top: 20px; } .bleed .bl-cr { display: none; } .bleed h2 { max-width: none; font-size: 22px; } .bleed .bl-in { padding: 0 16px 14px; } .bleed .bl-ar { display: none; } } /* description d'un bundle */
 </style>
 </head>
 <body>
@@ -274,6 +291,7 @@
       fit(); addEventListener("resize", fit); if (document.fonts) document.fonts.ready.then(fit);
     }
     var wrap = el("div", { class: "wrap" }), side = el("aside", { class: "side" }), main = el("main");
+    if (b.layout === "bleed" && films.length) app.appendChild(bleed(films, h));
     wrap.appendChild(side); wrap.appendChild(main); app.appendChild(wrap);
     if (b.description) main.appendChild(el("p", { class: "desc", text: b.description }));
     fillMain(b, main, side, wrap, h, films);
@@ -288,7 +306,7 @@
     (b.items || []).forEach(function (it) {
       // Section : trait + espace, avec son nom s'il y en a un (une section sans nom sépare quand même, Gus 22/11).
       if (it.section !== undefined) { var nm = String(it.section || "").trim(), s = el(nm ? "h2" : "div", { class: "sec" + (nm ? "" : " blank"), id: "s" + secs.length, text: nm }); if (nm) secs.push(s); main.appendChild(s); grid = null; return; }
-      if (!grid) { grid = el("div", { class: "grid c" + (b.cols || 3) }); grid.style.setProperty("--cols", b.cols || 3); main.appendChild(grid); }
+      if (!grid) { grid = el("div", { class: "grid c" + (b.cols || 3) }); main.appendChild(grid); }
       grid.appendChild(card(it, films.indexOf(it), k++, h));
     });
     if (!side) return; // bundle : la colonne de gauche liste les bandes
@@ -356,6 +374,7 @@
         var dls = b.download ? films.filter(function (it) { return it.full; }) : [];
         if (dls.length > 1) main.appendChild(el("button", { class: "dlall", style: "margin:0 0 22px", on: { click: function (e) { zipAll(dls, b.title, e.currentTarget); } } }, [svg(I_DL), "Download all"]));
         if (b.description) main.appendChild(el("p", { class: "desc", text: b.description }));
+        HERO = null; if (b.layout === "bleed" && films.length) { var hb = bleed(films, h); hb.style.marginTop = "0"; hb.style.marginBottom = "24px"; main.appendChild(hb); }
         fillMain(b, main, null, wrap, h, films);
         list = films; band = b;
         try { history.replaceState(null, "", location.pathname + location.search + "#" + (i + 1)); } catch (e) {}
@@ -367,6 +386,45 @@
     });
   }
 
+  // Grand film en haut (mise en page « Plein écran », Gus 24/11) : extrait qui joue tout seul (en pause quand on survole un autre film),
+  // titre et crédits dessus, flèches pour passer au film suivant / précédent, clic = lecteur.
+  var HERO = null;
+  function snipSrc(it) {
+    if (it.snipVideo) return { src: FN + "/api/media?u=" + encodeURIComponent(it.snipVideo) };
+    if (it.snip && it.full) return { src: it.full, s: it.snip.s, d: it.snip.d || 10 };
+    return it.video ? { src: it.video } : null;
+  }
+  function bleed(films, h) {
+    var k = 0, box = el("section", { class: "bleed" }), v = null, inn = el("div", { class: "bl-in" });
+    function show(i) {
+      k = (i + films.length) % films.length; var it = films[k];
+      box.style.backgroundImage = it.img ? 'url("' + it.img + '")' : "";
+      if (v) { v.remove(); v = null; }
+      var sn = snipSrc(it);
+      if (sn) {
+        v = el("video", { muted: "", playsinline: "", autoplay: "", loop: sn.s === undefined ? "" : null, preload: "auto" }); v.muted = true;
+        v.src = sn.src + (sn.s !== undefined ? "#t=" + sn.s : "");
+        if (sn.s !== undefined) v.addEventListener("timeupdate", function () { if (v && v.currentTime > sn.s + sn.d) v.currentTime = sn.s; });
+        v.addEventListener("playing", function () { if (v) v.classList.add("on"); });
+        box.insertBefore(v, box.firstChild);
+      }
+      inn.textContent = ""; inn.appendChild(el("h2", { text: it.title || "" }));
+      var cr = el("div", { class: "bl-cr" }), ds = (it.dops || []).filter(function (d) { return !(it.roles || {})[d]; });
+      if (!h.dir && it.dir) cr.appendChild(el("div", {}, [el("b", { text: "Director" }), el("span", { text: it.dir })]));
+      if (!h.dop && ds.length) cr.appendChild(el("div", {}, [el("b", { text: "Cinematographer" }), el("span", { text: ds.join(" & ") })]));
+      if (!h.prod && it.prod) cr.appendChild(el("div", {}, [el("b", { text: "Production" }), el("span", { text: it.prod })]));
+      inn.appendChild(cr);
+    }
+    box.appendChild(inn);
+    if (films.length > 1) {
+      box.appendChild(el("button", { class: "bl-ar bl-l", "aria-label": "Film précédent", on: { click: function (e) { e.stopPropagation(); show(k - 1); } } }, [svg('<path d="M15 5l-7 7 7 7"/>')]));
+      box.appendChild(el("button", { class: "bl-ar bl-r", "aria-label": "Film suivant", on: { click: function (e) { e.stopPropagation(); show(k + 1); } } }, [svg('<path d="M9 5l7 7-7 7"/>')]));
+    }
+    box.addEventListener("click", function () { openPlayer(k); });
+    HERO = { pause: function () { if (v) v.pause(); }, play: function () { if (v && cur < 0) v.play().catch(function () {}); } };
+    show(0);
+    return box;
+  }
   // Vignette : image (recadrée si besoin), extrait au survol (ou passage choisi du film), voile lumineux, fond flouté.
   var bg = document.getElementById("projbg"), bgv = document.getElementById("projvid"), hover = matchMedia("(hover: hover)").matches;
   function card(it, fi, i, h) {
@@ -383,6 +441,7 @@
     var own = it.snipVideo ? FN + "/api/media?u=" + encodeURIComponent(it.snipVideo) : "", v = null, src = own || (it.snip && it.full ? it.full : it.video);
     if (hover) {
       c.addEventListener("mouseenter", function () {
+        if (HERO) HERO.pause(); // le grand film en haut s'arrête quand on survole un autre film
         if (it.img) { bg.style.backgroundImage = 'url("' + it.img + '")'; document.body.classList.add("proj-on"); }
         if (!src || v) return;
         var cut = !own && it.snip;
@@ -393,7 +452,7 @@
         if (cr && !crAll) { v.style.transform = "scale(" + cr.z + ")"; v.style.transformOrigin = cr.x + "% " + cr.y + "%"; }
         inn.appendChild(v);
       });
-      c.addEventListener("mouseleave", function () { if (v) { v.remove(); v = null; } document.body.classList.remove("proj-on"); bgv.classList.remove("on"); });
+      c.addEventListener("mouseleave", function () { if (HERO) HERO.play(); if (v) { v.remove(); v = null; } document.body.classList.remove("proj-on"); bgv.classList.remove("on"); });
     }
     return c;
   }
@@ -492,7 +551,7 @@
       if (L && L.classList.contains("on")) showStill(stillsI + k); else if (!band.single) openPlayer(cur + k);
     });
   }
-  function closePlayer() { if (cur < 0 || band.single) return; P.classList.remove("on"); G.classList.remove("on"); cur = -1; document.body.style.overflow = ""; [].forEach.call(P.querySelectorAll("video"), function (v) { v.pause(); }); setTimeout(function () { if (cur < 0) P.textContent = ""; }, 350); }
+  function closePlayer() { if (cur < 0 || band.single) return; P.classList.remove("on"); G.classList.remove("on"); cur = -1; if (HERO) HERO.play(); document.body.style.overflow = ""; [].forEach.call(P.querySelectorAll("video"), function (v) { v.pause(); }); setTimeout(function () { if (cur < 0) P.textContent = ""; }, 350); }
   // Images d'une galerie chargées dans l'ordre (4 d'avance au plus) et affichées dans l'ordre : pas de « trous ».
   function orderedLoad(items, show, alive) {
     var next = 0, done = 0;
@@ -530,6 +589,7 @@
     return ul;
   }
   function openPlayer(i) {
+    if (HERO) HERO.pause();
     cur = (i + list.length) % list.length; var it = list[cur], h = band.hide || {}, run = ++galRun;
     P.textContent = ""; P.scrollTop = 0;
     if (!band.single) { document.body.style.overflow = "hidden"; P.appendChild(el("button", { class: "pclose", "aria-label": "Fermer" }, [svg22('<path d="M4 4l14 14M18 4L4 18"/>')])); }

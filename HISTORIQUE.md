@@ -549,3 +549,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 23/11 (bandes) : page d'un bundle (bandes de bandes, une par onglet à gauche).
 - 23/11 : page de test de l'hébergement vidéo `test-video/` (Slate et nous côte à côte, mesures identiques).
 - 24/11/2026 : plus de voile lumineux blanc sur téléphone (film sélectionné au repère, toucher), site et page des bandes ; inchangé sur ordinateur et tablette (Gus).
+- 24/11 (bandes, Gus, d'après les réglages Slate) : dernière ligne centrée, 2 colonnes moins larges, mise en page « Plein écran en haut » (Full Bleed).
