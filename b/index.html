@@ -170,6 +170,8 @@
   .bdesc { margin: 24px 32px 0; }
   /* « Plein écran en haut » (Gus 24/11, comme le Full Bleed de Slate) : le film en grand, son extrait qui joue, titre et crédits dessus. */
   .bleed { position: relative; height: min(80vh, 56.25vw); margin: 30px 0 0; overflow: hidden; background: #0b0b0b center / cover no-repeat; cursor: pointer; animation: rise .8s cubic-bezier(.2, .7, .2, 1) both; }
+  @media (hover: none) { .card { transform-origin: 50% 50%; will-change: scale; } } /* téléphone : perspective réglée par pickFocus */
+  .bleed .bl-bg { position: absolute; inset: 0; background: center / cover no-repeat; }
   .bleed video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .4s; }
   .bleed video.on { opacity: 1; }
   .bleed::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 55%, rgba(0,0,0,.65)); pointer-events: none; }
@@ -320,6 +322,7 @@
       if (!grid) { grid = el("div", { class: "grid c" + (b.cols || 3) }); main.appendChild(grid); }
       grid.appendChild(card(it, films.indexOf(it), k++, h));
     });
+    if (!hover) { heroOn = true; requestAnimationFrame(pickFocus); setTimeout(pickFocus, 900); } // téléphone : film au repère, perspective
     if (!side) return; // bundle : la colonne de gauche liste les bandes
     if (secs.length > 1) { // sections : liste à gauche, comme les onglets d'une page de chef op
       var cats = el("div", { class: "cats" });
@@ -406,10 +409,13 @@
     return it.video ? { src: it.video } : null;
   }
   function bleed(films, h) {
-    var k = 0, box = el("section", { class: "bleed" }), v = null, inn = el("div", { class: "bl-in" });
+    var k = 0, box = el("section", { class: "bleed" }), v = null, inn = el("div", { class: "bl-in" }), bgd = el("div", { class: "bl-bg" });
+    box.appendChild(bgd);
     function show(i) {
-      k = (i + films.length) % films.length; var it = films[k];
-      box.style.backgroundImage = it.img ? 'url("' + it.img + '")' : "";
+      k = (i + films.length) % films.length; var it = films[k], cr = it.crop;
+      // Recadrage de la page du chef op / de la bande (ex. bandes noires d'un film en scope) : l'extrait toujours, l'image si t.
+      bgd.style.backgroundImage = it.img ? 'url("' + it.img + '")' : "";
+      bgd.style.transform = cr && cr.t !== false ? "scale(" + cr.z + ")" : ""; bgd.style.transformOrigin = cr ? cr.x + "% " + cr.y + "%" : "";
       if (v) { v.remove(); v = null; }
       var sn = snipSrc(it);
       if (sn) {
@@ -417,7 +423,8 @@
         v.src = sn.src + (sn.s !== undefined ? "#t=" + sn.s : "");
         if (sn.s !== undefined) v.addEventListener("timeupdate", function () { if (v && v.currentTime > sn.s + sn.d) v.currentTime = sn.s; });
         v.addEventListener("playing", function () { if (v) v.classList.add("on"); });
-        box.insertBefore(v, box.firstChild);
+        if (cr) { v.style.transform = "scale(" + cr.z + ")"; v.style.transformOrigin = cr.x + "% " + cr.y + "%"; }
+        box.insertBefore(v, bgd.nextSibling);
       }
       inn.textContent = ""; inn.appendChild(el("h2", { text: it.title || "" }));
       var cr = el("div", { class: "bl-cr" }), ds = (it.dops || []).filter(function (d) { return !(it.roles || {})[d]; });
@@ -450,23 +457,53 @@
     c.addEventListener("click", function () { openPlayer(fi); });
     // Extrait : mp4 importé dans l'admin (relu par /api/media), sinon passage choisi du film complet, sinon extrait de Slate.
     var own = it.snipVideo ? FN + "/api/media?u=" + encodeURIComponent(it.snipVideo) : "", v = null, src = own || (it.snip && it.full ? it.full : it.video);
-    if (hover) {
-      c.addEventListener("mouseenter", function () {
-        if (HERO) HERO.pause(); // le grand film en haut s'arrête quand on survole un autre film
+    function on(phone) {
+        if (HERO && !phone) HERO.pause(); // le grand film en haut s'arrête quand on survole un autre film
         if (it.img) { bg.style.backgroundImage = 'url("' + it.img + '")'; document.body.classList.add("proj-on"); }
         if (!src || v) return;
         var cut = !own && it.snip;
         v = el("video", { muted: "", loop: cut ? null : "", playsinline: "", autoplay: "", preload: "auto" }); v.muted = true;
         v.src = src + (cut ? "#t=" + it.snip.s : "");
         if (cut) v.addEventListener("timeupdate", function () { if (v && v.currentTime > it.snip.s + (it.snip.d || 10)) v.currentTime = it.snip.s; });
-        v.addEventListener("playing", function () { if (!v) return; v.classList.add("on"); if (!cut) { bgv.src = src; bgv.play().catch(function () {}); bgv.classList.add("on"); } });
+        v.addEventListener("playing", function () { if (!v) return; v.classList.add("on"); if (!cut && !phone) { bgv.src = src; bgv.play().catch(function () {}); bgv.classList.add("on"); } });
         if (cr && !crAll) { v.style.transform = "scale(" + cr.z + ")"; v.style.transformOrigin = cr.x + "% " + cr.y + "%"; }
         inn.appendChild(v);
-      });
-      c.addEventListener("mouseleave", function () { if (HERO) HERO.play(); if (v) { v.remove(); v = null; } document.body.classList.remove("proj-on"); bgv.classList.remove("on"); });
     }
+    function off(phone) { if (HERO && !phone) HERO.play(); if (v) { v.removeAttribute("src"); v.load(); v.remove(); v = null; } document.body.classList.remove("proj-on"); bgv.classList.remove("on"); }
+    if (hover) { c.addEventListener("mouseenter", function () { on(); }); c.addEventListener("mouseleave", function () { off(); }); }
+    c._on = on; c._off = off;
     return c;
   }
+  // Téléphone (même chose que les pages de chef op du site, pickFocus d'app.js) : le film au repère (40 % de la hauteur ; tout en
+  // haut, le 1er film ; tout en bas, le dernier) joue son extrait avec le fond flouté ; perspective : plus un film est loin du
+  // repère, plus il est petit (au plus -13 %, à une demi-hauteur d'écran). Plein écran en haut : tant que le grand film est
+  // au repère, c'est lui qui joue.
+  var focusC = null, focusRaf = 0, heroOn = true;
+  function pickFocus() {
+    focusRaf = 0; if (hover || cur >= 0) return;
+    var H = innerHeight, line = H * 0.4, cards = [].filter.call(document.querySelectorAll(".grid .card"), function (c) { return c.offsetParent; });
+    if (focusC && !focusC.isConnected) focusC = null;
+    if (!cards.length) return;
+    var mid = function (b) { return (b.top + b.bottom) / 2; }, se = document.scrollingElement || document.documentElement, y = se.scrollTop;
+    line = Math.min(line, mid(cards[0].getBoundingClientRect()) + y);
+    var last = cards[cards.length - 1], left = se.scrollHeight - H - y;
+    // en bas (pied de page sous la grille) : le repère glisse vers le dernier film pendant la dernière demi-hauteur d'écran.
+    if (last !== cards[0] && left < y && left < H / 2) { var ml = mid(last.getBoundingClientRect()); line = ml + (line - ml) * left / (H / 2); }
+    var hb = document.querySelector(".bleed"), hon = !!(HERO && hb && hb.getBoundingClientRect().bottom > line);
+    var best = null, bd = 1e9, sizes = cards.map(function (c) {
+      var b = c.getBoundingClientRect(), d = Math.abs(mid(b) - line);
+      if (b.bottom > 0 && d < bd) { bd = d; best = c; }
+      return 1 - 0.13 * Math.min(1, d / (H * 0.5));
+    });
+    cards.forEach(function (c, i) { c.style.scale = sizes[i].toFixed(4); }); // « scale » : s'ajoute à l'animation d'arrivée
+    if (hon) best = null;
+    if (HERO && hon !== heroOn) { heroOn = hon; if (hon) HERO.play(); else HERO.pause(); }
+    if (best === focusC) return;
+    if (focusC) { focusC.classList.remove("focus"); focusC._off(true); }
+    focusC = best; if (best) { best.classList.add("focus"); best._on(true); }
+  }
+  function focusSoon() { if (!focusRaf) focusRaf = requestAnimationFrame(pickFocus); }
+  if (!hover) { addEventListener("scroll", focusSoon, { passive: true }); addEventListener("resize", focusSoon); }
   // « Download all » = un seul fichier zip (Gus 22/11), sans compression (des MP4), écrit au fil de l'eau : Chrome / Edge l'écrivent
   // directement sur le disque (fenêtre « Enregistrer sous »), les autres navigateurs le préparent en mémoire (jusqu'à ~1,5 Go, sinon
   // un fichier après l'autre). Vidéos lues par /api/media (autorisation CORS). ZIP64 au-delà de 4 Go.
@@ -562,7 +599,7 @@
       if (L && L.classList.contains("on")) showStill(stillsI + k); else if (!band.single) openPlayer(cur + k);
     });
   }
-  function closePlayer() { if (cur < 0 || band.single) return; P.classList.remove("on"); G.classList.remove("on"); cur = -1; if (HERO) HERO.play(); document.body.style.overflow = ""; [].forEach.call(P.querySelectorAll("video"), function (v) { v.pause(); }); setTimeout(function () { if (cur < 0) P.textContent = ""; }, 350); }
+  function closePlayer() { if (cur < 0 || band.single) return; P.classList.remove("on"); G.classList.remove("on"); cur = -1; if (HERO) HERO.play(); heroOn = true; if (!hover) focusSoon(); document.body.style.overflow = ""; [].forEach.call(P.querySelectorAll("video"), function (v) { v.pause(); }); setTimeout(function () { if (cur < 0) P.textContent = ""; }, 350); }
   // Images d'une galerie chargées dans l'ordre (4 d'avance au plus) et affichées dans l'ordre : pas de « trous ».
   function orderedLoad(items, show, alive) {
     var next = 0, done = 0;
@@ -601,6 +638,7 @@
   }
   function openPlayer(i) {
     if (HERO) HERO.pause();
+    if (focusC) { focusC.classList.remove("focus"); focusC._off(true); focusC = null; } // téléphone : l'extrait au repère s'arrête
     cur = (i + list.length) % list.length; var it = list[cur], h = band.hide || {}, run = ++galRun;
     P.textContent = ""; P.scrollTop = 0;
     if (!band.single) { document.body.style.overflow = "hidden"; P.appendChild(el("button", { class: "pclose", "aria-label": "Fermer" }, [svg22('<path d="M4 4l14 14M18 4L4 18"/>')])); }
