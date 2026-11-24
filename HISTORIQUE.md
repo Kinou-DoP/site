@@ -548,3 +548,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 23/11 (bandes) : lien d'un film seul (`single`) : le film au centre de la page, comme les liens de film de Slate.
 - 23/11 (bandes) : page d'un bundle (bandes de bandes, une par onglet à gauche).
 - 23/11 : page de test de l'hébergement vidéo `test-video/` (Slate et nous côte à côte, mesures identiques).
+- 24/11/2026 : plus de voile lumineux blanc sur téléphone (film sélectionné au repère, toucher), site et page des bandes ; inchangé sur ordinateur et tablette (Gus).

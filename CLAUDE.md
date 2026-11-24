@@ -109,7 +109,7 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 4. Grille 3 colonnes 16:9 (gap 6px, 4px sur téléphone) ; feed en 1 colonne.
 5. Lecteur plein écran sur verre dépoli (flou 36px, voile noir 62 %), image agrandie sur noir 98 % ; fermeture Échap / croix / clic à côté.
 6. Animations existantes seulement (arrivée des films en grandissant 94 % → 100 %, révélation circulaire, morphing du nom avec léger
-   flou, onglets en cascade, voile lumineux blanc 10 % au survol) : **ne pas en ajouter sans demande**.
+   flou, onglets en cascade, voile lumineux blanc 10 % au survol, **jamais sur téléphone**) : **ne pas en ajouter sans demande**.
 7. En-tête : logo au centre ; à gauche Instagram, spotlight, fiction, press, contact ; à droite cinematographers ; téléphone (≤ 700px) :
    burger à gauche, logo réduit, « DOP » à droite ; nom du chef op **centré** sur téléphone.
 8. Catégorie du film en gris (onglet FEATURED ; Narrative suivie des types Slate) ; jamais « Stills », « Fiction », « Trailer »,

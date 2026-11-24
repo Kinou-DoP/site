@@ -451,10 +451,10 @@ html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: h
 /* Arrivée directe sur la page d'un chef op : rien de l'accueil ni de la liste pendant l'ouverture */
 html.deep #home, html.deep main, html.deep #bg, html.deep #bgvid { visibility: hidden !important; }
 /* Téléphone, page d'un chef op : de la place sous le dernier film pour qu'il puisse venir au repère (être sélectionné) ;
-   voile lumineux quand un film est sélectionné (comme au survol sur ordinateur) ; perspective : taille réglée par app.js. */
+   pas de voile lumineux sur téléphone, ni au film sélectionné ni au toucher (Gus 24/11) ; perspective : taille réglée par app.js. */
 @media (hover: none) and (max-width: 700px) {
   .work { padding-bottom: 6vh; } /* le repère descend vers le dernier film en bas de page (pickFocus) */
-  .card.focus .still::after { animation: glow 1.25s ease-out; }
+  .still::after { display: none; }
   .card { transform-origin: 50% 50%; will-change: transform, scale; }
 }
 

@@ -71,6 +71,7 @@
   .still::after { content: ""; position: absolute; inset: 0; background: var(--kinou-fg); opacity: 0; pointer-events: none; }
   .card:hover .still::after { animation: glow 1.25s ease-out; }
   @keyframes glow { 0% { opacity: 0; } 20% { opacity: .1; } 100% { opacity: 0; } }
+  @media (hover: none) and (max-width: 700px) { .still::after { display: none; } } /* pas de voile lumineux sur téléphone (Gus 24/11) */
   .meta { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; padding: 36px 16px 14px; background: linear-gradient(transparent, rgba(0,0,0,.78)); opacity: 0; transition: opacity .3s; pointer-events: none; }
   .card:hover .meta { opacity: 1; }
   .meta h3 { margin: 0; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; line-height: 1.2; }
