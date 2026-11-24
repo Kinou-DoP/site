@@ -550,3 +550,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 23/11 : page de test de l'hébergement vidéo `test-video/` (Slate et nous côte à côte, mesures identiques).
 - 24/11/2026 : plus de voile lumineux blanc sur téléphone (film sélectionné au repère, toucher), site et page des bandes ; inchangé sur ordinateur et tablette (Gus).
 - 24/11 (bandes, Gus, d'après les réglages Slate) : dernière ligne centrée, 2 colonnes moins larges, mise en page « Plein écran en haut » (Full Bleed).
+- 24/11/2026 : une page cachée dans l'admin s'ouvre par son adresse (bouton « Voir sur le site » de l'admin) ; toujours absente de la liste et de la roulette, nom toujours sans lien ailleurs (Gus). Avant, l'adresse renvoyait à l'accueil.

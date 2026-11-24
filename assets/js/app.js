@@ -239,11 +239,14 @@
   }
 
   // ---------- Liste des DPs + page DP (template unique) ----------
-  function initSite(DPS, HOME) {
+  function initSite(DPS, HOME, HIDDEN) {
     // Liste des DPs (data/dps/index.json), meme balisage que le prototype.
+    // Pages cachées (HIDDEN) : un lien invisible, hors de la liste et de la roulette, seulement pour que leur adresse ouvre la page
+    // (bouton « Voir sur le site » de l'admin, Gus 24/11).
     var ul = document.querySelector("main ul");
-    DPS.forEach(function (d) {
+    DPS.concat(HIDDEN || []).forEach(function (d) {
       var li = document.createElement("li"), a = document.createElement("a");
+      if (d.hidden) { li.style.display = "none"; li.className = "off"; }
       a.setAttribute("href", pageURL(d.slug)); a.dataset.view = d.slug; a.dataset.img = d.img || "images/" + d.slug + ".jpg";
       a.textContent = d.name; a.dataset.t = d.name; // data-t : version grasse superposée au survol (main.css)
       a.addEventListener("mouseenter", function () { loadDP(d.slug); }); // precharge la fiche
@@ -1907,10 +1910,11 @@
   Promise.all([getJSON("home.json"), getJSON("dps/index.json")]).then(function (r) {
     // Ancien format : { dp, slug } ; nouveau (admin, bande Slate) : dps: [{ name, slug }].
     // Pages cachées dans l'admin (« En ligne sur le site » décoché, `hidden` dans index.json ; Gus 10/11) : ni dans la liste, ni
-    // ouvrables (adresse, liens) ; leur nom reste écrit sur l'accueil et sous les films, sans lien.
+    // liées (leur nom reste écrit sur l'accueil et sous les films, sans lien) ; leur adresse ouvre quand même la page (Gus 24/11).
     var off = {}, dps = r[1].dps.filter(function (d) { if (d.hidden) off[d.slug] = true; return !d.hidden; });
+    var hid = r[1].dps.filter(function (d) { return d.hidden && d.slug; });
     var slides = r[0].slides.map(function (p) { if (!p.dps) p.dps = [{ name: p.dp, slug: p.slug }]; p.dps.forEach(function (d) { if (off[d.slug]) delete d.slug; }); return p; });
     initHome(slides, r[0].duration);
-    initSite(dps, slides);
+    initSite(dps, slides, hid);
   }).catch(function (e) { undeep(); console.error("kinou : chargement des donnees impossible", e); });
 })();

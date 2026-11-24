@@ -33,7 +33,7 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 
 ## Données (dépôt admin, `data/` sur `main`, modifiées par l'admin, jamais à la main ici)
 - `dps/index.json` : `{ dps: [{ slug, name, img?, hidden?, gender? }] }` (ordre de la liste ; `hidden` = page cachée : absente de la
-  liste, adresse sans effet, nom sans lien ; `gender` sert seulement à l'admin).
+  liste et de la roulette, nom sans lien, mais **son adresse ouvre la page** (« Voir sur le site » de l'admin ; lien invisible `li.off`) ; `gender` sert seulement à l'admin).
 - `dps/<slug>.json` : `{ slug, name, hue, categories, clips, bundle?, open?, overrides?, showcase?, about, template? }`.
   Clip : `{ title, sub ("Réal\nProd[\nco-DoP Nom]"), video (extrait 10 s sans son), full (film complet 1080p), img (vignette signée),
   cat, featured, featuredOrder, slate (id Slate), stills? }`. Un même film peut être dans plusieurs catégories (une entrée chacune).
