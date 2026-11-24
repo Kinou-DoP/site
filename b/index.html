@@ -91,7 +91,7 @@
   footer .soc a { margin: 0 8px; transition: opacity .2s; } footer .soc a:hover { opacity: .6; }
   @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
   @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } .side { position: static; padding: 0 0 18px; } .side .cats { flex-direction: row; flex-wrap: wrap; gap: 8px 18px; } .grid.c3 { --cols: 2; } }
-  @media (max-width: 560px) { header { padding: calc(env(safe-area-inset-top, 0px) + 22px) 20px 0; grid-template-columns: 1fr auto; } header .bt > span { display: none; } header .logo { justify-self: start; font-size: 26px; } .hero { margin: 28px 20px 0; font-size: clamp(28px, 9vw, 44px); } .wrap { padding: 28px 10px 0; } .grid, .grid.c2, .grid.c3 { --cols: 1; --gap: 10px; } .desc { padding: 0 10px; } .sec { margin-left: 10px; } .dlmsg { left: 12px; right: 12px; bottom: 12px; max-width: none; } .side { padding: 0 10px 14px; } }
+  @media (max-width: 560px) { header { padding: calc(env(safe-area-inset-top, 0px) + 22px) 20px 0; grid-template-columns: 1fr auto; } header .bt { display: none; } header .bt:has(.dlall) { display: flex; grid-column: 1 / -1; order: 3; } header .logo { justify-self: start; font-size: 26px; } .hero { margin: 28px 20px 0; font-size: clamp(28px, 9vw, 44px); } .wrap { padding: 28px 10px 0; } .grid, .grid.c2, .grid.c3 { --cols: 1; --gap: 10px; } .desc { padding: 0 10px; } .sec { margin-left: 10px; } .dlmsg { left: 12px; right: 12px; bottom: 12px; max-width: none; } .side { padding: 0 10px 14px; } }
   /* Messages (mot de passe, lien invalide) */
   .msg { max-width: 420px; margin: 18vh auto; padding: 0 24px; text-align: center; color: var(--dim); line-height: 1.6; animation: rise .6s ease both; }
   .msg .logo { display: block; margin-bottom: 40px; color: var(--kinou-fg); font-size: 30px; }
@@ -181,6 +181,11 @@
   .bleed .bl-ar { position: absolute; z-index: 2; top: 50%; margin-top: -30px; width: 60px; height: 60px; padding: 0; border: 0; background: none; color: var(--kinou-fg); opacity: .7; cursor: pointer; transition: opacity .2s; }
   .bleed .bl-ar:hover { opacity: 1; } .bleed .bl-l { left: clamp(10px, 4vw, 60px); } .bleed .bl-r { right: clamp(10px, 4vw, 60px); }
   .bleed .bl-ar svg { width: 30px; height: 30px; }
+  .bleed.top { height: 74vh; min-height: 460px; margin: 0; animation: none; }
+  .bleed.top header, .bleed.top .hero { position: relative; z-index: 2; }
+  .bleed.top::before { content: ""; position: absolute; z-index: 1; left: 0; right: 0; top: 0; height: 45%; background: linear-gradient(rgba(0,0,0,.6), transparent); pointer-events: none; }
+  .bleed.top + .wrap { padding-top: 34px; }
+  @media (max-width: 700px) { .bleed.top { height: 68vh; min-height: 0; } }
   @media (max-width: 700px) { .bleed { height: 56.25vw; margin-top: 20px; } .bleed .bl-cr { display: none; } .bleed h2 { max-width: none; font-size: 22px; } .bleed .bl-in { padding: 0 16px 14px; } .bleed .bl-ar { display: none; } } /* description d'un bundle */
 </style>
 </head>
@@ -291,7 +296,13 @@
       fit(); addEventListener("resize", fit); if (document.fonts) document.fonts.ready.then(fit);
     }
     var wrap = el("div", { class: "wrap" }), side = el("aside", { class: "side" }), main = el("main");
-    if (b.layout === "bleed" && films.length) app.appendChild(bleed(films, h));
+    // « Plein écran en haut » (Gus 24/11) : la vidéo sous tout le haut de page (en-tête et nom compris), coupée assez haut pour
+    // qu'on voie les films en dessous.
+    if (b.layout === "bleed" && films.length) {
+      var bx = bleed(films, h), hd = app.querySelector("header"), hr = app.querySelector(".hero");
+      bx.classList.add("top"); app.insertBefore(bx, app.firstChild);
+      if (hr) bx.insertBefore(hr, bx.firstChild); if (hd) bx.insertBefore(hd, bx.firstChild);
+    }
     wrap.appendChild(side); wrap.appendChild(main); app.appendChild(wrap);
     if (b.description) main.appendChild(el("p", { class: "desc", text: b.description }));
     fillMain(b, main, side, wrap, h, films);
@@ -420,7 +431,7 @@
       box.appendChild(el("button", { class: "bl-ar bl-l", "aria-label": "Film précédent", on: { click: function (e) { e.stopPropagation(); show(k - 1); } } }, [svg('<path d="M15 5l-7 7 7 7"/>')]));
       box.appendChild(el("button", { class: "bl-ar bl-r", "aria-label": "Film suivant", on: { click: function (e) { e.stopPropagation(); show(k + 1); } } }, [svg('<path d="M9 5l7 7-7 7"/>')]));
     }
-    box.addEventListener("click", function () { openPlayer(k); });
+    box.addEventListener("click", function (e) { if (e.target.closest("a, button, header, .hero")) return; openPlayer(k); });
     HERO = { pause: function () { if (v) v.pause(); }, play: function () { if (v && cur < 0) v.play().catch(function () {}); } };
     show(0);
     return box;
