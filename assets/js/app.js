@@ -3,8 +3,10 @@
   // Vidéos jouées depuis NOTRE hébergement Amazon (copie de tout Slate le 25/11, au même chemin que sur le CloudFront de Slate) :
   // seul le début de l'adresse change ; les données gardent l'adresse Slate. Fichier absent chez nous (film ajouté sur Slate
   // depuis la copie) : repli automatique sur Slate (événement « error »). Même code dans app.js, b/index.html et l'admin.
+  var vidURL = function (u) { return u; }; // adresse réellement jouée (Amazon, ou Slate si notre CloudFront ne répond pas)
   (function () {
     var SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxii6rvamjf.cloudfront.net/";
+    vidURL = function (u) { return typeof u === "string" && u.indexOf(SLATE) === 0 && !panne ? NOUS + u.slice(SLATE.length) : u; };
     var d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src");
     Object.defineProperty(HTMLMediaElement.prototype, "src", { configurable: true, enumerable: d.enumerable, get: d.get,
       set: function (u) { delete this.dataset.repliSlate; d.set.call(this, typeof u === "string" && u.indexOf(SLATE) === 0 && !panne ? NOUS + u.slice(SLATE.length) : u); } });
@@ -23,6 +25,24 @@
       if (v.autoplay || v.veutJouer) { var p = jouer.call(v); if (p && p.catch) p.catch(function () {}); }
     }, true);
   })();
+  // Préchargement des extraits en fond (Gus 25/11) : chaque page télécharge ses extraits dans l'ordre (le plus haut d'abord),
+  // 2 à la fois, en priorité basse, dans le cache du navigateur : au survol, l'extrait démarre tout de suite (~0,02 s au lieu
+  // de ~0,5 s). Une nouvelle page remplace la file ; un extrait déjà téléchargé ne l'est pas deux fois.
+  var pre = { file: [], faits: {}, actifs: 0 };
+  function precharger(urls, ajouter) {
+    if (!ajouter) pre.file = [];
+    if (navigator.connection && navigator.connection.saveData) return; // « économiseur de données » du téléphone : rien en fond
+    urls.forEach(function (u) { u = u && vidURL(u); if (u && !pre.faits[u] && pre.file.indexOf(u) < 0) pre.file.push(u); });
+    preSuite();
+  }
+  function preSuite() {
+    while (pre.actifs < 2 && pre.file.length) {
+      var u = pre.file.shift(); if (pre.faits[u]) continue;
+      pre.faits[u] = 1; pre.actifs++;
+      fetch(u, { mode: "no-cors", priority: "low" }).then(function (r) { return r.blob(); }).catch(function () {})
+        .then(function () { pre.actifs--; preSuite(); });
+    }
+  }
   // Adresses des pages : ROOT + <slug>/ (+ <catégorie> + /feed), comme sur kinou.fr, pour que les aperçus de lien (WhatsApp,
   // iMessage…) puissent montrer le chef op : un robot GitHub (tools/share-pages.mjs) fabrique <slug>/index.html avec son nom et
   // sa photo, qui renvoie ici avec #<slug>. Les anciennes adresses en « #<slug> » marchent toujours (puis sont réécrites).
@@ -187,9 +207,11 @@
       v.dataset.src = v.src = PROJECTS[i].video; return true;
     }
     // Le passage HD du projet suivant se charge à l'avance (le film complet est plus long à démarrer).
-    function preloadNext(i) {
-      var n = slides[(i + 1) % slides.length].querySelector("video");
-      if (n && n._hd && !n.src) { n.preload = "auto"; n.src = n.dataset.src; }
+    function preloadNext(i) { // les 2 projets suivants (Gus 25/11 : avant, seulement le suivant)
+      for (var k = 1; k <= 2; k++) {
+        var n = slides[(i + k) % slides.length].querySelector("video");
+        if (n && !n.src) { n.preload = "auto"; n.src = n.dataset.src; }
+      }
     }
 
     document.addEventListener("keydown", function (e) {
@@ -318,8 +340,18 @@
     function bgWanted(a) { return a.matches(":hover") || a === document.activeElement || a.dataset.view === roulSel; }
     function hide() { bg.style.opacity = 0; bgvid.classList.remove("on"); bgvid.onplaying = null; bgvid.pause(); }
 
+    // Extrait du fond d'un chef op (1er film FEATURED), sans le jouer : pour le préchargement autour du nom survolé.
+    function bgSnip(slug) {
+      return loadDP(slug).then(function (d) { var f = d && (WORK[slug] || []).filter(function (p) { return p.f && p.video; }).sort(function (x, y) { return (x.fo || 0) - (y.fo || 0); })[0]; return f && f.video; });
+    }
+    var listeNoms = Array.prototype.slice.call(document.querySelectorAll("li a"));
+    function autour(a) {
+      var i = listeNoms.indexOf(a), l = [];
+      for (var k = 1; k <= 3; k++) { if (listeNoms[i + k]) l.push(listeNoms[i + k]); if (listeNoms[i - k]) l.push(listeNoms[i - k]); }
+      l.forEach(function (n) { if (n.dataset.view) bgSnip(n.dataset.view).then(function (u) { if (u) precharger([u], true); }, function () {}); });
+    }
     document.querySelectorAll("li a").forEach(function (a) {
-      a.addEventListener("mouseenter", function () { showBgVideo(a); });
+      a.addEventListener("mouseenter", function () { showBgVideo(a); autour(a); });
       a.addEventListener("focus", function () { showBgVideo(a); });
       a.addEventListener("mouseleave", hide);
       a.addEventListener("blur", hide);
@@ -1236,6 +1268,7 @@
       var isShow = shown.length && showTab(slug, cat) && (mode === "feed" || phone.matches);
       var isPhotos = !isShow && cat !== "FEATURED" && shown.length && shown.every(function (p) { return !p.full && (p.nosnip || !p.video) && photosOf(p).length; });
       work.classList.toggle("photos-on", !!isPhotos); document.body.classList.toggle("photos-on", !!isPhotos); // pas de choix grille / colonne pour les photos
+      precharger(shown.map(function (p) { return !p.nosnip && p.video; }));
       if (isShow) { renderShow(shown); return; }
       if (isPhotos) { renderPhotos(shown); return; }
       shown.forEach(function (p, i) {

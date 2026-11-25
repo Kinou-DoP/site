@@ -30,6 +30,9 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 - **Vidéos depuis Amazon** (25/11) : tous les fichiers de Slate sont copiés sur notre CloudFront `d3toxii6rvamjf.cloudfront.net`
   (même chemin que `d1ko11x0ybxl0h`). `app.js` et `b/index.html` (et l'admin) changent l'adresse au moment de jouer (setter `src`
   des `<video>`), repli automatique sur Slate si le fichier manque. Les données gardent l'adresse Slate.
+- **Extraits préchargés en fond** (`precharger`, 25/11) : chaque onglet (chef op, spotlight, fiction) télécharge tous ses extraits dans
+  l'ordre, 2 à la fois, en priorité basse (`fetch` no-cors → cache du navigateur) ; liste des chefs op : extraits des 3 noms au-dessus et
+  en dessous du nom survolé ; accueil : les 2 projets suivants. Rien si « économiseur de données ».
 - À chaque modification de `main.css` ou `app.js` : mettre à jour le numéro `?v=` dans `index.html` (date-heure), sinon les
   navigateurs gardent l'ancienne version. Tester en local : `python3 -m http.server` puis http://localhost:8000 (pas en `file://`),
   dans un navigateur, sur ordinateur **et** téléphone (Playwright est installé).
