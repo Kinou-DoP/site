@@ -79,6 +79,20 @@
     });
   }
 
+  // Video club de l'admin (Gus 26/11 : « le video club sert partout ») : ce qu'on change dans la fenêtre d'un film du video club
+  // (data/bibli/edits.json, clé « s<id Slate> » : vignette, extrait léger, film, titre, crédits, stills) s'applique aussi au site,
+  // par-dessus les fiches, le spotlight, la fiction et l'accueil (vcApply). Fichier absent ou en erreur : le site sans retouches.
+  var VC = {}, VC_P = getJSON("bibli/edits.json").then(function (x) { VC = (x && x.films) || {}; }, function () {});
+  var FN = ON_CF ? location.origin : "https://kinou-4tv.pages.dev"; // fonctions du site (/api/media)
+  function vcOf(id) { return id ? VC["s" + id] || null : null; }
+  // Extrait du video club : mp4 importé (relu par /api/media), sinon extrait léger 720p du robot (snip.v, s'il vient bien du film
+  // affiché : vf), sinon l'extrait retouché (video). Un passage choisi sans extrait léger ne change rien (le site ne lit pas de passage).
+  function vcSnip(e, full) {
+    if (e.snipVideo) return FN + "/api/media?u=" + encodeURIComponent(e.snipVideo);
+    if (e.snip && e.snip.v && (!e.snip.vf || !full || e.snip.vf === full)) return e.snip.v;
+    return typeof e.video === "string" && e.video ? e.video : "";
+  }
+
   // ---------- Accueil : slideshow (data/home.json) ----------
   function initHome(PROJECTS, DURATION) {
 
@@ -439,7 +453,7 @@
     var WORK = {}, CATS_BY = {}, TEMPLATE = {}, SHOW = {}, loading = {};
     function loadDP(slug) {
       if (!loading[slug]) loading[slug] = (slug === SPOT ? getJSON("spotlight.json").then(spotToDP) : slug === FIC ? getJSON("fiction.json").then(ficToDP) : getJSON("dps/" + slug + ".json"))
-        .then(function (d) { register(d); if (!MULTI[slug]) live(d); return d; }, function () { return null; });
+        .then(function (d) { return VC_P.then(function () { register(d); if (!MULTI[slug]) live(d); return d; }); }, function () { return null; });
       return loading[slug];
     }
     // ---------- Spotlight (data/spotlight.json, rubrique « spotlight » de l'admin) ----------
@@ -652,6 +666,32 @@
       if (/^https:\/\/images\.slatecdn\.net\//.test(u)) { var t = ourThumb(u, w); if (t) return t; }
       return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=80&fm=webp" : u;
     }
+    // Retouches du video club (edits.json) sur un film d'une page (d = fiche, spotlight ou fiction) : elles passent devant celles de
+    // la page (le video club n'enregistre que ce qui diffère des pages). Crédits refaits comme dans les bandes : « Réal », « Prod »,
+    // puis « co-DoP Nom » (fiche d'un chef op) ou « DoP Nom » (si le chef op de la page a un autre rôle), puis « Rôle Nom »
+    // (ex. Camera operator) ; spotlight / fiction : chefs op sans rôle dans « DoP Nom » (liens), autres rôles dans les crédits.
+    function vcApply(p, e, d) {
+      if (e.title) p.title = e.title;
+      if (e.img) p.img = e.img;
+      if (typeof e.full === "string" && e.full) p.full = e.full;
+      var sn = vcSnip(e, p.full); if (sn) p.video = sn;
+      if (e.extras !== undefined) { p.extras = e.extras || []; delete p.stills; delete p.stillsLink; } // stills et vidéos sous le film
+      if (!["dir", "prod", "dops", "roles"].some(function (k) { return e[k] !== undefined; })) return;
+      var DOP = /^(?:co-)?dop\.?\s+/i, isDop = function (x) { return DOP.test(x); }; // « co-DoP Nom », « DoP Nom », « dop. Nom »
+      var l = String(p.sub || "").split("\n").map(function (x) { return x.trim(); });
+      var plain = l.filter(function (x) { return x && !isDop(x); }), was = [];
+      l.filter(isDop).forEach(function (x) { was = was.concat(x.replace(DOP, "").split(/\s*[,&]\s*/)); });
+      var multi = MULTI[d.slug], me = multi ? "" : plainName(d.name);
+      var dops = e.dops ? e.dops.slice() : multi ? (p.dps || []).map(function (x) { return x.name; }) : [d.name].concat(was);
+      dops = dops.filter(Boolean); var ro = {}; Object.keys(e.roles || {}).forEach(function (n) { if (e.roles[n]) ro[plainName(n)] = e.roles[n]; });
+      var main = dops.filter(function (n) { return !ro[plainName(n)]; }), oth = dops.filter(function (n) { return ro[plainName(n)]; });
+      var nm = function (n) { return split(n).main; }, lines = [e.dir !== undefined ? e.dir : plain[0] || "", e.prod !== undefined ? e.prod : plain[1] || ""];
+      if (multi) { if (e.dops || e.roles) p.dps = main.map(dpByName); }
+      else if (ro[me]) { if (main.length) lines.push("DoP " + main.map(nm).join(" & ")); }
+      else { var co = main.filter(function (n) { return plainName(n) !== me; }); if (co.length) lines.push("co-DoP " + co.map(nm).join(" & ")); }
+      oth.forEach(function (n) { lines.push(ro[plainName(n)] + " " + nm(n)); });
+      p.sub = lines.concat(plain.slice(2)).filter(Boolean).join("\n");
+    }
     // Fiche JSON -> format interne du prototype (WORK, CATS_BY, ABOUT).
     function register(d) {
       var hue = d.hue || 0;
@@ -660,6 +700,7 @@
         var p = {}; for (var k in c) p[k] = c[k];
         if (ov[c.slate]) for (k in ov[c.slate]) p[k] = ov[c.slate][k];
         if (d.open !== undefined && c.slate === d.open) p.open = true;
+        var e = vcOf(c.slate); if (e) vcApply(p, e, d);
         // Projet en stills avec un extrait vidéo choisi dans l'admin (court métrage sans film ni bande-annonce) :
         // l'extrait joue au survol seulement ; au clic, le lecteur montre la galerie (pas de vidéo).
         if (p.hover && p.hover.video && !p.full && !p.video) { p.video = p.hover.video; p.nosnip = true; }
@@ -1976,7 +2017,9 @@
     im.src = DATA_BASE + c.logo;
   }).catch(function () { clearTimeout(logoWait); if (!logoEl.classList.contains("ready")) logoText(); });
 
-  Promise.all([getJSON("home.json"), getJSON("dps/index.json")]).then(function (r) {
+  Promise.all([getJSON("home.json"), getJSON("dps/index.json"), VC_P]).then(function (r) {
+    // Video club : vignette, titre et film complet retouchés (l'accueil garde sa vidéo, pas d'extrait).
+    r[0].slides.forEach(function (p) { var e = vcOf(p.slate); if (!e) return; if (e.img) p.img = e.img; if (e.title) p.film = e.title; if (typeof e.full === "string" && e.full) p.full = e.full; });
     // Ancien format : { dp, slug } ; nouveau (admin, bande Slate) : dps: [{ name, slug }].
     // Pages cachées dans l'admin (« En ligne sur le site » décoché, `hidden` dans index.json ; Gus 10/11) : ni dans la liste, ni
     // liées (leur nom reste écrit sur l'accueil et sous les films, sans lien) ; leur adresse ouvre quand même la page (Gus 24/11).

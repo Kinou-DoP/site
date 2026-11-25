@@ -111,6 +111,12 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 - **Test de l'hébergement vidéo** (`test-video/`, `noindex`, étude « remplacer Slate ») : le même film lu depuis Slate puis depuis notre
   adresse (champ « Notre adresse » ou `?sema=<url>&napoli=<url>`), l'un après l'autre : démarrage, sauts milieu / fin, coupures et
   avance en mémoire sur 30 s, résumé à copier.
+- **Le video club sert partout** (Gus 26/11) : au chargement, `app.js` lit `data/bibli/edits.json` (retouches de la fenêtre d'un film
+  du video club de l'admin, clé `s<id Slate>`, `VC_P`) ; `vcApply` les applique par-dessus les `overrides` de chaque film des fiches,
+  spotlight et fiction : `img` (vignette), `title`, `full`, extrait = `snipVideo` (par `/api/media`) sinon `snip.v` (extrait léger, s'il vient
+  du film affiché : `vf`) sinon `video` ; `extras` (stills et vidéos dessous, remplace `stills`) ; crédits refaits si `dir` / `prod` / `dops` /
+  `roles` changent (« co-DoP Nom », « DoP Nom » si le chef op de la page a un rôle, puis « Rôle Nom » ; spotlight / fiction : `dps`).
+  Accueil : vignette, titre (`film`), film complet. Fichier absent : le site sans retouches. Le recadrage (`crop`) reste celui des pages.
 - **Version live** (`live/` → `?live`) : vignettes qui jouent leur extrait en boucle ; toujours le cas sur téléphone (`liveOn`).
 
 ## Règles visuelles — à respecter absolument
