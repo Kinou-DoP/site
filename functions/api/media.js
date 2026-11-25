@@ -2,7 +2,10 @@
 // - sans dl : la vidéo relue avec l'autorisation CORS, pour que l'admin puisse en capturer une image (vignette d'une bande) ;
 // - avec dl : téléchargement direct (Content-Disposition: attachment) depuis la page d'une bande, sans ouvrir d'onglet.
 // Seules les vidéos de notre CloudFront Slate sont acceptées (pas un relais ouvert). Les demandes partielles (Range) sont transmises.
-const OK = /^https:\/\/d1ko11x0ybxl0h\.cloudfront\.net\/kinou\/production\/[\w\/.%-]+\.(mp4|mov|m4v)$/i;
+// Depuis le 25/11, tous les fichiers de Slate sont copiés sur NOTRE CloudFront (Amazon), au même chemin : la vidéo est lue chez
+// nous d'abord, chez Slate seulement si elle n'y est pas (film ajouté sur Slate depuis la copie). Notre adresse est acceptée aussi.
+const OK = /^https:\/\/(d1ko11x0ybxl0h|d3toxil6rvamjf)\.cloudfront\.net\/kinou\/production\/[\w\/.%-]+\.(mp4|mov|m4v)$/i;
+const SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxil6rvamjf.cloudfront.net/";
 // Extraits importés dans la bibliothèque de l'admin (mp4 déposés dans le dépôt admin) : raw.githubusercontent les sert sans le bon
 // type de fichier ; relus ici en video/mp4 pour que tous les navigateurs les jouent.
 const OWN = /^https:\/\/raw\.githubusercontent\.com\/Kinou-DoP\/admin\/main\/data\/bibli\/vid\/[\w-]+\.mp4$/;
@@ -13,7 +16,13 @@ export async function onRequest({ request }) {
   if (!OK.test(u) && !OWN.test(u)) return new Response("adresse refusée", { status: 400, headers: cors });
   const h = {}, range = request.headers.get("Range");
   if (range) h.Range = range;
-  const r = await fetch(u, { headers: h, method: request.method === "HEAD" ? "HEAD" : "GET" });
+  const opts = { headers: h, method: request.method === "HEAD" ? "HEAD" : "GET" };
+  let r = null;
+  if (OK.test(u)) { // chez nous d'abord, puis Slate
+    const chemin = u.replace(SLATE, "").replace(NOUS, "");
+    try { r = await fetch(NOUS + chemin, opts); } catch (e) { r = null; }
+    if (!r || !r.ok) r = await fetch(SLATE + chemin, opts);
+  } else r = await fetch(u, opts);
   const out = new Headers(cors);
   ["content-type", "content-length", "content-range", "accept-ranges", "etag", "last-modified"].forEach(function (k) { const v = r.headers.get(k); if (v) out.set(k, v); });
   out.set("Cache-Control", "public, max-age=86400");
