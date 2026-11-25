@@ -626,8 +626,8 @@
     }
     // Charge une image (de secours si besoin) puis cb(adresse qui a marché, ou celle de départ si aucune).
     function loadImg(u, cb) {
-      var im = new Image(), raw = "", o = ORIG[u];
-      im.onload = function () { cb(im.src); };
+      var im = new Image(), raw = "", o = ORIG[u], u0 = u;
+      im.onload = function () { GOT[u0] = im.src; cb(im.src); };
       // Notre vignette absente (film ajouté depuis) : celle de Slate, puis l'original sur S3.
       im.onerror = function () { if (o) { im.src = o; u = o; o = null; return; } if (!raw && (raw = slateRaw(u))) im.src = raw; else cb(u); };
       im.src = u;
@@ -640,7 +640,7 @@
     // Vignettes réduites chez nous (26/11) : le robot « Vignettes réduites » de l'admin fait, pour chaque image copiée de Slate, une
     // version WebP de 800 et de 1600 px sous thumbs/<chemin de l'image>-<largeur>.webp sur notre CloudFront. Le chemin est lu dans
     // l'adresse signée de Slate (slateRaw) ; ORIG garde l'adresse de Slate pour le secours (loadImg).
-    var THUMBS = "https://d3toxii6rvamjf.cloudfront.net/thumbs/", ORIG = {};
+    var THUMBS = "https://d3toxii6rvamjf.cloudfront.net/thumbs/", ORIG = {}, GOT = {}; // GOT : adresse demandée → adresse qui a marché
     function ourThumb(u, w) {
       var raw = slateRaw(u), path = ""; if (!raw) return "";
       try { path = decodeURIComponent(new URL(raw).pathname); } catch (e) { return ""; }
@@ -699,7 +699,7 @@
     // Fond plein ecran du projet survole (ou selectionne par clic / tap). p.img = visuel du projet.
     var projbg = document.getElementById("projbg"), projvid = document.getElementById("projvid"), selCard = null;
     function bgFor(p, w) {
-      if (p.img) return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + thumb(p.img, w || GW) + '")';
+      if (p.img) { var tu = thumb(p.img, w || GW); return 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("' + (GOT[tu] || (ORIG[tu] && !GOT.hasOwnProperty(tu) ? ORIG[tu] : tu)) + '")'; } // l'image qui a marché dans la grille (nôtre ou Slate)
       return "none"; // pas de fond colore provisoire
     }
     // Ignore les cartes masquees sous l'en-tete (zone du titre) quand on a defile.
