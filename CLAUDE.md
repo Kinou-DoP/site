@@ -27,6 +27,9 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 - **À faire pour la mise en production** : brancher kinou.fr sur Cloudflare (DNS chez OVH), vignettes réduites (`IMG_CDN` / `thumb()`
   vers le redimensionnement de Cloudflare), `SITE_URL` de `tools/share-pages.mjs`, mentions légales (hébergeur), puis validation
   de Gus et fusion dans `main`.
+- **Vidéos depuis Amazon** (25/11) : tous les fichiers de Slate sont copiés sur notre CloudFront `d3toxil6rvamjf.cloudfront.net`
+  (même chemin que `d1ko11x0ybxl0h`). `app.js` et `b/index.html` (et l'admin) changent l'adresse au moment de jouer (setter `src`
+  des `<video>`), repli automatique sur Slate si le fichier manque. Les données gardent l'adresse Slate.
 - À chaque modification de `main.css` ou `app.js` : mettre à jour le numéro `?v=` dans `index.html` (date-heure), sinon les
   navigateurs gardent l'ancienne version. Tester en local : `python3 -m http.server` puis http://localhost:8000 (pas en `file://`),
   dans un navigateur, sur ordinateur **et** téléphone (Playwright est installé).

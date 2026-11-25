@@ -1,5 +1,19 @@
 // kinou — logique du site. Les donnees viennent des fichiers JSON de DATA_BASE.
 (function () {
+  // Vidéos jouées depuis NOTRE hébergement Amazon (copie de tout Slate le 25/11, au même chemin que sur le CloudFront de Slate) :
+  // seul le début de l'adresse change ; les données gardent l'adresse Slate. Fichier absent chez nous (film ajouté sur Slate
+  // depuis la copie) : repli automatique sur Slate (événement « error »). Même code dans app.js, b/index.html et l'admin.
+  (function () {
+    var SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxil6rvamjf.cloudfront.net/";
+    var d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src");
+    Object.defineProperty(HTMLMediaElement.prototype, "src", { configurable: true, enumerable: d.enumerable, get: d.get,
+      set: function (u) { delete this.dataset.repliSlate; d.set.call(this, typeof u === "string" && u.indexOf(SLATE) === 0 ? NOUS + u.slice(SLATE.length) : u); } });
+    document.addEventListener("error", function (ev) {
+      var v = ev.target, u = v instanceof HTMLMediaElement && v.getAttribute("src");
+      if (!u || u.indexOf(NOUS) !== 0 || v.dataset.repliSlate) return;
+      v.dataset.repliSlate = "1"; d.set.call(v, SLATE + u.slice(NOUS.length));
+    }, true);
+  })();
   // Adresses des pages : ROOT + <slug>/ (+ <catégorie> + /feed), comme sur kinou.fr, pour que les aperçus de lien (WhatsApp,
   // iMessage…) puissent montrer le chef op : un robot GitHub (tools/share-pages.mjs) fabrique <slug>/index.html avec son nom et
   // sa photo, qui renvoie ici avec #<slug>. Les anciennes adresses en « #<slug> » marchent toujours (puis sont réécrites).
