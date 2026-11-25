@@ -18,6 +18,7 @@
       var v = ev.target, u = v instanceof HTMLMediaElement && v.getAttribute("src");
       if (!u || u.indexOf(NOUS) !== 0 || v.dataset.repliSlate) return;
       if (++replis >= 2 && !ok) panne = true;
+      ev.stopImmediatePropagation(); // l'échec chez nous ne compte pas comme une erreur de la vidéo (ex. accueil : pas de passage à l'extrait)
       v.dataset.repliSlate = "1"; d.set.call(v, SLATE + u.slice(NOUS.length));
       if (v.autoplay || v.veutJouer) { var p = jouer.call(v); if (p && p.catch) p.catch(function () {}); }
     }, true);
