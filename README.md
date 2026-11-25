@@ -24,7 +24,7 @@ Site statique Kinou
 - **Onglet ouvert par défaut** quand `#featured` n'est pas le premier showreel du bundle : aujourd'hui
   FEATURED reste ouvert par défaut ; à décider.
 - **Photos de survol de la liste** (`images/<slug>.jpg`) : aujourd'hui fonds colorés provisoires.
-- **Les ~73 autres DPs** à ajouter (un bundle Slate chacun, selon la convention du CLAUDE.md).
+- **Les ~73 autres DPs** à ajouter (un bundle Slate chacun, selon la convention de docs/donnees.md).
 - **Lara Perrotte Boucard** : brancher la synchronisation Slate quand son bundle suit la convention
   (`#featured`, `#narrative`, `#commercial` à créer, `#music video`, `#fashion`, `#comedy`) et reprendre
   en corrections les titres retouchés (ex. « Stings - Energy Drink », « Louis Vuitton - FLIGHT MODE… »).

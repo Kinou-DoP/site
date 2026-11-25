@@ -3,121 +3,25 @@
 Site de kinou, agence parisienne de chefs opérateurs (~70 chefs op). HTML / CSS / JS vanilla, **aucune dépendance**, données JSON
 lues dans le dépôt `Kinou-DoP/admin`. On parle à Gus en français, en le tutoyant, simplement (il n'est pas développeur).
 
-**À lire aussi** : `ARCHITECTURE.md` (carte du code et des trois dépôts, pour un développeur) ; `HISTORIQUE.md` (pourquoi les choses
-sont comme ça : demandes de Gus datées, essais, retours en arrière ; à consulter avant de changer un comportement) ; dans le dépôt
-privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etudes/remplacer-slate.md` (hébergement des vidéos).
-**À chaque changement** : mettre à jour ce fichier (le fonctionnement, sans historique), ajouter une ligne datée en bas de
-`HISTORIQUE.md`, et `ARCHITECTURE.md` si la structure change.
+## Notes par tâche (ne lire que celle de ta tâche, et seulement le passage utile)
+- `docs/hebergement.md` : GitHub Pages / Cloudflare, fonctions `functions/`, Slate, vidéos et vignettes chez Amazon, envoi des
+  vidéos (`/api/depot`), préchargement des extraits, mise en production.
+- `docs/donnees.md` : format des JSON (fiches, `overrides`, accueil, spotlight, fiction, contact, bandes, `edits.json`).
+- `docs/pages.md` : adresses, accueil, liste, page d'un chef op, lecteur, spotlight, fiction, contact, bandes `b/`, version live.
+- `ARCHITECTURE.md` : carte du code (`app.js` dans l'ordre) et des trois dépôts. `HISTORIQUE.md` : pourquoi c'est comme ça (avant
+  de changer un comportement, chercher le mot-clé dedans plutôt que tout lire).
+- **À chaque changement** : la note de tâche concernée (le fonctionnement), une ligne datée en bas de `HISTORIQUE.md`,
+  `ARCHITECTURE.md` si la structure change ; ce fichier seulement si une règle générale change.
 
-## Hébergement, branches, mise en ligne
-- On travaille sur **`beta`** (dans une nouvelle session : `git checkout beta` avant tout). `main` = production kinou.fr : **jamais
-  de fusion `beta` → `main` sans validation explicite de Gus**.
-- La beta est en ligne ~1 min après un push sur **GitHub Pages** (https://kinou-dop.github.io/site/) et sur **Cloudflare Pages**
-  (https://kinou-4tv.pages.dev/, projet « kinou » de Gus, branche de production `beta`, sans construction).
-- **Netlify est bloqué** (crédits épuisés depuis le 21/10/2026, fonctions en 503 depuis le 30/10) : `netlify/functions/` n'est plus
-  en ligne ; `netlify/functions/slate.mjs` reste la **bibliothèque de lecture de Slate** utilisée par les fonctions Cloudflare.
-- **Fonctions Cloudflare** (`functions/`) : `/api/data/<chemin>` (fichier du dernier commit de `main` de l'admin, visible en ~10 s),
-  `/api/bundle/<id>`, `/api/stills`, `/api/reel` (lecture de Slate pour l'admin), `/api/refresh/<slug>` (vérifie la clé, rien à vider).
-  Gratuit : 100 000 appels / jour, 10 ms de calcul par appel (un gros bundle peut échouer : l'admin passe alors par son robot).
-- Le site lit ses JSON par `/api/data` sur `*.pages.dev` (`JSON_BASE`, `ON_CF`), sinon sur raw.githubusercontent.com (`DATA_BASE`,
-  cache 5 min). Images et CV : toujours sur raw.
-- **Slate** héberge les vidéos (CloudFront `d1ko11x0ybxl0h`) et les images (`images.slatecdn.net`, URLs signées). Depuis le 17/11
-  Slate refuse les demandes sans User-Agent (`UA` dans `slate.mjs`). Si `images.slatecdn.net` tombe, `slateRaw` / `loadImg` chargent
-  l'original sur S3 (adresse en base64 dans l'URL signée). Étude en cours pour remplacer Slate : dépôt notes.
-- **À faire pour la mise en production** : brancher kinou.fr sur Cloudflare (DNS chez OVH), vignettes réduites (`IMG_CDN` / `thumb()`
-  vers le redimensionnement de Cloudflare), `SITE_URL` de `tools/share-pages.mjs`, mentions légales (hébergeur), puis validation
-  de Gus et fusion dans `main`.
-- **Vidéos depuis Amazon** (25/11) : tous les fichiers de Slate sont copiés sur notre CloudFront `d3toxii6rvamjf.cloudfront.net`
-  (même chemin que `d1ko11x0ybxl0h`). `app.js` et `b/index.html` (et l'admin) changent l'adresse au moment de jouer (setter `src`
-  des `<video>`), repli automatique sur Slate si le fichier manque. Les données gardent l'adresse Slate.
-- **Vignettes chez nous** (26/11) : le robot « Vignettes réduites » de l'admin (`tools/vignettes.mjs`) fait de chaque image copiée de
-  Slate une version WebP de 800 et de 1600 px (`thumbs/<chemin>-<largeur>.webp` sur notre CloudFront) ; `thumb()` retrouve le chemin
-  dans l'adresse signée de Slate (`slateRaw`, `ourThumb`) et prend la nôtre ; absente : celle de Slate (`ORIG`, `loadImg`), puis S3.
-- **Envoi des vidéos depuis l'admin** (`functions/api/depot.js`, 26/11) : signe les adresses d'envoi en morceaux (S3 multipart :
-  `start`, `parts`, `list`, `complete`) vers `kinou-videos/depot/` ; clé Amazon de dépôt seulement (`DEPOT_KEY_ID` / `DEPOT_KEY_SECRET`,
-  secrets Cloudflare rangés par Gus) ; réservé aux clés GitHub qui peuvent écrire dans admin. Le robot d'encodage de l'admin range
-  ses fichiers sous `nous/<id>/` (version web, vignettes, extraits 720p) ; `/api/media` les accepte ; bandes : extrait léger `snip.v`.
-- **Extraits préchargés en fond** (`precharger`, 25/11) : chaque onglet (chef op, spotlight, fiction) télécharge tous ses extraits dans
-  l'ordre, 2 à la fois, en priorité basse (`fetch` no-cors → cache du navigateur) ; liste des chefs op : extraits des 3 noms au-dessus et
-  en dessous du nom survolé ; accueil : les 2 projets suivants. Rien si « économiseur de données ».
-- À chaque modification de `main.css` ou `app.js` : mettre à jour le numéro `?v=` dans `index.html` (date-heure), sinon les
-  navigateurs gardent l'ancienne version. Tester en local : `python3 -m http.server` puis http://localhost:8000 (pas en `file://`),
-  dans un navigateur, sur ordinateur **et** téléphone (Playwright est installé).
-
-## Données (dépôt admin, `data/` sur `main`, modifiées par l'admin, jamais à la main ici)
-- `dps/index.json` : `{ dps: [{ slug, name, img?, hidden?, gender? }] }` (ordre de la liste ; `hidden` = page cachée : absente de la
-  liste et de la roulette, nom sans lien, mais **son adresse ouvre la page** (« Voir sur le site » de l'admin ; lien invisible `li.off`) ; `gender` sert seulement à l'admin).
-- `dps/<slug>.json` : `{ slug, name, hue, categories, clips, bundle?, open?, overrides?, showcase?, about, template? }`.
-  Clip : `{ title, sub ("Réal\nProd[\nco-DoP Nom]"), video (extrait 10 s sans son), full (film complet 1080p), img (vignette signée),
-  cat, featured, featuredOrder, slate (id Slate), stills? }`. Un même film peut être dans plusieurs catégories (une entrée chacune).
-- `overrides[<id Slate>]` (corrections de l'admin, appliquées par-dessus le clip, toutes les clés sont copiées) : `title`, `sub`,
-  `hidden`, `zoom` / `zoomPos` / `zoomThumb` (recadrage de l'extrait, jamais dans le lecteur), `phoneX` (cadrage téléphone),
-  `extras` (sous le film dans le lecteur : `[{ link, title, stills }]` ou `[{ link, title, full, video, img, cols?: { d, m } }]`),
-  `stills` + `stillsLink` (ancien format), `images` + `ratios` (projet en images seulement, écrits par le robot de l'admin),
-  `types` (types de contenu Slate, robot), `hover` (`{ link, title, video, img? }` : extrait au survol d'un projet en images),
-  `info` (`{ year, episodes, runtime, ratio, platforms, camera, lenses, starring, awards, synopsis, synopsisEn }` ; `awardsFrom`,
-  `awardsHidden`, `auto`, `autoSrc` ne servent qu'à l'admin).
-- `about` : `{ bio, bioEn, cv, instagram, website, links: [{ label, url }], img, pos, zoom, color, og }` (portrait en noir et blanc
-  sauf `color`).
-- `home.json` : `{ duration, reel, overrides, slides: [{ slate, film, song, legend, video, full, img, dps: [{ name, slug }], start?,
-  phoneX?, zoom?, zoomPos?, extras? }] }` (`start` + `full` = « extrait HD » : le film complet lu de `start` pendant `duration`).
-- `spotlight.json` : `{ reel, categories, overrides, films, readAt }` ; `fiction.json` : `{ reel, overrides, films, readAt }` avec, par
-  film, `status` (new | soon | past), `genre`, `date`, `platforms`, `poster`, `thumbCrop` / `snipCrop` (cadrage cinémascope).
-  `films` (`slate, title, sub, video, full, img, cats, artists, images?, ratios?`) écrits par le robot de l'admin.
-- `contact.json` : `{ team, address, newsletter, newsletterLabel, social, legal }` ; `site.json` : `{ logo, logoHeight }`.
-- `bandes/<code>.json` : bandes envoyées aux producteurs (voir plus bas).
-- Convention des bundles Slate d'un chef op : un showreel `#featured` (ordre du FEATURED) puis un showreel par catégorie (`#music video`
-  → onglet MUSIC VIDEO) ; ordre des showreels = ordre des onglets. Plusieurs chefs op sur un film : page de celui qui a le plus de
-  films, les autres en « co-DoP Nom ».
-
-## Pages et comportements
-- **Adresses** : `<racine>/<slug>/[<catégorie>][/feed]`, `spotlight/…`, `fiction/…`, `contact/`, liste des chefs op = `cinematographers/`
-  (`LIST`), film ouvert = `<slug>/<onglet>/<titre>` (`pageURL`, `filmURL`, `route`). Tous les liens internes ont leur vraie adresse :
-  **Ctrl / Cmd / Maj + clic ou clic molette** = nouvel onglet (`newTab` : le clic n'est pas intercepté ; sur un film : `filmTab`). Les dossiers `<slug>/index.html` sont des **pages d'aperçu de lien** (Open Graph) fabriquées par
-  `tools/share-pages.mjs` (workflow `share-pages.yml` à chaque push sur `beta`) et par l'admin (`sharePage`, contenu identique) :
-  ne pas les modifier à la main. `404.html` renvoie les autres adresses vers `<racine>/#<chemin>`.
-- **Accueil** : slideshow des 10 films de la bande de l'accueil (arrivée sur un film au hasard), un lien par chef op crédité ; clic =
-  le film **complet avec le son** dans le lecteur (infos, prix, stills repris de la fiche / fiction / spotlight du même film).
-- **Liste des chefs op** : nom survolé en blanc gras + extrait du 1er film FEATURED en fond ; téléphone en portrait : **roulette**.
-- **Page d'un chef op** : nom qui glisse depuis la liste, onglets en cascade, grille 3 colonnes 16:9 ou colonne (`/feed`) ; survol =
-  extrait + fond flouté ; sur ordinateur le 1er film est déjà « survolé » à l'arrivée. Téléphone : toujours en colonne, le film au
-  repère joue, perspective « roulette », onglets qui défilent en boucle s'ils dépassent. Onglet ABOUT (bio FR / EN, portrait).
-  Onglet en **présentation vidéo + stills** si la fiche le demande (`showcase`, `renderShow`). Onglet de **photos** (tous les projets
-  en images seulement) : colonnes à la forme de chaque photo (`renderPhotos`).
-- **Lecteur** (`openPlayer`) : verre dépoli, film complet, titre et crédits, types (Narrative : types Slate), **infos du film**
-  (`fillInfo` : année | épisodes · durée | format | plateformes, STARRING, CAMERA / LENSES, synopsis FR / EN) et **prix** groupés
-  par festival (ordinateur : à droite, remontés à la hauteur des crédits ; téléphone / tablette : une colonne), puis `extras` (galeries,
-  vidéos en 1 à 3 colonnes). Flèches ‹ › en bas, clavier, Échap ; le bouton retour du téléphone ferme d'abord le lecteur.
-- **Spotlight** : page de films de plusieurs chefs op, onglet ALL puis catégories (types de contenu Slate), « DoP Nom » cliquable,
-  extraits toujours en boucle. **Fiction** : NEW RELEASES (9 au plus, les plus anciens passent seuls en PAST), COMING SOON (passe seul
-  en New release le jour de la sortie dès 9 h, heure de Paris), PAST RELEASES + genres, onglets FEATURE FILMS / SHORT FILMS
-  (seulement par adresse) ; vignettes en cinémascope 2,39 (fin de `main.css`), affiche à
-  gauche du film dans le lecteur.
-- **Contact** : présentation « générique de fin », mentions légales dépliables, fond = film de l'accueil.
-- **Bandes envoyées aux producteurs** (`b/index.html`, page indépendante, `noindex`) : adresse **`b/<code>`** (réécrite par `_redirects`
-  sur Cloudflare ; `404.html` renvoie vers `b/?<code>` sur GitHub Pages). Lit `data/b/<empreinte>.json` **chiffré** (même calcul que
-  `bandSeal` de l'admin : PBKDF2-SHA256 du code → nom du fichier + clé AES-GCM ; mot de passe → clé tirée de code + mot de passe, un
-  mauvais mot de passe ne déchiffre rien) ; anciennes bandes en clair `data/bandes/<code>.json`. Mise en page des pages de chef op :
-  nom(s) en grand à droite sur une seule ligne (plus petits s'ils dépassent ; liens vers leur page), liste des sections à gauche
-  seulement s'il y a des sections (sinon toute la largeur), sections séparées par un trait et de l'espace (même une section sans nom), grille 1 à 3 colonnes (flex : **dernière ligne incomplète centrée** ; 2 colonnes ≤ 1240px, 1 colonne ≤ 1040px), mise en page **« Plein écran en haut »** (`layout: "bleed"`, `bleed()` : 1er film en grand **sous tout le haut de page, en-tête et nom compris** (`.bleed.top`, 74vh, 68vh sur téléphone, pour voir la grille dessous), extrait qui joue (recadré par `crop` comme les vignettes), en pause au survol d'un autre film ou dans le lecteur, titre + Director / Cinematographer / Production, flèches pour changer de film, clic = lecteur ; aussi dans un onglet de bundle), voile lumineux et fond flouté au survol ; **téléphone** = comme les pages de chef op (`pickFocus`, repris d'app.js) : le film au repère (40 % de la hauteur, 1er film en haut, dernier en bas) joue son extrait avec le fond flouté, perspective (−13 % au plus loin), le grand film du haut joue tant qu'il est au repère,
-  recadrage `crop` (extrait toujours, vignette si `t`), extrait choisi `snip` (film complet à partir de `s`) ou mp4 importé `snipVideo` (lu par `/api/media`), crédits « DoP » (cinematographer) puis les autres rôles (`roles`, ex. « Camera operator Nom »), lecteur **repris du site** (verre dépoli `#pglass`, clic dans le vide = fermer, flèches ‹ ›, Échap) avec crédits (cachables), types,
-  prix groupés par festival (`awards`), stills (images chargées et affichées dans l'ordre, `orderedLoad`, agrandissement `.plight`) et
-  vidéos dessous (`extras`), « See more projects ». Téléchargement si permis : « Download » en haut à droite du lecteur,
-  direct par `/api/media?u=…&dl=<titre>` (sans ouvrir d'onglet) ; « Download all » après le nom de la bande = **un fichier zip**
-  (`zipAll` : sans compression, ZIP64 au-delà de 4 Go ; Chrome / Edge l'écrivent directement sur le disque, les autres en mémoire
-  jusqu'à 1,5 Go, sinon un fichier après l'autre). Expiration : message « plus disponible ». **Bundle** (`bundle: true`) : chaque bande lue avec son propre code, une par onglet à gauche (`showBundle`, `fillMain`, adresse `#<n>` = onglet), noms des chefs op de toutes les bandes, mot de passe demandé dans l'onglet d'une bande protégée. **Film partagé seul** (`single: true`, admin) : le lecteur au centre de la page (`#player.single`, sans croix ni fond flouté), « Download » si permis.
-- **`/api/media?u=<vidéo CloudFront Slate>[&dl=nom]`** (`functions/api/media.js`) : depuis le 25/11, lit d'abord la copie sur **notre CloudFront Amazon** (`d3toxii6rvamjf`, même chemin), Slate si absente ; relais limité à ces deux CloudFront et aux mp4 de `data/bibli/vid/` du dépôt admin (servis en video/mp4), avec CORS
-  (capture d'une image pour les vignettes des bandes dans l'admin) ou en téléchargement direct.
-- **Test de l'hébergement vidéo** (`test-video/`, `noindex`, étude « remplacer Slate ») : le même film lu depuis Slate puis depuis notre
-  adresse (champ « Notre adresse » ou `?sema=<url>&napoli=<url>`), l'un après l'autre : démarrage, sauts milieu / fin, coupures et
-  avance en mémoire sur 30 s, résumé à copier.
-- **Le video club sert partout** (Gus 26/11) : au chargement, `app.js` lit `data/bibli/edits.json` (retouches de la fenêtre d'un film
-  du video club de l'admin, clé `s<id Slate>`, `VC_P`) ; `vcApply` les applique par-dessus les `overrides` de chaque film des fiches,
-  spotlight et fiction : `img` (vignette), `title`, `full`, extrait = `snipVideo` (par `/api/media`) sinon `snip.v` (extrait léger, s'il vient
-  du film affiché : `vf`) sinon `video` ; `extras` (stills et vidéos dessous, remplace `stills`) ; crédits refaits si `dir` / `prod` / `dops` /
-  `roles` changent (« co-DoP Nom », « DoP Nom » si le chef op de la page a un rôle, puis « Rôle Nom » ; spotlight / fiction : `dps`).
-  Accueil : vignette, titre (`film`), film complet. Fichier absent : le site sans retouches. Le recadrage (`crop`) reste celui des pages.
-- **Version live** (`live/` → `?live`) : vignettes qui jouent leur extrait en boucle ; toujours le cas sur téléphone (`liveOn`).
+## L'essentiel
+- On travaille sur **`beta`** (`git checkout beta` avant tout). `main` = production kinou.fr (encore l'ancien site Squarespace) :
+  **jamais de fusion `beta` → `main` sans validation explicite de Gus**.
+- Beta en ligne ~1 min après un push : https://kinou-dop.github.io/site/ et https://kinou-4tv.pages.dev/ (fonctions Cloudflare).
+  Netlify n'est plus utilisé (bloqué) ; `netlify/functions/slate.mjs` reste la bibliothèque de lecture de Slate.
+- À chaque modification de `main.css` ou `app.js` : mettre à jour `?v=` dans `index.html` (date-heure).
+- `app.js` (~140 Ko) et `main.css` : **ne jamais les lire en entier** : chercher (grep) puis lire le passage.
+- Tester : `python3 -m http.server` puis http://localhost:8000, ordinateur **et** téléphone (Playwright installé ; captures
+  seulement pour un vrai contrôle visuel).
 
 ## Règles visuelles — à respecter absolument
 1. Pas de framework CSS ; tokens globaux en variables `--kinou-*` (`--kinou-bg`, `--kinou-fg`, `--kinou-body`, `--kinou-sans`,

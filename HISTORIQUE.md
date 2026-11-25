@@ -560,3 +560,5 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 26/11/2026 — Encodage du video club (Gus) : fonction `/api/depot` (envoi des vidéos de l'ordinateur chez Amazon, clé de dépôt dans Cloudflare) ; bandes : extrait léger `snip.v` (720p sans son, fait par le robot) joué en boucle à la place du film complet ; `/api/media` accepte `nous/`.
 - 26/11/2026 — Bandes : pas de repli vers Slate pour nos vidéos encodées (`nous/`).
 - 26/11/2026 — Le video club sert partout (Gus) : `app.js` lit `data/bibli/edits.json` (`VC_P`, `vcApply`) et applique les retouches de la fenêtre d'un film du video club (vignette, extrait léger `snip.v` ou mp4 `snipVideo`, film, titre, crédits avec rôles, stills / vidéos dessous) aux fiches, spotlight, fiction ; accueil : vignette, titre, film. Avant, seulement dans les bandes (ex. vignettes de Thomas Brémond absentes de sa page).
+- 26/11 (chef d'orchestre) : CLAUDE.md allégé pour économiser l'abonnement Claude (relu à chaque message) : le détail est déplacé
+  tel quel dans des notes par sujet `docs/` (à lire seulement pour la tâche concernée) ; CLAUDE.md garde l'essentiel et les règles.
