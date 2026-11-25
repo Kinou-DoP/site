@@ -626,9 +626,10 @@
     }
     // Charge une image (de secours si besoin) puis cb(adresse qui a marché, ou celle de départ si aucune).
     function loadImg(u, cb) {
-      var im = new Image(), raw = "";
+      var im = new Image(), raw = "", o = ORIG[u];
       im.onload = function () { cb(im.src); };
-      im.onerror = function () { if (!raw && (raw = slateRaw(u))) im.src = raw; else cb(u); };
+      // Notre vignette absente (film ajouté depuis) : celle de Slate, puis l'original sur S3.
+      im.onerror = function () { if (o) { im.src = o; u = o; o = null; return; } if (!raw && (raw = slateRaw(u))) im.src = raw; else cb(u); };
       im.src = u;
     }
     // Images affichées (<img>) : même secours, pour toutes (lecteur, photo en grand, catégorie de photos…).
@@ -636,7 +637,19 @@
       var im = e.target; if (!im || im.tagName !== "IMG" || im.dataset.raw) return;
       var raw = slateRaw(im.src); if (raw) { im.dataset.raw = "1"; im.src = raw; }
     }, true);
+    // Vignettes réduites chez nous (26/11) : le robot « Vignettes réduites » de l'admin fait, pour chaque image copiée de Slate, une
+    // version WebP de 800 et de 1600 px sous thumbs/<chemin de l'image>-<largeur>.webp sur notre CloudFront. Le chemin est lu dans
+    // l'adresse signée de Slate (slateRaw) ; ORIG garde l'adresse de Slate pour le secours (loadImg).
+    var THUMBS = "https://d3toxii6rvamjf.cloudfront.net/thumbs/", ORIG = {};
+    function ourThumb(u, w) {
+      var raw = slateRaw(u), path = ""; if (!raw) return "";
+      try { path = decodeURIComponent(new URL(raw).pathname); } catch (e) { return ""; }
+      var m = /(kinou\/production\/.+)\.[a-z0-9]+$/i.exec(path); if (!m) return "";
+      var t = THUMBS + m[1].split("/").map(encodeURIComponent).join("/") + "-" + (w > 800 ? 1600 : 800) + ".webp";
+      ORIG[t] = u; return t;
+    }
     function thumb(u, w) {
+      if (/^https:\/\/images\.slatecdn\.net\//.test(u)) { var t = ourThumb(u, w); if (t) return t; }
       return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=80&fm=webp" : u;
     }
     // Fiche JSON -> format interne du prototype (WORK, CATS_BY, ABOUT).

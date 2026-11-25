@@ -555,3 +555,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 24/11/2026 — Bandes : le grand film du « Plein écran en haut » reprend le recadrage de la page du chef op (bandes noires de « A Toute Allure »). Téléphone : même défilement que les pages de chef op (film au repère qui joue, fond flouté, perspective) (Gus).
 - 25/11 : vidéos du site et des bandes servies par notre CloudFront Amazon (`d3toxii6rvamjf`), repli sur Slate ; le repli ne déclenche plus le passage à l'extrait Slate sur l'accueil (passages hors timecodes vus par Gus pendant que l'adresse était fausse).
 - 25/11 : extraits préchargés en fond (pages : tous, du plus haut au plus bas ; liste : noms autour du survol ; accueil : 2 projets suivants), demande de Gus (survol plus rapide).
+- 26/11 : vignettes réduites chez nous (WebP 800 / 1600 px sur notre CloudFront), celles de Slate en secours (Gus : ne plus dépendre du service d'images de Slate).
