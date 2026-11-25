@@ -28,14 +28,18 @@
   // Préchargement des extraits en fond (Gus 25/11) : chaque page télécharge ses extraits dans l'ordre (le plus haut d'abord),
   // 2 à la fois, en priorité basse, dans le cache du navigateur : au survol, l'extrait démarre tout de suite (~0,02 s au lieu
   // de ~0,5 s). Une nouvelle page remplace la file ; un extrait déjà téléchargé ne l'est pas deux fois.
-  var pre = { file: [], faits: {}, actifs: 0 };
+  // Les vignettes d'abord (Gus 25/11 : vignettes très lentes) : la file attend que les images en cours (loadImg, pre.img) soient
+  // arrivées, 4 s au plus après le dernier ajout, pour ne pas leur prendre la connexion.
+  var pre = { file: [], faits: {}, actifs: 0, img: 0, t: 0, att: 0 };
   function precharger(urls, ajouter) {
     if (!ajouter) pre.file = [];
     if (navigator.connection && navigator.connection.saveData) return; // « économiseur de données » du téléphone : rien en fond
+    pre.t = Date.now();
     urls.forEach(function (u) { u = u && vidURL(u); if (u && !pre.faits[u] && pre.file.indexOf(u) < 0) pre.file.push(u); });
     preSuite();
   }
   function preSuite() {
+    if (pre.img > 0 && Date.now() - pre.t < 4000) { if (!pre.att) pre.att = setTimeout(function () { pre.att = 0; preSuite(); }, 150); return; }
     while (pre.actifs < 2 && pre.file.length) {
       var u = pre.file.shift(); if (pre.faits[u]) continue;
       pre.faits[u] = 1; pre.actifs++;
@@ -84,7 +88,7 @@
   // par-dessus les fiches, le spotlight, la fiction et l'accueil (vcApply). Fichier absent ou en erreur : le site sans retouches.
   var VC = {}, VC_P = getJSON("bibli/edits.json").then(function (x) { VC = (x && x.films) || {}; }, function () {});
   var FN = ON_CF ? location.origin : "https://kinou-4tv.pages.dev"; // fonctions du site (/api/media)
-  function vcOf(id) { return id ? VC["s" + id] || null : null; }
+  function vcOf(id) { return id ? VC[/^\d+$/.test(id) ? "s" + id : id] || null : null; } // id Slate, ou clé d'un import du video club (« i… », « e… »)
   // Extrait du video club : mp4 importé (relu par /api/media), sinon extrait léger 720p du robot (snip.v, s'il vient bien du film
   // affiché : vf), sinon l'extrait retouché (video). Un passage choisi sans extrait léger ne change rien (le site ne lit pas de passage).
   function vcSnip(e, full) {
@@ -640,10 +644,11 @@
     }
     // Charge une image (de secours si besoin) puis cb(adresse qui a marché, ou celle de départ si aucune).
     function loadImg(u, cb) {
-      var im = new Image(), raw = "", o = ORIG[u], u0 = u;
-      im.onload = function () { GOT[u0] = im.src; cb(im.src); };
+      var im = new Image(), raw = "", o = ORIG[u], u0 = u, fin = false;
+      pre.img++; var done = function (x) { if (!fin) { fin = true; pre.img--; } cb(x); };
+      im.onload = function () { GOT[u0] = im.src; done(im.src); };
       // Notre vignette absente (film ajouté depuis) : celle de Slate, puis l'original sur S3.
-      im.onerror = function () { if (o) { im.src = o; u = o; o = null; return; } if (!raw && (raw = slateRaw(u))) im.src = raw; else cb(u); };
+      im.onerror = function () { if (o) { im.src = o; u = o; o = null; return; } if (!raw && (raw = slateRaw(u))) im.src = raw; else done(u); };
       im.src = u;
     }
     // Images affichées (<img>) : même secours, pour toutes (lecteur, photo en grand, catégorie de photos…).
