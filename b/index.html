@@ -202,11 +202,19 @@
     var SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxil6rvamjf.cloudfront.net/";
     var d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src");
     Object.defineProperty(HTMLMediaElement.prototype, "src", { configurable: true, enumerable: d.enumerable, get: d.get,
-      set: function (u) { delete this.dataset.repliSlate; d.set.call(this, typeof u === "string" && u.indexOf(SLATE) === 0 ? NOUS + u.slice(SLATE.length) : u); } });
+      set: function (u) { delete this.dataset.repliSlate; d.set.call(this, typeof u === "string" && u.indexOf(SLATE) === 0 && !panne ? NOUS + u.slice(SLATE.length) : u); } });
+    // Lecture demandée (play) : relancée après le repli, sinon la vidéo restait arrêtée.
+    var jouer = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () { this.veutJouer = true; return jouer.apply(this, arguments); };
+    // Notre CloudFront ne répond pas du tout (2 replis, aucune vidéo lue chez nous) : Slate directement pour la suite de la visite.
+    var ok = false, replis = 0, panne = false;
+    document.addEventListener("loadeddata", function (ev) { var u = ev.target.getAttribute && ev.target.getAttribute("src"); if (u && u.indexOf(NOUS) === 0) ok = true; }, true);
     document.addEventListener("error", function (ev) {
       var v = ev.target, u = v instanceof HTMLMediaElement && v.getAttribute("src");
       if (!u || u.indexOf(NOUS) !== 0 || v.dataset.repliSlate) return;
+      if (++replis >= 2 && !ok) panne = true;
       v.dataset.repliSlate = "1"; d.set.call(v, SLATE + u.slice(NOUS.length));
+      if (v.autoplay || v.veutJouer) { var p = jouer.call(v); if (p && p.catch) p.catch(function () {}); }
     }, true);
   })();
 (function () {
