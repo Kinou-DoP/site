@@ -9,6 +9,9 @@
 //   parts    { key, uploadId, numbers: [n] }  → { urls: { n: url } } (adresses d'envoi des morceaux, valables 6 h)
 //   list     { key, uploadId }                → { parts: [{ n, etag, size }] } (reprise après une coupure)
 //   complete { key, uploadId, parts: [{ n, etag }] } → { key }
+//   img      { key: "depot/<dossier>/<nom>.webp|jpg|png" } → { url } (Gus 25/11 : stills, vignettes, images importées) : adresse
+//            d'envoi d'une image en une fois (PUT, 15 min, 20 Mo au plus côté admin) ; le dossier est tiré au hasard par l'admin, qui
+//            connaît ainsi tout de suite l'adresse définitive (notre CloudFront + key). Content-Type et Cache-Control envoyés par l'admin.
 import { ADMIN_REPO, json, preflight } from "../_shared.js";
 
 const BUCKET = "kinou-videos", REGION = "eu-north-1", HOST = BUCKET + ".s3." + REGION + ".amazonaws.com", MAX = 10 * 1024 ** 3;
@@ -64,6 +67,10 @@ export async function onRequest({ request, env }) {
       const key = "depot/" + rand(20) + "/" + safeName(b.name);
       const t = await s3(await presign("POST", key, { uploads: "" }), "POST");
       return json({ key, uploadId: tag(t, "UploadId") });
+    }
+    if (b.op === "img") {
+      if (!KEY.test(b.key || "") || !/\.(webp|jpe?g|png)$/i.test(b.key)) return json({ error: "image refusée" }, 400);
+      return json({ url: await presign("PUT", b.key, {}, 900) });
     }
     if (!KEY.test(b.key || "") || !b.uploadId) return json({ error: "envoi inconnu" }, 400);
     if (b.op === "parts") {

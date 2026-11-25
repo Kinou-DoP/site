@@ -246,7 +246,10 @@
   function open(f, raw) {
     return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]).then(function (key) {
       return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64u8(f.iv) }, key, b64u8(f.d));
-    }).then(function (d) { return JSON.parse(new TextDecoder().decode(d)); });
+    }).then(function (d) {
+      // Images du video club envoyées avant le 25/11 (dépôt GitHub, lent) : leur copie chez Amazon (robot « Images du video club »).
+      return JSON.parse(new TextDecoder().decode(d).split("https://raw.githubusercontent.com/Kinou-DoP/admin/main/data/bibli/img/").join("https://d3toxii6rvamjf.cloudfront.net/nous/bibli-img/"));
+    });
   }
   if (!code || !window.crypto || !crypto.subtle) { msg("Lien incomplet", "Vérifiez l'adresse reçue."); return; }
   var today = new Date().toISOString().slice(0, 10);

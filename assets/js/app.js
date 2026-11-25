@@ -39,12 +39,24 @@
     preSuite();
   }
   function preSuite() {
+    // Lecteur ouvert (film, stills dessous) : rien en fond, la connexion est pour lui ; les préchargements en cours sont arrêtés et
+    // remis en file (Gus 25/11 : stills lents) ; reprise à la fermeture du lecteur.
+    var pl = document.getElementById("player");
+    if (pl && pl.classList.contains("on")) {
+      Object.keys(pre.cours || {}).forEach(function (u) { pre.cours[u].abort(); });
+      if (!pre.att) pre.att = setTimeout(function () { pre.att = 0; preSuite(); }, 500); return;
+    }
     if (pre.img > 0 && Date.now() - pre.t < 4000) { if (!pre.att) pre.att = setTimeout(function () { pre.att = 0; preSuite(); }, 150); return; }
+    pre.cours = pre.cours || {};
     while (pre.actifs < 2 && pre.file.length) {
       var u = pre.file.shift(); if (pre.faits[u]) continue;
       pre.faits[u] = 1; pre.actifs++;
-      fetch(u, { mode: "no-cors", priority: "low" }).then(function (r) { return r.blob(); }).catch(function () {})
-        .then(function () { pre.actifs--; preSuite(); });
+      (function (u) {
+        var c = "AbortController" in window ? new AbortController() : null; if (c) pre.cours[u] = c;
+        fetch(u, { mode: "no-cors", priority: "low", signal: c ? c.signal : undefined }).then(function (r) { return r.blob(); })
+          .catch(function (e) { if (e && e.name === "AbortError") { delete pre.faits[u]; pre.file.unshift(u); } })
+          .then(function () { delete pre.cours[u]; pre.actifs--; preSuite(); });
+      })(u);
     }
   }
   // Adresses des pages : ROOT + <slug>/ (+ <catégorie> + /feed), comme sur kinou.fr, pour que les aperçus de lien (WhatsApp,
@@ -645,6 +657,7 @@
     // Charge une image (de secours si besoin) puis cb(adresse qui a marché, ou celle de départ si aucune).
     function loadImg(u, cb) {
       var im = new Image(), raw = "", o = ORIG[u], u0 = u, fin = false;
+      try { im.fetchPriority = "high"; } catch (e) {} // devant les vidéos (même serveur : notre CloudFront)
       pre.img++; var done = function (x) { if (!fin) { fin = true; pre.img--; } cb(x); };
       im.onload = function () { GOT[u0] = im.src; done(im.src); };
       // Notre vignette absente (film ajouté depuis) : celle de Slate, puis l'original sur S3.
@@ -654,6 +667,7 @@
     // Images affichées (<img>) : même secours, pour toutes (lecteur, photo en grand, catégorie de photos…).
     document.addEventListener("error", function (e) {
       var im = e.target; if (!im || im.tagName !== "IMG" || im.dataset.raw) return;
+      if (ORIG[im.src]) { im.dataset.raw = "1"; im.src = ORIG[im.src]; return; } // notre copie absente : l'adresse d'origine
       var raw = slateRaw(im.src); if (raw) { im.dataset.raw = "1"; im.src = raw; }
     }, true);
     // Vignettes réduites chez nous (26/11) : le robot « Vignettes réduites » de l'admin fait, pour chaque image copiée de Slate, une
@@ -667,7 +681,15 @@
       var t = THUMBS + m[1].split("/").map(encodeURIComponent).join("/") + "-" + (w > 800 ? 1600 : 800) + ".webp";
       ORIG[t] = u; return t;
     }
+    // Images du video club envoyées avant le 25/11 (data/bibli/img/ du dépôt admin, sur raw.githubusercontent : cache 5 min, lent) :
+    // copiées chez Amazon par le robot « Images du video club » sous nous/bibli-img/ ; ORIG garde l'adresse GitHub en secours.
+    var BIBLI_RAW = /^https:\/\/raw\.githubusercontent\.com\/Kinou-DoP\/admin\/main\/data\/bibli\/img\/(.+)$/;
+    function ourImg(u) {
+      var m = BIBLI_RAW.exec(u || ""); if (!m) return u;
+      var t = "https://d3toxii6rvamjf.cloudfront.net/nous/bibli-img/" + m[1]; ORIG[t] = u; return t;
+    }
     function thumb(u, w) {
+      if (BIBLI_RAW.test(u || "")) return ourImg(u);
       if (/^https:\/\/images\.slatecdn\.net\//.test(u)) { var t = ourThumb(u, w); if (t) return t; }
       return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=80&fm=webp" : u;
     }
@@ -900,14 +922,14 @@
       if (src) {
         var v = document.createElement("video");
         v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = "auto";
-        if (p.img) v.poster = p.img;
+        if (p.img) v.poster = ourImg(p.img);
         v.src = src; pstage.appendChild(v);
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
       } else if (solo) {
         var im1 = document.createElement("img"); im1.src = solo; im1.alt = p.title; im1.className = "pbig"; pstage.appendChild(im1);
         im1.addEventListener("click", function () { showStill(0); });
       } else if (p.img) {
-        var im = document.createElement("img"); im.src = p.img; im.alt = p.title; pstage.appendChild(im);
+        var im = document.createElement("img"); im.src = thumb(p.img, FW); im.alt = p.title; pstage.appendChild(im); // notre version réduite (1600), l'originale en secours
         // Image d'une présentation « vidéo + stills » : clic = en plein écran (flèches : toute la galerie).
         if (p._big !== undefined) { im.className = "pbig"; im.addEventListener("click", function () { showStill(p._big); }); }
       }
@@ -932,7 +954,7 @@
       fillInfo(p);
       buildStills(p, src, solo);
       player.scrollTop = 0;
-      player.classList.add("on"); pglass.classList.add("on");
+      player.classList.add("on"); pglass.classList.add("on"); preSuite(); // préchargements en fond arrêtés (reprise à la fermeture)
     }
     // Infos d'un film (admin, overrides[<id>].info, Gus 04/11), sous les crédits : « 2025 | 90 min | 1.85 | Netflix » et
     // caméra / optiques à gauche, prix & sélections à droite (en blanc), synopsis dessous (en gris). Rien si aucune info.
@@ -1077,7 +1099,7 @@
         if (x.title) { var t = document.createElement("h3"); t.className = "ptitle"; t.textContent = x.title; w.appendChild(t); }
         var v = document.createElement("video");
         v.controls = true; v.playsInline = true; v.preload = "metadata";
-        if (x.img) v.poster = x.img;
+        if (x.img) v.poster = ourImg(x.img);
         v.src = x.full || x.video; w.appendChild(v); (row || pgal).appendChild(w);
         if (seen) seen.observe(w); else reveal(w);
       });
@@ -1107,7 +1129,7 @@
     function showStill(i) {
       var n = stillsP.stills.length; i = (i + n) % n;
       plimg.textContent = "";
-      var im = document.createElement("img"); im.src = stillsP.stills[i]; im.alt = stillsP.title; plimg.appendChild(im);
+      var im = document.createElement("img"); im.src = ourImg(stillsP.stills[i]); im.alt = stillsP.title; plimg.appendChild(im);
       if (!plight.classList.contains("on")) pushStep();
       plight.classList.toggle("multi", n > 1);
       stillsIdx = i; plight.classList.add("on");

@@ -35,3 +35,10 @@ Note de tâche : à lire seulement quand la tâche touche ce sujet. Règles gén
 - À chaque modification de `main.css` ou `app.js` : mettre à jour le numéro `?v=` dans `index.html` (date-heure), sinon les
   navigateurs gardent l'ancienne version. Tester en local : `python3 -m http.server` puis http://localhost:8000 (pas en `file://`),
   dans un navigateur, sur ordinateur **et** téléphone (Playwright est installé).
+- **Images du video club chez Amazon** (Gus 25/11) : stills, vignettes importées ou capturées, suites d'images partent de l'admin
+  directement dans `kinou-videos/depot/<dossier>/<nom>.webp` (`/api/depot` op `img` : adresse d'envoi signée, 15 min ; WebP, cache 1 an),
+  servies par notre CloudFront. Les anciennes (`data/bibli/img/` du dépôt admin) sont copiées sous `nous/bibli-img/` par le robot
+  « Images du video club » (admin, `main`) ; `app.js` (`ourImg`, `thumb`) et `b/index.html` prennent la copie, GitHub en secours (site).
+- **Lecteur ouvert** : préchargements d'extraits arrêtés (repris à la fermeture) ; images en priorité haute (`fetchPriority`), devant
+  les vidéos qui passent par le même CloudFront.
+
