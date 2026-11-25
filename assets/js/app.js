@@ -676,11 +676,13 @@
     // puis « co-DoP Nom » (fiche d'un chef op) ou « DoP Nom » (si le chef op de la page a un autre rôle), puis « Rôle Nom »
     // (ex. Camera operator) ; spotlight / fiction : chefs op sans rôle dans « DoP Nom » (liens), autres rôles dans les crédits.
     function vcApply(p, e, d) {
-      if (e.title) p.title = e.title;
+      // Titre : propre à chaque page (Gus 25/11 : tout passe par le video club « sauf les noms des films ») ; le titre du video club ne vaut que pour les bandes.
       if (e.img) p.img = e.img;
       if (typeof e.full === "string" && e.full) p.full = e.full;
       var sn = vcSnip(e, p.full); if (sn) p.video = sn;
       if (e.extras !== undefined) { p.extras = e.extras || []; delete p.stills; delete p.stillsLink; } // stills et vidéos sous le film
+      // Recadrage du video club (Gus 25/11 : une seule source pour fiches et video club) : { z, x, y, t } ; null = aucun.
+      if (e.crop !== undefined) { if (e.crop && +e.crop.z > 1) { p.zoom = +e.crop.z; p.zoomPos = (+e.crop.x || 0) + "% " + (+e.crop.y || 0) + "%"; p.zoomThumb = !!e.crop.t; } else { delete p.zoom; delete p.zoomPos; delete p.zoomThumb; } }
       if (!["dir", "prod", "dops", "roles"].some(function (k) { return e[k] !== undefined; })) return;
       var DOP = /^(?:co-)?dop\.?\s+/i, isDop = function (x) { return DOP.test(x); }; // « co-DoP Nom », « DoP Nom », « dop. Nom »
       var l = String(p.sub || "").split("\n").map(function (x) { return x.trim(); });
@@ -2024,7 +2026,7 @@
 
   Promise.all([getJSON("home.json"), getJSON("dps/index.json"), VC_P]).then(function (r) {
     // Video club : vignette, titre et film complet retouchés (l'accueil garde sa vidéo, pas d'extrait).
-    r[0].slides.forEach(function (p) { var e = vcOf(p.slate); if (!e) return; if (e.img) p.img = e.img; if (e.title) p.film = e.title; if (typeof e.full === "string" && e.full) p.full = e.full; });
+    r[0].slides.forEach(function (p) { var e = vcOf(p.slate); if (!e) return; if (e.img) p.img = e.img; if (typeof e.full === "string" && e.full) p.full = e.full; });
     // Ancien format : { dp, slug } ; nouveau (admin, bande Slate) : dps: [{ name, slug }].
     // Pages cachées dans l'admin (« En ligne sur le site » décoché, `hidden` dans index.json ; Gus 10/11) : ni dans la liste, ni
     // liées (leur nom reste écrit sur l'accueil et sous les films, sans lien) ; leur adresse ouvre quand même la page (Gus 24/11).

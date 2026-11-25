@@ -43,6 +43,7 @@ Note de tâche : à lire seulement quand la tâche touche ce sujet. Règles gén
   adresse (champ « Notre adresse » ou `?sema=<url>&napoli=<url>`), l'un après l'autre : démarrage, sauts milieu / fin, coupures et
   avance en mémoire sur 30 s, résumé à copier.
 - **Le video club sert partout** (Gus 26/11) : au chargement, `app.js` lit `data/bibli/edits.json` (retouches de la fenêtre d'un film
+- **Une seule source** (Gus 25/11) : vignette, extrait, recadrage (`crop { z, x, y, t }` → `zoom`, `zoomPos`, `zoomThumb` ; `null` = aucun), stills et crédits viennent du video club (`edits.json`), par-dessus les pages ; **le titre reste celui de chaque page** (le titre du video club ne vaut que pour les bandes). `vcOf` accepte aussi la clé d'un import du video club (« i… », « e… ») placé dans une page.
   du video club de l'admin, clé `s<id Slate>`, `VC_P`) ; `vcApply` les applique par-dessus les `overrides` de chaque film des fiches,
   spotlight et fiction : `img` (vignette), `title`, `full`, extrait = `snipVideo` (par `/api/media`) sinon `snip.v` (extrait léger, s'il vient
   du film affiché : `vf`) sinon `video` ; `extras` (stills et vidéos dessous, remplace `stills`) ; crédits refaits si `dir` / `prod` / `dops` /

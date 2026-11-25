@@ -563,3 +563,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 26/11 (chef d'orchestre) : CLAUDE.md allégé pour économiser l'abonnement Claude (relu à chaque message) : le détail est déplacé
   tel quel dans des notes par sujet `docs/` (à lire seulement pour la tâche concernée) ; CLAUDE.md garde l'essentiel et les règles.
 - 25/11/2026 — Vignettes d'abord : les extraits ne se préchargent qu'une fois les vignettes visibles arrivées (`pre.img`, 4 s au plus) ; `vcOf` accepte la clé d'un import du video club (« i… », « e… ») placé dans une page.
+- 25/11/2026 — Une seule source (Gus) : recadrage du video club appliqué au site ; titre du video club plus appliqué aux pages (chacune garde le sien).
