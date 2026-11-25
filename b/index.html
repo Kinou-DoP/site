@@ -199,7 +199,7 @@
   // seul le début de l'adresse change ; les données gardent l'adresse Slate. Fichier absent chez nous (film ajouté sur Slate
   // depuis la copie) : repli automatique sur Slate (événement « error »). Même code dans app.js, b/index.html et l'admin.
   (function () {
-    var SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxil6rvamjf.cloudfront.net/";
+    var SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxii6rvamjf.cloudfront.net/";
     var d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src");
     Object.defineProperty(HTMLMediaElement.prototype, "src", { configurable: true, enumerable: d.enumerable, get: d.get,
       set: function (u) { delete this.dataset.repliSlate; d.set.call(this, typeof u === "string" && u.indexOf(SLATE) === 0 && !panne ? NOUS + u.slice(SLATE.length) : u); } });

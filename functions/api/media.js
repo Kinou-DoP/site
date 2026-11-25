@@ -4,8 +4,8 @@
 // Seules les vidéos de notre CloudFront Slate sont acceptées (pas un relais ouvert). Les demandes partielles (Range) sont transmises.
 // Depuis le 25/11, tous les fichiers de Slate sont copiés sur NOTRE CloudFront (Amazon), au même chemin : la vidéo est lue chez
 // nous d'abord, chez Slate seulement si elle n'y est pas (film ajouté sur Slate depuis la copie). Notre adresse est acceptée aussi.
-const OK = /^https:\/\/(d1ko11x0ybxl0h|d3toxil6rvamjf)\.cloudfront\.net\/kinou\/production\/[\w\/.%-]+\.(mp4|mov|m4v)$/i;
-const SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxil6rvamjf.cloudfront.net/";
+const OK = /^https:\/\/(d1ko11x0ybxl0h|d3toxii6rvamjf)\.cloudfront\.net\/kinou\/production\/[\w\/.%-]+\.(mp4|mov|m4v)$/i;
+const SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxii6rvamjf.cloudfront.net/";
 // Extraits importés dans la bibliothèque de l'admin (mp4 déposés dans le dépôt admin) : raw.githubusercontent les sert sans le bon
 // type de fichier ; relus ici en video/mp4 pour que tous les navigateurs les jouent.
 const OWN = /^https:\/\/raw\.githubusercontent\.com\/Kinou-DoP\/admin\/main\/data\/bibli\/vid\/[\w-]+\.mp4$/;

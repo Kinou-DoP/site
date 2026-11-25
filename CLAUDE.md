@@ -27,7 +27,7 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 - **À faire pour la mise en production** : brancher kinou.fr sur Cloudflare (DNS chez OVH), vignettes réduites (`IMG_CDN` / `thumb()`
   vers le redimensionnement de Cloudflare), `SITE_URL` de `tools/share-pages.mjs`, mentions légales (hébergeur), puis validation
   de Gus et fusion dans `main`.
-- **Vidéos depuis Amazon** (25/11) : tous les fichiers de Slate sont copiés sur notre CloudFront `d3toxil6rvamjf.cloudfront.net`
+- **Vidéos depuis Amazon** (25/11) : tous les fichiers de Slate sont copiés sur notre CloudFront `d3toxii6rvamjf.cloudfront.net`
   (même chemin que `d1ko11x0ybxl0h`). `app.js` et `b/index.html` (et l'admin) changent l'adresse au moment de jouer (setter `src`
   des `<video>`), repli automatique sur Slate si le fichier manque. Les données gardent l'adresse Slate.
 - À chaque modification de `main.css` ou `app.js` : mettre à jour le numéro `?v=` dans `index.html` (date-heure), sinon les
@@ -96,7 +96,7 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
   direct par `/api/media?u=…&dl=<titre>` (sans ouvrir d'onglet) ; « Download all » après le nom de la bande = **un fichier zip**
   (`zipAll` : sans compression, ZIP64 au-delà de 4 Go ; Chrome / Edge l'écrivent directement sur le disque, les autres en mémoire
   jusqu'à 1,5 Go, sinon un fichier après l'autre). Expiration : message « plus disponible ». **Bundle** (`bundle: true`) : chaque bande lue avec son propre code, une par onglet à gauche (`showBundle`, `fillMain`, adresse `#<n>` = onglet), noms des chefs op de toutes les bandes, mot de passe demandé dans l'onglet d'une bande protégée. **Film partagé seul** (`single: true`, admin) : le lecteur au centre de la page (`#player.single`, sans croix ni fond flouté), « Download » si permis.
-- **`/api/media?u=<vidéo CloudFront Slate>[&dl=nom]`** (`functions/api/media.js`) : depuis le 25/11, lit d'abord la copie sur **notre CloudFront Amazon** (`d3toxil6rvamjf`, même chemin), Slate si absente ; relais limité à ces deux CloudFront et aux mp4 de `data/bibli/vid/` du dépôt admin (servis en video/mp4), avec CORS
+- **`/api/media?u=<vidéo CloudFront Slate>[&dl=nom]`** (`functions/api/media.js`) : depuis le 25/11, lit d'abord la copie sur **notre CloudFront Amazon** (`d3toxii6rvamjf`, même chemin), Slate si absente ; relais limité à ces deux CloudFront et aux mp4 de `data/bibli/vid/` du dépôt admin (servis en video/mp4), avec CORS
   (capture d'une image pour les vignettes des bandes dans l'admin) ou en téléchargement direct.
 - **Test de l'hébergement vidéo** (`test-video/`, `noindex`, étude « remplacer Slate ») : le même film lu depuis Slate puis depuis notre
   adresse (champ « Notre adresse » ou `?sema=<url>&napoli=<url>`), l'un après l'autre : démarrage, sauts milieu / fin, coupures et
