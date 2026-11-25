@@ -428,6 +428,7 @@
   var HERO = null;
   function snipSrc(it) {
     if (it.snipVideo) return { src: FN + "/api/media?u=" + encodeURIComponent(it.snipVideo) };
+    if (it.snip && it.snip.v) return { src: it.snip.v }; // extrait léger fabriqué par le robot d'encodage (720p, en boucle)
     if (it.snip && it.full) return { src: it.full, s: it.snip.s, d: it.snip.d || 10 };
     return it.video ? { src: it.video } : null;
   }
@@ -479,7 +480,8 @@
       it.images && !it.full && !it.video ? el("span", { class: "n", text: it.images.length + " images" }) : el("span", { class: "ty", text: types.slice(0, 2).join(" · ") })])]);
     c.addEventListener("click", function () { openPlayer(fi); });
     // Extrait : mp4 importé dans l'admin (relu par /api/media), sinon passage choisi du film complet, sinon extrait de Slate.
-    var own = it.snipVideo ? FN + "/api/media?u=" + encodeURIComponent(it.snipVideo) : "", v = null, src = own || (it.snip && it.full ? it.full : it.video);
+    // (ou extrait léger 720p fabriqué par le robot d'encodage, snip.v, Gus 26/11)
+    var own = it.snipVideo ? FN + "/api/media?u=" + encodeURIComponent(it.snipVideo) : it.snip && it.snip.v ? it.snip.v : "", v = null, src = own || (it.snip && it.full ? it.full : it.video);
     function on(phone) {
         if (HERO && !phone) HERO.pause(); // le grand film en haut s'arrête quand on survole un autre film
         if (it.img) { bg.style.backgroundImage = 'url("' + it.img + '")'; document.body.classList.add("proj-on"); }

@@ -557,3 +557,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 25/11 : extraits préchargés en fond (pages : tous, du plus haut au plus bas ; liste : noms autour du survol ; accueil : 2 projets suivants), demande de Gus (survol plus rapide).
 - 26/11 : vignettes réduites chez nous (WebP 800 / 1600 px sur notre CloudFront), celles de Slate en secours (Gus : ne plus dépendre du service d'images de Slate).
 - 26/11 : fond flouté au survol : même image que la grille (notre vignette, ou celle de Slate si la nôtre n'est pas encore faite).
+- 26/11/2026 — Encodage du video club (Gus) : fonction `/api/depot` (envoi des vidéos de l'ordinateur chez Amazon, clé de dépôt dans Cloudflare) ; bandes : extrait léger `snip.v` (720p sans son, fait par le robot) joué en boucle à la place du film complet ; `/api/media` accepte `nous/`.

@@ -33,6 +33,10 @@ privé `notes` : `FEUILLE-DE-ROUTE.md` (projets, décisions, priorités) et `etu
 - **Vignettes chez nous** (26/11) : le robot « Vignettes réduites » de l'admin (`tools/vignettes.mjs`) fait de chaque image copiée de
   Slate une version WebP de 800 et de 1600 px (`thumbs/<chemin>-<largeur>.webp` sur notre CloudFront) ; `thumb()` retrouve le chemin
   dans l'adresse signée de Slate (`slateRaw`, `ourThumb`) et prend la nôtre ; absente : celle de Slate (`ORIG`, `loadImg`), puis S3.
+- **Envoi des vidéos depuis l'admin** (`functions/api/depot.js`, 26/11) : signe les adresses d'envoi en morceaux (S3 multipart :
+  `start`, `parts`, `list`, `complete`) vers `kinou-videos/depot/` ; clé Amazon de dépôt seulement (`DEPOT_KEY_ID` / `DEPOT_KEY_SECRET`,
+  secrets Cloudflare rangés par Gus) ; réservé aux clés GitHub qui peuvent écrire dans admin. Le robot d'encodage de l'admin range
+  ses fichiers sous `nous/<id>/` (version web, vignettes, extraits 720p) ; `/api/media` les accepte ; bandes : extrait léger `snip.v`.
 - **Extraits préchargés en fond** (`precharger`, 25/11) : chaque onglet (chef op, spotlight, fiction) télécharge tous ses extraits dans
   l'ordre, 2 à la fois, en priorité basse (`fetch` no-cors → cache du navigateur) ; liste des chefs op : extraits des 3 noms au-dessus et
   en dessous du nom survolé ; accueil : les 2 projets suivants. Rien si « économiseur de données ».

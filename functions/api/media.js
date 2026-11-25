@@ -5,6 +5,8 @@
 // Depuis le 25/11, tous les fichiers de Slate sont copiés sur NOTRE CloudFront (Amazon), au même chemin : la vidéo est lue chez
 // nous d'abord, chez Slate seulement si elle n'y est pas (film ajouté sur Slate depuis la copie). Notre adresse est acceptée aussi.
 const OK = /^https:\/\/(d1ko11x0ybxl0h|d3toxii6rvamjf)\.cloudfront\.net\/kinou\/production\/[\w\/.%-]+\.(mp4|mov|m4v)$/i;
+// Films envoyés depuis l'ordinateur et encodés par le robot du video club (Gus 26/11) : chez nous seulement (nous/<id>/…).
+const ENC = /^https:\/\/d3toxii6rvamjf\.cloudfront\.net\/nous\/[a-z0-9]{6,32}\/[\w.-]+\.mp4$/;
 const SLATE = "https://d1ko11x0ybxl0h.cloudfront.net/", NOUS = "https://d3toxii6rvamjf.cloudfront.net/";
 // Extraits importés dans la bibliothèque de l'admin (mp4 déposés dans le dépôt admin) : raw.githubusercontent les sert sans le bon
 // type de fichier ; relus ici en video/mp4 pour que tous les navigateurs les jouent.
@@ -13,7 +15,7 @@ export async function onRequest({ request }) {
   const q = new URL(request.url).searchParams, u = q.get("u") || "", dl = q.get("dl");
   const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Range", "Access-Control-Expose-Headers": "Content-Length, Content-Range, Accept-Ranges" };
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-  if (!OK.test(u) && !OWN.test(u)) return new Response("adresse refusée", { status: 400, headers: cors });
+  if (!OK.test(u) && !OWN.test(u) && !ENC.test(u)) return new Response("adresse refusée", { status: 400, headers: cors });
   const h = {}, range = request.headers.get("Range");
   if (range) h.Range = range;
   const opts = { headers: h, method: request.method === "HEAD" ? "HEAD" : "GET" };
