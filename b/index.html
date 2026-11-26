@@ -724,7 +724,8 @@
       el("button", { class: "parrow l", "aria-label": "Film précédent", on: { click: function () { openPlayer(cur - 1); } } }, [svg22(ARROW_L)]),
       el("button", { class: "parrow r", "aria-label": "Film suivant", on: { click: function () { openPlayer(cur + 1); } } }, [svg22(ARROW_R)])]));
     // Sous le film : images du projet puis stills et vidéos ajoutés (extras), dans l'ordre ; images chargées dans l'ordre.
-    var blocks = (it.images && it.images.length ? [{ stills: it.images }] : []).concat((it.extras || []).filter(function (x) { return (x.stills && x.stills.length) || x.full || x.video; }));
+    var xs = (it.extras || []).filter(function (x) { return !x.self && !(x.hide && x.hide.indexOf("band") > -1) && ((x.stills && x.stills.length) || x.full || x.video); }), imgs = it.images && it.images.length ? [{ stills: it.images, crop: it.scrop || null }] : [];
+    var at = Math.max(0, Math.min(+it.ipos || 0, xs.length)), blocks = xs.slice(0, at).concat(imgs, xs.slice(at)); // images du projet placées parmi les lignes (admin)
     var gal = el("div", { class: "pgal" }), order = [];
     stillsL = []; stillsC = [];
     blocks.forEach(function (x) {

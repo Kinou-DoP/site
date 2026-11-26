@@ -98,7 +98,19 @@
   // Video club de l'admin (Gus 26/11 : « le video club sert partout ») : ce qu'on change dans la fenêtre d'un film du video club
   // (data/bibli/edits.json, clé « s<id Slate> » : vignette, extrait léger, film, titre, crédits, stills) s'applique aussi au site,
   // par-dessus les fiches, le spotlight, la fiction et l'accueil (vcApply). Fichier absent ou en erreur : le site sans retouches.
-  var VC = {}, VC_P = getJSON("bibli/edits.json").then(function (x) { VC = (x && x.films) || {}; }, function () {});
+  var VC = {}, VCL = {}, VC_P = Promise.all([getJSON("bibli/edits.json").then(function (x) { VC = (x && x.films) || {}; }, function () {}),
+    getJSON("bibli/library.json").then(function (x) { ((x && x.items) || []).forEach(function (it) { VCL[it.key] = it; }); }, function () {})]);
+  // Vidéos importées ensemble (`grp` + `gi` dans library.json) : chacune montre les autres sous elle, dans le même ordre pour toutes (Gus 26/11).
+  // Lignes `auto` recalculées ici (titres, vignettes, extraits à jour) tant que la ligne n'a pas été réglée à la main dans l'admin.
+  function vcGroup(id) {
+    var k = /^\d+$/.test(id || "") ? "s" + id : id, me = VCL[k]; if (!me || !me.grp) return null;
+    var ms = Object.keys(VCL).map(function (x) { return VCL[x]; }).filter(function (x) { return x.grp === me.grp; }).sort(function (a, b) { return (a.gi || 0) - (b.gi || 0); });
+    var l = ms.filter(function (m) { return m.key !== me.key; }).map(function (m) {
+      var e = VC[m.key] || {}, full = typeof e.full === "string" && e.full ? e.full : m.full, sn = vcSnip(Object.assign({}, m, e), full);
+      return { title: e.title || m.title, full: full, video: sn || e.video || m.video, img: e.img || m.img, key: m.key, auto: true };
+    }).filter(function (x) { return x.full || x.video; });
+    return l.length ? l : null;
+  }
   var FN = ON_CF ? location.origin : "https://kinou-4tv.pages.dev"; // fonctions du site (/api/media)
   function vcOf(id) { return id ? VC[/^\d+$/.test(id) ? "s" + id : id] || null : null; } // id Slate, ou clé d'un import du video club (« i… », « e… »)
   // Extrait du video club : mp4 importé (relu par /api/media), sinon extrait léger 720p du robot (snip.v, s'il vient bien du film
@@ -697,12 +709,15 @@
     // la page (le video club n'enregistre que ce qui diffère des pages). Crédits refaits comme dans les bandes : « Réal », « Prod »,
     // puis « co-DoP Nom » (fiche d'un chef op) ou « DoP Nom » (si le chef op de la page a un autre rôle), puis « Rôle Nom »
     // (ex. Camera operator) ; spotlight / fiction : chefs op sans rôle dans « DoP Nom » (liens), autres rôles dans les crédits.
-    function vcApply(p, e, d) {
+    function vcApply(p, e, d, ge) {
       // Titre : propre à chaque page (Gus 25/11 : tout passe par le video club « sauf les noms des films ») ; le titre du video club ne vaut que pour les bandes.
       if (e.img) p.img = e.img;
       if (typeof e.full === "string" && e.full) p.full = e.full;
       var sn = vcSnip(e, p.full); if (sn) p.video = sn;
-      if (e.extras !== undefined) { p.extras = (e.extras || []).filter(function (x) { return !(x.hide && x.hide.indexOf(d.slug) > -1); }); delete p.stills; delete p.stillsLink; } // stills et vidéos sous le film ; `hide` = lieux où la ligne est masquée (Gus 26/11)
+      var ex = e.extras;
+      if (ge && (!ex || ex.every(function (x) { return x.auto; }))) ex = ge; // pas réglées à la main : les vidéos du même import
+      if (ex !== undefined) { p.extras = (ex || []).filter(function (x) { return !x.self && !(x.hide && x.hide.indexOf(d.slug) > -1); }); delete p.stills; delete p.stillsLink; }
+      if (e.ipos !== undefined) p.ipos = e.ipos; if (e.ihide) p.ihide = e.ihide.indexOf(d.slug) > -1; // stills et vidéos sous le film ; `hide` = lieux où la ligne est masquée (Gus 26/11)
       // Images d'un projet en images : l'ordre choisi dans le video club vaut partout (Gus 26/11) ; recadrage commun `scrop` { ar, z, x, y }.
       if (e.images && e.images.length) { p.images = e.images; if (p.stills && p.stills.length) p.stills = e.images; }
       if (e.scrop !== undefined) p.scrop = e.scrop || null;
@@ -732,7 +747,8 @@
         var p = {}; for (var k in c) p[k] = c[k];
         if (ov[c.slate]) for (k in ov[c.slate]) p[k] = ov[c.slate][k];
         if (d.open !== undefined && c.slate === d.open) p.open = true;
-        var e = vcOf(c.slate); if (e) vcApply(p, e, d);
+        var e = vcOf(c.slate), ge = vcGroup(c.slate); if (e || ge) vcApply(p, e || {}, d, ge);
+        if (p.extras && p.extras.some(function (x) { return x.hide; })) p.extras = p.extras.filter(function (x) { return !(x.hide && x.hide.indexOf(d.slug) > -1); }); // lignes masquées sur cette page (réglage de la page)
         // Projet en stills avec un extrait vidéo choisi dans l'admin (court métrage sans film ni bande-annonce) :
         // l'extrait joue au survol seulement ; au clic, le lecteur montre la galerie (pas de vidéo).
         if (p.hover && p.hover.video && !p.full && !p.video) { p.video = p.hover.video; p.nosnip = true; }
@@ -1056,9 +1072,12 @@
       var b = (p.extras || []).filter(function (x) { return (x.stills && x.stills.length) || x.full || x.video; });
       // p.images : images d'un projet en images seulement, ajoutées par le robot GitHub de l'admin (lues sur Slate).
       var own = p.stills && p.stills.length ? p.stills : !src && p.images && p.images.length ? p.images : null;
+      if (p.ihide) own = null; // images du projet masquées sur cette page (admin)
       var st = own ? [{ stills: own, crop: p.scrop || null }] : [];
       if (!p.extras) return st;
-      return src ? b : st.concat(b);
+      if (src || !st.length) return b;
+      var at = Math.max(0, Math.min(+p.ipos || 0, b.length)); // images du projet placées parmi les lignes (admin, glisser)
+      return b.slice(0, at).concat(st, b.slice(at));
     }
     // Chaque element apparait en arrivant a l'ecran ; un clic sur une image l'agrandit (fleches : toutes les images).
     var stillsP = null, stillsIdx = 0;

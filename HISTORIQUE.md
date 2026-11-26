@@ -568,3 +568,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 26/11/2026 — Stills : ordre des images (`images`) et recadrage commun (`scrop`, `extras[].crop`) lus dans edits.json (admin, video club).
 - 26/11/2026 — Recadrage des stills en rectangle (`l t w h`) + cadre propre à une image (`per`).
 - 26/11/2026 — Bande d'un film seul : le fond flouté du film, visionneuse calée sur l'écran (l'animation d'arrivée gardait un transform qui sortait les flèches de l'écran), recadrage des stills ; lignes sous le film masquables par lieu.
+- 26/11/2026 — Vidéos d'un même import liées (`vcGroup`), images du projet placées parmi les lignes (`ipos`), lignes masquées par page (`hide`) aussi pour les extras des fiches ; bande : `hide` « band ».
