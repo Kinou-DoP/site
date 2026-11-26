@@ -715,7 +715,10 @@
       if (typeof e.full === "string" && e.full) p.full = e.full;
       var sn = vcSnip(e, p.full); if (sn) p.video = sn;
       var ex = e.extras;
-      if (ge && (!ex || ex.every(function (x) { return x.auto; }))) ex = ge; // pas réglées à la main : les vidéos du même import
+      if (ge && (!ex || ex.every(function (x) { return x.auto; }))) { // pas réglées à la main : les vidéos du même import (masquages gardés)
+        var hid = {}; (ex || []).forEach(function (x) { if (x.key && x.hide) hid[x.key] = x.hide; });
+        ex = ge.map(function (g) { if (hid[g.key]) g.hide = hid[g.key]; return g; });
+      }
       if (ex !== undefined) { p.extras = (ex || []).filter(function (x) { return !x.self && !(x.hide && x.hide.indexOf(d.slug) > -1); }); delete p.stills; delete p.stillsLink; }
       if (e.ipos !== undefined) p.ipos = e.ipos; if (e.ihide) p.ihide = e.ihide.indexOf(d.slug) > -1; // stills et vidéos sous le film ; `hide` = lieux où la ligne est masquée (Gus 26/11)
       // Images d'un projet en images : l'ordre choisi dans le video club vaut partout (Gus 26/11) ; recadrage commun `scrop` { ar, z, x, y }.
