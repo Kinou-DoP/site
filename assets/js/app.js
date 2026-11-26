@@ -510,6 +510,7 @@
         var fc = (f.cats || []).map(up).map(function (c) { return c === "ART FILM" ? "ART VIDEO" : c; }), mine = cats.filter(function (c) { return fc.indexOf(c) > -1; }); // « Art Film » sur Slate = ART VIDEO
         var base = { title: f.title, slate: f.slate };
         ["sub", "video", "full", "img", "images", "ratios"].forEach(function (k) { if (f[k]) base[k] = f[k]; });
+        if (f.crop && +f.crop.z > 1) { base.zoom = +f.crop.z; base.zoomPos = (+f.crop.x || 0) + "% " + (+f.crop.y || 0) + "%"; base.zoomThumb = !!f.crop.t; } // recadrage écrit sur le film lui-même (video club), repris comme celui des fiches
         if (f.artists && f.artists.length) base.dps = f.artists.map(dpByName); // « DoP Nom » sous les crédits, liens vers leur page
         (mine.length ? mine : [""]).forEach(function (c, k) {
           var e = Object.assign({}, base, { cat: c });
@@ -1432,7 +1433,8 @@
         if (slug === FIC) scopeCrop(st, p); // fiction : cadrage cinémascope (vignette et extrait réglés à part dans l'admin)
         else if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); if (p.zoomPos) st.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) st.classList.add("zoomed"); }
         if (p.img) {
-          loadImg(thumb(p.img, mode === "gallery" ? GW : FW), (function (st) { return function (url) { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st));
+          loadImg(thumb(p.img, mode === "gallery" ? GW : FW), (function (st) { return function (url) { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st)) // le fond flou (petite image, autre adresse que la vignette) est préchargé dès que la vignette est là : il apparaît tout de suite au survol
+          (function (u64) { setTimeout(function () { loadImg(u64, function () {}); }, 0); })(thumb(p.img, 64));
         }
         var meta = document.createElement("div"); meta.className = "meta";
         var h = document.createElement("h3"); h.textContent = dtitle(p);
