@@ -716,7 +716,11 @@
       var sn = vcSnip(e, p.full); if (sn) p.video = sn;
       var ex = e.extras;
       var same = ge && ex && ex.every(function (x) { return x.key; }) && ex.filter(function (x) { return !x.self; }).length === ge.length && ex.every(function (x) { return x.self || ge.some(function (g) { return g.key === x.key; }); });
-      if (ge && p.extras && p.extras.length && p.extras.some(function (x) { return x.key; })) ex = p.extras; // la page a réglé elle-même ces vidéos (ordre, masquées) : c'est elle qui décide
+      if (ge && p.extras && p.extras.length && p.extras.some(function (x) { return x.key; })) { // la page a sa liste (masquées, retirées) : les vidéos du lot y suivent le video club (titres, ordre) sauf ordre choisi sur la page (`extrasOrd`)
+        var by = {}; ge.forEach(function (g) { by[g.key] = g; });
+        ex = p.extras.map(function (x) { return x.key && by[x.key] ? Object.assign({}, by[x.key], x.hide ? { hide: x.hide } : {}) : x; });
+        if (!p.extrasOrd) { var order = ge.map(function (g) { return g.key; }), slots = [], keyed = []; ex.forEach(function (x, i) { if (x.key && order.indexOf(x.key) > -1) { slots.push(i); keyed.push(x); } }); keyed.sort(function (a, b) { return order.indexOf(a.key) - order.indexOf(b.key); }); slots.forEach(function (i, j) { ex[i] = keyed[j]; }); }
+      }
       else if (ge && (!ex || ex.every(function (x) { return x.auto; }) || same)) { // pas réglées à la main : les vidéos du même import (masquages gardés)
         var hid = {}; (ex || []).forEach(function (x) { if (x.key && x.hide) hid[x.key] = x.hide; });
         ex = ge.map(function (g) { if (hid[g.key]) g.hide = hid[g.key]; return g; });
