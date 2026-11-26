@@ -703,6 +703,9 @@
       if (typeof e.full === "string" && e.full) p.full = e.full;
       var sn = vcSnip(e, p.full); if (sn) p.video = sn;
       if (e.extras !== undefined) { p.extras = e.extras || []; delete p.stills; delete p.stillsLink; } // stills et vidéos sous le film
+      // Images d'un projet en images : l'ordre choisi dans le video club vaut partout (Gus 26/11) ; recadrage commun `scrop` { ar, z, x, y }.
+      if (e.images && e.images.length) { p.images = e.images; if (p.stills && p.stills.length) p.stills = e.images; }
+      if (e.scrop !== undefined) p.scrop = e.scrop || null;
       // Recadrage du video club (Gus 25/11 : une seule source pour fiches et video club) : { z, x, y, t } ; null = aucun.
       if (e.crop !== undefined) { if (e.crop && +e.crop.z > 1) { p.zoom = +e.crop.z; p.zoomPos = (+e.crop.x || 0) + "% " + (+e.crop.y || 0) + "%"; p.zoomThumb = !!e.crop.t; } else { delete p.zoom; delete p.zoomPos; delete p.zoomThumb; } }
       if (!["dir", "prod", "dops", "roles"].some(function (k) { return e[k] !== undefined; })) return;
@@ -1053,7 +1056,7 @@
       var b = (p.extras || []).filter(function (x) { return (x.stills && x.stills.length) || x.full || x.video; });
       // p.images : images d'un projet en images seulement, ajoutées par le robot GitHub de l'admin (lues sur Slate).
       var own = p.stills && p.stills.length ? p.stills : !src && p.images && p.images.length ? p.images : null;
-      var st = own ? [{ stills: own }] : [];
+      var st = own ? [{ stills: own, crop: p.scrop || null }] : [];
       if (!p.extras) return st;
       return src ? b : st.concat(b);
     }
@@ -1066,7 +1069,7 @@
       if (seen) seen.disconnect();
       pgal.textContent = ""; if (plight.classList.contains("on")) closeStill();
       var blocks = blocksOf(p, src), all = [], order = [], run = ++galRun;
-      stillsP = { title: p.title, stills: all };
+      var crops = []; stillsP = { title: p.title, stills: all, crops: crops };
       // Image seule déjà en grand : pas répétée dessous, mais agrandie au clic (1re image de la visionneuse).
       if (solo && blocks[0] && blocks[0].stills && blocks[0].stills.length === 1 && blocks[0].stills[0] === solo) { all.push(solo); blocks = blocks.slice(1); }
       player.classList.toggle("has-stills", blocks.length > 0);
@@ -1084,8 +1087,10 @@
         }
         if (x.stills && x.stills.length) {
           var g = document.createElement("div"); g.className = "pgrid"; pgal.appendChild(g);
+          var cr = cropOf(x.crop); // recadrage commun aux images du groupe (admin, Gus 26/11) : forme du cadre, zoom, point de cadrage
           x.stills.forEach(function (u, i) {
-            var k = all.push(u) - 1, b = document.createElement("button");
+            var k = all.push(u) - 1, b = document.createElement("button"); crops[k] = cr;
+            if (cr) { b.className = "cr"; cropVars(b, cr); b.appendChild(document.createElement("i")); }
             b.dataset.src = thumb(u, GW);
             b.style.setProperty("--i", i % 3);
             b.setAttribute("aria-label", "Image " + (k + 1));
@@ -1123,13 +1128,18 @@
     var galRun = 0;
     function reveal(b) {
       if (b.classList.contains("pxv")) { b.classList.add("shown"); return; }
-      loadImg(b.dataset.src, function (u) { b.style.backgroundImage = 'url("' + u + '")'; b.classList.add("shown"); });
+      loadImg(b.dataset.src, function (u) { (b.classList.contains("cr") ? b.firstChild : b).style.backgroundImage = 'url("' + u + '")'; b.classList.add("shown"); });
     }
+    // Recadrage de stills { ar, z, x, y } (admin : « ▣ ») : le cadre prend la forme `ar`, l'image (cover) est agrandie de `z` autour du point x % y %.
+    function cropOf(c) { return c && +c.ar > 0 ? { ar: +c.ar, z: Math.max(1, +c.z || 1), x: c.x === undefined ? 50 : +c.x, y: c.y === undefined ? 50 : +c.y } : null; }
+    function cropVars(el, c) { el.style.setProperty("--sar", c.ar); el.style.setProperty("--sz", c.z); el.style.setProperty("--sx", c.x + "%"); el.style.setProperty("--sy", c.y + "%"); }
     var plimg = document.getElementById("plimg");
     function showStill(i) {
       var n = stillsP.stills.length; i = (i + n) % n;
       plimg.textContent = "";
-      var im = document.createElement("img"); im.src = ourImg(stillsP.stills[i]); im.alt = stillsP.title; plimg.appendChild(im);
+      var cr = stillsP.crops && stillsP.crops[i];
+      if (cr) { var w = document.createElement("div"); w.className = "plcr"; cropVars(w, cr); var iy = document.createElement("i"); iy.style.backgroundImage = 'url("' + ourImg(stillsP.stills[i]) + '")'; iy.setAttribute("role", "img"); iy.setAttribute("aria-label", stillsP.title || ""); w.appendChild(iy); plimg.appendChild(w); }
+      else { var im = document.createElement("img"); im.src = ourImg(stillsP.stills[i]); im.alt = stillsP.title; plimg.appendChild(im); }
       if (!plight.classList.contains("on")) pushStep();
       plight.classList.toggle("multi", n > 1);
       stillsIdx = i; plight.classList.add("on");

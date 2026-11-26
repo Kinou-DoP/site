@@ -26,3 +26,9 @@ Note de tâche : à lire seulement quand la tâche touche ce sujet. Règles gén
 - Convention des bundles Slate d'un chef op : un showreel `#featured` (ordre du FEATURED) puis un showreel par catégorie (`#music video`
   → onglet MUSIC VIDEO) ; ordre des showreels = ordre des onglets. Plusieurs chefs op sur un film : page de celui qui a le plus de
   films, les autres en « co-DoP Nom ».
+
+## Recadrage et ordre des stills (video club, 26/11)
+- `edits.json` : `images` (ordre des images d'un projet en images, remplace `images` / `stills` de la page), `scrop` = `{ ar, z, x, y }`
+  (rapport largeur / hauteur du cadre, zoom ≥ 1, point de cadrage en %) commun aux images du projet ; `extras[i].crop` = même chose pour un
+  groupe de stills sous un film. Sur le site : `vcApply` → `p.images`, `p.scrop` ; `buildStills` (`button.cr > i`, variables `--sar --sz --sx --sy`) et
+  la visionneuse (`.plcr`). Les bandes (`b/`) ne reprennent pas encore le recadrage.

@@ -194,6 +194,8 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 #player.nostage .pin { --pw: min(100%, 1800px); }
 #player.nostage .pgal { margin-top: 40px; }
 #player .pgal button { aspect-ratio: 16 / 9; padding: 0; border: 0; background: #070707 center / cover no-repeat; cursor: zoom-in; opacity: 0; }
+#player .pgal button.cr { position: relative; overflow: hidden; aspect-ratio: var(--sar); }
+#player .pgal button.cr i { position: absolute; inset: 0; background: center / cover no-repeat; background-position: var(--sx) var(--sy); transform: scale(var(--sz)); transform-origin: var(--sx) var(--sy); }
 #player .pgal button.shown { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
 #player .pfade { display: none; position: fixed; z-index: 1; left: 0; right: 0; bottom: 0; height: 22vh; pointer-events: none;
   background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,.25) 30%, rgba(0,0,0,.65) 65%, rgba(0,0,0,.92) 90%, #000); }
@@ -201,6 +203,8 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
 /* Agrandissement d'une image : flèches pour passer à la suivante, clic ou Escape pour fermer. */
 #player .plight { position: fixed; z-index: 2; inset: 0; display: flex; align-items: center; justify-content: center; padding: 56px 32px; background: rgba(0,0,0,.98); cursor: zoom-out; opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s; }
 #player .plight.on { opacity: 1; visibility: visible; }
+#player .plight .plcr { position: relative; overflow: hidden; aspect-ratio: var(--sar); width: min(100%, calc((100vh - 112px) * var(--sar))); }
+#player .plight .plcr i { position: absolute; inset: 0; background: center / cover no-repeat; background-position: var(--sx) var(--sy); transform: scale(var(--sz)); transform-origin: var(--sx) var(--sy); }
 #player .plight img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
 @media (max-width: 560px) {
   #player { padding-left: 16px; padding-right: 16px; }
