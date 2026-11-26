@@ -175,7 +175,9 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
    léger fondu au noir en bas de l'écran. Projet sans film : directement la galerie sous le titre. */
 #player .pgal { display: none; flex: none; flex-direction: column; align-items: center; gap: 32px; width: min(100%, 1800px); margin-top: 64px; padding-bottom: 22vh; }
 #player.has-stills .pgal { display: flex; }
-#player .pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; width: 100%; }
+/* Galerie de stills : 3 colonnes (2 sur téléphone) ; la dernière ligne, si elle n'est pas pleine, est centrée (Gus 26/11). */
+#player .pgrid { --n: 3; --g: 32px; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: var(--g); width: 100%; }
+#player .pgrid > button { flex: 0 0 calc((100% - (var(--n) - 1) * var(--g)) / var(--n)); min-width: 0; }
 #player .pxv { width: min(100%, 1400px, calc((100vh - 290px) * 16 / 9)); opacity: 0; }
 #player .pxv.shown { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
 #player .pxv video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; object-fit: contain; }
@@ -209,7 +211,7 @@ body.viewing.proj-on #projvid.on { opacity: 1; }
   #player { padding-left: 16px; padding-right: 16px; }
   #player .pgal { gap: 8px; margin-top: 40px; }
   #player .pxv { margin: 16px 0; }
-  #player .pgrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  #player .pgrid { --n: 2; --g: 8px; }
   #player .plight { padding: 56px 0; }
 }
 

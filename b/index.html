@@ -132,7 +132,9 @@
   #player .pnav .l, #player .plight .l { left: 24px; } #player .pnav .r, #player .plight .r { right: 24px; }
   #player .pgal { display: none; flex: none; flex-direction: column; align-items: center; gap: 32px; width: min(100%, 1800px); margin-top: 64px; padding-bottom: 22vh; }
   #player.has-stills .pgal { display: flex; }
-  #player .pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; width: 100%; }
+  /* Galerie de stills : 3 colonnes (2 sur téléphone) ; la dernière ligne, si elle n'est pas pleine, est centrée (Gus 26/11). */
+  #player .pgrid { --n: 3; --g: 32px; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: var(--g); width: 100%; }
+  #player .pgrid > button { flex: 0 0 calc((100% - (var(--n) - 1) * var(--g)) / var(--n)); min-width: 0; }
   #player .pgal button { aspect-ratio: 16 / 9; padding: 0; border: 0; background: #070707 center / cover no-repeat; cursor: zoom-in; opacity: 0; }
   #player .pgal button.cr { position: relative; overflow: hidden; aspect-ratio: var(--sar); align-self: start; }
   #player .pgal button.cr i, #player .plight .plcr i { position: absolute; inset: 0; background: center / cover no-repeat; background-size: var(--bsz, cover); background-position: var(--bpos, var(--sx, 50%) var(--sy, 50%)); transform: scale(var(--sz, 1)); transform-origin: var(--sx, 50%) var(--sy, 50%); }
@@ -171,7 +173,7 @@
   #player .pi-awards .aw-it b { font-weight: 500; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,252,235,.45); margin-right: .8em; }
   #player .pcap .pi-awards.pi-up { float: right; clear: right; max-width: 62%; margin: 0 0 0 32px; text-align: right; }
   @media (max-width: 900px), (hover: none) and (pointer: coarse) { #player .pi-awards { margin-top: 18px; } #player .pi-awards li.aw { align-items: flex-start; } }
-  @media (max-width: 560px) { #player { padding-left: 16px; padding-right: 16px; } #player .pgal { gap: 8px; margin-top: 40px; } #player .pxv { margin: 16px 0; } #player .pgrid { grid-template-columns: repeat(2, 1fr); gap: 8px; } #player .plight { padding: 56px 0; } }
+  @media (max-width: 560px) { #player { padding-left: 16px; padding-right: 16px; } #player .pgal { gap: 8px; margin-top: 40px; } #player .pxv { margin: 16px 0; } #player .pgrid { --n: 2; --g: 8px; } #player .plight { padding: 56px 0; } }
   @media (max-width: 700px) { #player:not(.has-stills) .pin { margin: 12vh 0 auto; } }
   /* Film partagé seul : le lecteur dans la page, au centre, sans croix ni fond flouté */
   #player.single { position: relative; inset: auto; z-index: 1; min-height: calc(100vh - 100px); overflow: visible; padding-top: 32px; opacity: 1; visibility: visible; animation: rise .7s cubic-bezier(.2, .7, .2, 1) backwards; }

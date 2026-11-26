@@ -576,3 +576,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 26/11/2026 — Client affiché avant le titre (`dtitle`, `cshow`), site et bandes.
 - 26/11/2026 — Client affiché par défaut (meta.json + edits.json, `cshow: false` pour le cacher).
 - 26/11/2026 — Son coupé partout (une vidéo coupée coupe les autres jusqu'à rechargement) ; titre « Client | Titre » sans doublon (`dtitle`).
+- 27/11/2026 — Galerie de stills : la dernière ligne incomplète est centrée (flex + --n / --g), site et bandes.
