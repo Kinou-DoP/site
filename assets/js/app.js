@@ -702,7 +702,7 @@
       if (e.img) p.img = e.img;
       if (typeof e.full === "string" && e.full) p.full = e.full;
       var sn = vcSnip(e, p.full); if (sn) p.video = sn;
-      if (e.extras !== undefined) { p.extras = e.extras || []; delete p.stills; delete p.stillsLink; } // stills et vidéos sous le film
+      if (e.extras !== undefined) { p.extras = (e.extras || []).filter(function (x) { return !(x.hide && x.hide.indexOf(d.slug) > -1); }); delete p.stills; delete p.stillsLink; } // stills et vidéos sous le film ; `hide` = lieux où la ligne est masquée (Gus 26/11)
       // Images d'un projet en images : l'ordre choisi dans le video club vaut partout (Gus 26/11) ; recadrage commun `scrop` { ar, z, x, y }.
       if (e.images && e.images.length) { p.images = e.images; if (p.stills && p.stills.length) p.stills = e.images; }
       if (e.scrop !== undefined) p.scrop = e.scrop || null;

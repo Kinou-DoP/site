@@ -31,4 +31,5 @@ Note de tâche : à lire seulement quand la tâche touche ce sujet. Règles gén
 - `edits.json` : `images` (ordre des images d'un projet en images, remplace `images` / `stills` de la page), `scrop` = `{ l, t, w, h, ar, per? }`
   (rectangle en fraction de l'image, `ar` = forme du cadre ; `per[adresse]` = recadrage propre à une image) commun aux images du projet ;
   `extras[i].crop` = même chose pour un groupe de stills sous un film. Ancien format `{ ar, z, x, y }` encore lu. Sur le site : `vcApply` →
-  `p.images`, `p.scrop` ; `buildStills` (`button.cr > i`, variables `--sar --bsz --bpos`) et la visionneuse (`.plcr`). Les bandes (`b/`) ne le reprennent pas encore.
+  `p.images`, `p.scrop` ; `buildStills` (`button.cr > i`, variables `--sar --bsz --bpos`) et la visionneuse (`.plcr`). La page des bandes (`b/index.html`) le reprend aussi (`cropOf`, `.plcr`).
+- `extras[i].hide` = lieux où la ligne est masquée (`club`, `fiction`, `spotlight`, adresse d'un chef op) : `vcApply` la retire quand `d.slug` y figure. Lignes `auto: true` = vidéos importées avec celle-ci.

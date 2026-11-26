@@ -134,6 +134,9 @@
   #player.has-stills .pgal { display: flex; }
   #player .pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; width: 100%; }
   #player .pgal button { aspect-ratio: 16 / 9; padding: 0; border: 0; background: #070707 center / cover no-repeat; cursor: zoom-in; opacity: 0; }
+  #player .pgal button.cr { position: relative; overflow: hidden; aspect-ratio: var(--sar); align-self: start; }
+  #player .pgal button.cr i, #player .plight .plcr i { position: absolute; inset: 0; background: center / cover no-repeat; background-size: var(--bsz, cover); background-position: var(--bpos, var(--sx, 50%) var(--sy, 50%)); transform: scale(var(--sz, 1)); transform-origin: var(--sx, 50%) var(--sy, 50%); }
+  #player .plight .plcr { position: relative; overflow: hidden; aspect-ratio: var(--sar); width: min(100%, calc((100vh - 112px) * var(--sar))); }
   #player .pgal button.shown { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
   #player .pxv { width: min(100%, 1400px, calc((100vh - 290px) * 16 / 9)); opacity: 0; }
   #player .pxv.shown { animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
@@ -163,7 +166,7 @@
   @media (max-width: 560px) { #player { padding-left: 16px; padding-right: 16px; } #player .pgal { gap: 8px; margin-top: 40px; } #player .pxv { margin: 16px 0; } #player .pgrid { grid-template-columns: repeat(2, 1fr); gap: 8px; } #player .plight { padding: 56px 0; } }
   @media (max-width: 700px) { #player:not(.has-stills) .pin { margin: 12vh 0 auto; } }
   /* Film partagé seul : le lecteur dans la page, au centre, sans croix ni fond flouté */
-  #player.single { position: relative; inset: auto; z-index: 1; min-height: calc(100vh - 100px); overflow: visible; padding-top: 32px; opacity: 1; visibility: visible; animation: rise .7s cubic-bezier(.2, .7, .2, 1) both; }
+  #player.single { position: relative; inset: auto; z-index: 1; min-height: calc(100vh - 100px); overflow: visible; padding-top: 32px; opacity: 1; visibility: visible; animation: rise .7s cubic-bezier(.2, .7, .2, 1) backwards; }
   #player.single:not(.has-stills) .pin { margin: auto 0; }
   #player.single .pfade { display: none; }
   #player.single .pgal { padding-bottom: 6vh; }
@@ -300,6 +303,10 @@
     if (b.single) {
       app.appendChild(el("header", {}, [el("div"), logo, el("a", { class: "nav", href: ROOT + "cinematographers/", text: "cinematographers" })]));
       initPlayer(films, b); P.classList.add("single"); app.appendChild(P); openPlayer(0);
+      // Fond : image du film très floutée et assombrie, puis son extrait (comme au survol d'un film), Gus 26/11.
+      var f0 = films[0] || {}, own0 = f0.snipVideo ? FN + "/api/media?u=" + encodeURIComponent(f0.snipVideo) : f0.snip && f0.snip.v ? f0.snip.v : f0.video || "";
+      if (f0.img) { document.getElementById("projbg").style.backgroundImage = 'url("' + f0.img + '")'; document.body.classList.add("proj-on"); }
+      if (own0) { var bv0 = document.getElementById("projvid"); bv0.src = own0; bv0.addEventListener("playing", function () { bv0.classList.add("on"); }, { once: true }); bv0.play().catch(function () {}); }
       var so1 = (ctx.contact && ctx.contact.social) || {}, soc1 = el("div", { class: "soc" });
       [["instagram", "Instagram"], ["vimeo", "Vimeo"], ["imdb", "IMDb"]].forEach(function (s) { if (so1[s[0]]) soc1.appendChild(el("a", { href: so1[s[0]], target: "_blank", rel: "noopener", text: s[1] })); });
       app.appendChild(el("footer", {}, [el("a", { class: "logo", href: ROOT, text: "kinou" }), el("div", { text: "cinematographer agency" }), soc1.childNodes.length ? el("p", {}, [soc1]) : null]));
@@ -611,7 +618,7 @@
   }
 
   // ---- Lecteur (repris du site, assets/js/app.js : openPlayer, buildStills, orderedLoad, showStill, fillInfo) ----
-  var P = null, G = null, cur = -1, list = [], band = null, stillsL = [], stillsI = 0, galRun = 0;
+  var P = null, G = null, cur = -1, list = [], band = null, stillsL = [], stillsC = [], stillsI = 0, galRun = 0;
   var ARROW_L = '<path d="M13.5 4.5 7 11l6.5 6.5"/>', ARROW_R = '<path d="M8.5 4.5 15 11l-6.5 6.5"/>';
   function svg22(d) { var x = svg(d); x.setAttribute("viewBox", "0 0 22 22"); x.setAttribute("width", "22"); x.setAttribute("height", "22"); return x; }
   function initPlayer(films, b) {
@@ -637,9 +644,24 @@
     function flush() { if (!alive()) return; while (done < items.length && items[done].ok) show(items[done++]); pump(); }
     pump();
   }
+  // Recadrage de stills (admin, ▣) : { l, t, w, h, ar, per? } ; ancien format { ar, z, x, y } (même code que le site, app.js).
+  function cropOf(c, u) {
+    if (c && c.per && u && c.per[u]) c = c.per[u];
+    if (!c) return null;
+    if (+c.w > 0 && +c.h > 0 && +c.ar > 0) return { ar: +c.ar, w: +c.w, h: +c.h, l: +c.l || 0, t: +c.t || 0 };
+    if (+c.ar > 0) return { ar: +c.ar, z: Math.max(1, +c.z || 1), x: c.x === undefined ? 50 : +c.x, y: c.y === undefined ? 50 : +c.y };
+    return null;
+  }
+  function cropVars(e, c) {
+    e.style.setProperty("--sar", c.ar);
+    if (c.w) { e.style.setProperty("--bsz", 100 / c.w + "% " + 100 / c.h + "%"); e.style.setProperty("--bpos", (c.w < 1 ? c.l / (1 - c.w) * 100 : 0) + "% " + (c.h < 1 ? c.t / (1 - c.h) * 100 : 0) + "%"); }
+    else { e.style.setProperty("--sz", c.z); e.style.setProperty("--sx", c.x + "%"); e.style.setProperty("--sy", c.y + "%"); }
+  }
   function showStill(i) {
     var L = P.querySelector(".plight"), n = stillsL.length; if (!L || !n) return; i = (i + n) % n; stillsI = i;
-    var box = L.querySelector(".plimg"); box.textContent = ""; box.appendChild(el("img", { src: stillsL[i], alt: "" }));
+    var box = L.querySelector(".plimg"); box.textContent = ""; var cr = stillsC[i];
+    if (cr) { var w = el("div", { class: "plcr" }, [el("i", { style: 'background-image:url("' + stillsL[i] + '")' })]); cropVars(w, cr); box.appendChild(w); }
+    else box.appendChild(el("img", { src: stillsL[i], alt: "" }));
     L.classList.toggle("multi", n > 1); L.classList.add("on");
   }
   function awardsList(it) { // prix groupés par festival, comme sur le site
@@ -704,15 +726,16 @@
     // Sous le film : images du projet puis stills et vidéos ajoutés (extras), dans l'ordre ; images chargées dans l'ordre.
     var blocks = (it.images && it.images.length ? [{ stills: it.images }] : []).concat((it.extras || []).filter(function (x) { return (x.stills && x.stills.length) || x.full || x.video; }));
     var gal = el("div", { class: "pgal" }), order = [];
-    stillsL = [];
+    stillsL = []; stillsC = [];
     blocks.forEach(function (x) {
       if (x.stills && x.stills.length) {
         if (x.title) gal.appendChild(el("h3", { class: "ptitle", text: x.title, style: "align-self:flex-start" }));
         var g = el("div", { class: "pgrid" }); gal.appendChild(g);
         x.stills.forEach(function (u, k) {
-          var n = stillsL.push(u) - 1, bt = el("button", { "aria-label": "Image " + (n + 1), style: "--i:" + (k % 3) });
+          var cr = cropOf(x.crop, u), n = stillsL.push(u) - 1, bt = el("button", { "aria-label": "Image " + (n + 1), style: "--i:" + (k % 3), class: cr ? "cr" : null }); stillsC[n] = cr;
+          if (cr) { cropVars(bt, cr); bt.appendChild(el("i")); }
           bt.addEventListener("click", function () { showStill(n); });
-          g.appendChild(bt); order.push({ src: u, el: bt });
+          g.appendChild(bt); order.push({ src: u, el: bt, t: cr ? bt.firstChild : bt });
         });
         return;
       }
@@ -729,7 +752,7 @@
     var sx = null; L.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
     L.addEventListener("touchend", function (e) { if (sx === null) return; var dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) { e.preventDefault(); showStill(stillsI + (dx < 0 ? 1 : -1)); } });
     P.appendChild(L);
-    orderedLoad(order, function (o) { o.el.style.backgroundImage = 'url("' + o.src + '")'; o.el.classList.add("shown"); }, function () { return run === galRun && cur > -1; });
+    orderedLoad(order, function (o) { (o.t || o.el).style.backgroundImage = 'url("' + o.src + '")'; o.el.classList.add("shown"); }, function () { return run === galRun && cur > -1; });
     P.classList.add("on"); if (!band.single) G.classList.add("on");
   }
 })();
