@@ -715,7 +715,8 @@
       if (typeof e.full === "string" && e.full) p.full = e.full;
       var sn = vcSnip(e, p.full); if (sn) p.video = sn;
       var ex = e.extras;
-      if (ge && (!ex || ex.every(function (x) { return x.auto; }))) { // pas réglées à la main : les vidéos du même import (masquages gardés)
+      var same = ge && ex && ex.every(function (x) { return x.key; }) && ex.filter(function (x) { return !x.self; }).length === ge.length && ex.every(function (x) { return x.self || ge.some(function (g) { return g.key === x.key; }); });
+      if (ge && (!ex || ex.every(function (x) { return x.auto; }) || same)) { // pas réglées à la main : les vidéos du même import (masquages gardés)
         var hid = {}; (ex || []).forEach(function (x) { if (x.key && x.hide) hid[x.key] = x.hide; });
         ex = ge.map(function (g) { if (hid[g.key]) g.hide = hid[g.key]; return g; });
       }
