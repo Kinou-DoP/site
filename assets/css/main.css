@@ -340,6 +340,7 @@ body.menu-on .burger { opacity: 0; }
   .logo { font-size: 20px; top: calc(env(safe-area-inset-top, 0px) + 32px); }
   .logo.img img { height: calc(var(--logo-h, 36px) * .56); }
   #bgvid, #home .slide video { object-position: var(--pp, 50%) 50%; } /* fond de la liste et accueil : partie de l'extrait choisie dans l'admin (phoneX) */
+  #home .slide video { transform: scale(var(--zm, var(--z, 1))); } /* zoom propre au téléphone (admin, « séparer » dans le montage de l'accueil), sinon le même qu'ordinateur */
   .logo:not(.img) { font-size: 28px; top: calc(env(safe-area-inset-top, 0px) + 28px); } /* texte « kinou » (sans logo image) : à l'échelle de « DOP » */
   .nav-btn { font-size: 19px; font-weight: 700; letter-spacing: .02em; top: calc(env(safe-area-inset-top, 0px) + 35px); }
   .nav-btn .long { display: none; }

@@ -150,6 +150,7 @@
       s.style.setProperty("--h", p.h);
       if (p.zoom > 1) { s.style.setProperty("--z", p.zoom); if (p.zoomPos) s.style.setProperty("--zp", p.zoomPos); } // recadrage réglé dans l'admin (enlève les bandes noires)
       if (p.phoneX !== undefined) s.style.setProperty("--pp", p.phoneX + "%"); // cadrage téléphone (admin)
+      if (p.phoneZoom !== undefined) s.style.setProperty("--zm", p.phoneZoom); // zoom téléphone séparé (admin)
       var inner = document.createElement("div"); inner.className = "in"; s.appendChild(inner);
       // Extrait HD (admin) : passage du film complet, de « start » pendant la durée d'un projet, sans le son.
       // Sinon (ou si le film complet ne se lit pas) : l'extrait Slate, plus compressé.
