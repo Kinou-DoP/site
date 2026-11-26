@@ -17,7 +17,8 @@ Note de tâche : à lire seulement quand la tâche touche ce sujet. Règles gén
 - `about` : `{ bio, bioEn, cv, instagram, website, links: [{ label, url }], img, pos, zoom, color, og }` (portrait en noir et blanc
   sauf `color`).
 - `home.json` : `{ duration, reel, overrides, slides: [{ slate, film, song, legend, video, full, img, dps: [{ name, slug }], start?,
-  phoneX?, zoom?, zoomPos?, extras? }] }` (`start` + `full` = « extrait HD » : le film complet lu de `start` pendant `duration`).
+  phoneX?, zoom?, zoomPos?, extras? }] }` (`start` + `full` = « extrait HD » : le film complet lu de `start` pendant `duration`). `parts?` : `[{ s, d, x }]` = montage de l'extrait HD (blocs lus l'un après l'autre, Σ`d` = `duration`, `x` = cadrage téléphone du bloc en %) ; `start` = `parts[0].s`.
+- `source.json` : `{ video: "nous" | "slate", at, by }` (admin, liste des chefs op) : « slate » = vidéos et images lues chez Slate (secours en cas de panne chez nous) ; absent = chez nous. Lu par `app.js` (`kinouSource`) et par l'admin.
 - `spotlight.json` : `{ reel, categories, overrides, films, readAt }` ; `fiction.json` : `{ reel, overrides, films, readAt }` avec, par
   film, `status` (new | soon | past), `genre`, `date`, `platforms`, `poster`, `thumbCrop` / `snipCrop` (cadrage cinémascope).
   `films` (`slate, title, sub, video, full, img, cats, artists, images?, ratios?`) écrits par le robot de l'admin.

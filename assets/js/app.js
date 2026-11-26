@@ -25,6 +25,8 @@
     ["loadstart", "play"].forEach(function (n) { document.addEventListener(n, function (ev) { if (sonCoupe && ev.target instanceof HTMLMediaElement && ev.target.controls) coupeSon(ev.target); }, true); });
     // Notre CloudFront ne répond pas du tout (2 replis, aucune vidéo lue chez nous) : Slate directement pour la suite de la visite.
     var ok = false, replis = 0, panne = false;
+    // Source des vidéos choisie dans l'admin (data/source.json : « slate » = tout lire chez Slate, en cas de panne chez nous ; par défaut : chez nous).
+    window.kinouSource = function (v) { panne = v === "slate"; window.KINOU_SLATE = panne; };
     document.addEventListener("loadeddata", function (ev) { var u = ev.target.getAttribute && ev.target.getAttribute("src"); if (u && u.indexOf(NOUS) === 0) ok = true; }, true);
     document.addEventListener("error", function (ev) {
       var v = ev.target, u = v instanceof HTMLMediaElement && v.getAttribute("src");
@@ -157,6 +159,8 @@
         v.muted = true; v.playsInline = true; v.preload = "none";
         v.dataset.src = hd ? p.full + "#t=" + p.start : p.video;
         if (hd) { v._hd = true; v._start = +p.start; }
+        // Montage de l'extrait (admin, 27/11) : p.parts = [{ s, d, x }] (blocs lus l'un après l'autre, durée totale = celle d'un projet ; x = cadrage téléphone du bloc).
+        if (hd && p.parts && p.parts.length > 1) { v._parts = p.parts; v._pi = 0; v._start = +p.parts[0].s; if (p.parts[0].x !== undefined) s.style.setProperty("--pp", p.parts[0].x + "%"); }
         inner.appendChild(v);
       }
       wrap.appendChild(s); slides.push(s);
@@ -183,11 +187,21 @@
     var timed = false, timedAt = 0;
     function later() { clearTimeout(timer); timer = setTimeout(next, DURATION); timed = true; timedAt = performance.now(); }
     // Avancement du projet en cours (0 a 1), affiche par le trait blanc de sa barre.
+    function hdElapsed(v) { // secondes écoulées dans l'extrait HD (montage : blocs déjà lus + position dans le bloc en cours)
+      if (!v._parts) return v.currentTime - v._start;
+      var t = 0, k = 0; for (; k < v._pi; k++) t += v._parts[k].d; return t + Math.max(0, v.currentTime - v._parts[v._pi].s);
+    }
+    function hdBloc(v, i) { // montage : bloc fini → suivant (même fichier, on saute au bloc d'après et on change le cadrage téléphone) ; dernier bloc fini → projet suivant
+      var pt = v._parts[v._pi]; if (v.currentTime < pt.s + pt.d - 0.03) return;
+      if (v._pi + 1 < v._parts.length) { v._pi++; var q = v._parts[v._pi]; try { v.currentTime = q.s; } catch (e) {} if (q.x !== undefined) slides[i].style.setProperty("--pp", q.x + "%"); }
+      else next();
+    }
     (function tick() {
       if (active && cur >= 0) {
         var v = slides[cur].querySelector("video"), p = 0;
+        if (v && v._hd && v._parts && !timed && !v.paused && !v.seeking) hdBloc(v, cur);
         if (timed) p = (performance.now() - timedAt) / DURATION;
-        else if (v && v._hd) p = (v.currentTime - v._start) * 1000 / DURATION;
+        else if (v && v._hd) p = hdElapsed(v) * 1000 / DURATION;
         else if (v && v.duration) p = v.currentTime / v.duration;
         buttons[cur].style.setProperty("--p", Math.min(1, p).toFixed(4));
       }
@@ -233,6 +247,7 @@
       var v = slides[i].querySelector("video");
       if (v) {
         if (!v.src) v.src = v.dataset.src;
+        if (v._parts) { v._pi = 0; if (v._parts[0].x !== undefined) slides[i].style.setProperty("--pp", v._parts[0].x + "%"); }
         try { v.currentTime = v._hd ? v._start : 0; } catch (e) {}
         v.onended = next;
         v.onerror = function () {
@@ -250,14 +265,14 @@
     slides.forEach(function (s, i) {
       var v = s.querySelector("video");
       if (v) v.addEventListener("timeupdate", function () {
-        if (!v._hd || v.currentTime < v._start + DURATION / 1000) return;
+        if (!v._hd || v._parts || v.currentTime < v._start + DURATION / 1000) return;
         if (i === cur && active) next();
         else { v.pause(); try { v.currentTime = v._start; } catch (e) {} }
       });
     });
     // Film complet illisible : retour à l'extrait Slate pour ce projet.
     function snippetOf(v, i) {
-      v._hd = false;
+      v._hd = false; v._parts = null;
       if (!PROJECTS[i].video) return false;
       v.dataset.src = v.src = PROJECTS[i].video; return true;
     }
@@ -327,11 +342,11 @@
       resume: function () {
         if (active) return; active = true; var v = slides[cur].querySelector("video");
         // Passage HD : on reprend dans le passage (sinon au début du passage).
-        if (v && v._hd && (v.currentTime < v._start - 0.5 || v.currentTime >= v._start + DURATION / 1000 - 0.3)) { try { v.currentTime = v._start; } catch (e) {} }
+        if (v && v._hd && !v._parts && (v.currentTime < v._start - 0.5 || v.currentTime >= v._start + DURATION / 1000 - 0.3)) { try { v.currentTime = v._start; } catch (e) {} }
         if (v && v.src) { var pr = v.play(); if (pr && pr.catch) pr.catch(later); v.onended = next; } else later();
       },
       // Passage HD en cours [début, fin] en secondes (fond de la page contact : le même passage, en boucle).
-      segment: function () { var v = slides[cur].querySelector("video"); return v && v._hd ? [v._start, v._start + DURATION / 1000] : null; },
+      segment: function () { var v = slides[cur].querySelector("video"); return v && v._hd ? (v._parts ? [v._parts[0].s, v._parts[0].s + v._parts[0].d] : [v._start, v._start + DURATION / 1000]) : null; },
       videoEl: function () { return slides[cur].querySelector("video"); },
       current: function () { return PROJECTS[cur]; }
     };
@@ -715,6 +730,7 @@
       var t = "https://d3toxii6rvamjf.cloudfront.net/nous/bibli-img/" + m[1]; ORIG[t] = u; return t;
     }
     function thumb(u, w) {
+      if (window.KINOU_SLATE && /^https:\/\/images\.slatecdn\.net\//.test(u || "")) return u; // source « Slate » (admin) : images de Slate
       if (BIBLI_RAW.test(u || "")) return ourImg(u);
       if (/^https:\/\/images\.slatecdn\.net\//.test(u)) { var t = ourThumb(u, w); if (t) return t; }
       return IMG_CDN && /^https:\/\/images\.slatecdn\.net\//.test(u) ? "/.netlify/images?url=" + encodeURIComponent(u) + "&w=" + w + "&q=80&fm=webp" : u;
@@ -2119,7 +2135,8 @@
     im.src = DATA_BASE + c.logo;
   }).catch(function () { clearTimeout(logoWait); if (!logoEl.classList.contains("ready")) logoText(); });
 
-  Promise.all([getJSON("home.json"), getJSON("dps/index.json"), VC_P]).then(function (r) {
+  Promise.all([getJSON("home.json"), getJSON("dps/index.json"), VC_P, getJSON("source.json").catch(function () { return {}; })]).then(function (r) {
+    if (r[3] && r[3].video === "slate") window.kinouSource("slate");
     // Video club : vignette, titre et film complet retouchés (l'accueil garde sa vidéo, pas d'extrait).
     r[0].slides.forEach(function (p) { var e = vcOf(p.slate); if (!e) return; if (e.img) p.img = e.img; if (typeof e.full === "string" && e.full) p.full = e.full; });
     // Ancien format : { dp, slug } ; nouveau (admin, bande Slate) : dps: [{ name, slug }].
