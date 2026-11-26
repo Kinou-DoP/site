@@ -35,4 +35,5 @@ Note de tâche : à lire seulement quand la tâche touche ce sujet. Règles gén
 - `extras[i].hide` = lieux où la ligne est masquée (`club`, `fiction`, `spotlight`, adresse d'un chef op) : `vcApply` la retire quand `d.slug` y figure. Lignes `auto: true` = vidéos importées avec celle-ci.
 - Vidéos importées ensemble : `grp` / `gi` dans `library.json` ; `vcGroup` (app.js) ajoute les autres du lot sous chaque vidéo (lignes `auto`, la ligne `self` n'est jamais montrée). `ipos` / `ihide` (edits.json) = place et masquage des images d'un projet parmi les lignes sous le film.
 - `client` + `cshow` (edits.json) : titre affiché « Client | Titre » (`dtitle`) sur le site (cartes, lecteur) et dans les bandes ; l'adresse d'un film garde le titre seul. `snip.parts` = montage de l'extrait (blocs bout à bout, joués via `snip.v`).
+- Client : `meta.json` (`films[<id Slate>].client`, robot) ou `client` dans `edits.json` ; affiché « Client | Titre » sauf `cshow: false`.
 

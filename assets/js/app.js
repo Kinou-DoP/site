@@ -99,7 +99,10 @@
   // (data/bibli/edits.json, clé « s<id Slate> » : vignette, extrait léger, film, titre, crédits, stills) s'applique aussi au site,
   // par-dessus les fiches, le spotlight, la fiction et l'accueil (vcApply). Fichier absent ou en erreur : le site sans retouches.
   var VC = {}, VCL = {}, VC_P = Promise.all([getJSON("bibli/edits.json").then(function (x) { VC = (x && x.films) || {}; }, function () {}),
-    getJSON("bibli/library.json").then(function (x) { ((x && x.items) || []).forEach(function (it) { VCL[it.key] = it; }); }, function () {})]);
+    getJSON("bibli/library.json").then(function (x) { ((x && x.items) || []).forEach(function (it) { VCL[it.key] = it; }); }, function () {}),
+    getJSON("bibli/meta.json").then(function (x) { VCM = (x && x.films) || {}; }, function () {})]);
+  var VCM = {}; // meta.json (robot) : client de chaque film des pages ; affiché avant le titre sauf si l'admin le cache (`cshow: false`)
+  function vcClient(id) { var m = /^\d+$/.test(id || "") ? VCM[id] : null; return m && m.client || ""; }
   // Vidéos importées ensemble (`grp` + `gi` dans library.json) : chacune montre les autres sous elle, dans le même ordre pour toutes (Gus 26/11).
   // Lignes `auto` recalculées ici (titres, vignettes, extraits à jour) tant que la ligne n'a pas été réglée à la main dans l'admin.
   function vcGroup(id) {
@@ -709,7 +712,7 @@
     // la page (le video club n'enregistre que ce qui diffère des pages). Crédits refaits comme dans les bandes : « Réal », « Prod »,
     // puis « co-DoP Nom » (fiche d'un chef op) ou « DoP Nom » (si le chef op de la page a un autre rôle), puis « Rôle Nom »
     // (ex. Camera operator) ; spotlight / fiction : chefs op sans rôle dans « DoP Nom » (liens), autres rôles dans les crédits.
-    function vcApply(p, e, d, ge) {
+    function vcApply(p, e, d, ge, mc) {
       // Titre : propre à chaque page (Gus 25/11 : tout passe par le video club « sauf les noms des films ») ; le titre du video club ne vaut que pour les bandes.
       if (e.img) p.img = e.img;
       if (typeof e.full === "string" && e.full) p.full = e.full;
@@ -726,7 +729,7 @@
         ex = ge.map(function (g) { if (hid[g.key]) g.hide = hid[g.key]; return g; });
       }
       if (ex !== undefined) { p.extras = (ex || []).filter(function (x) { return !x.self && !(x.hide && x.hide.indexOf(d.slug) > -1); }); delete p.stills; delete p.stillsLink; }
-      if (e.cshow !== undefined || e.client !== undefined) { if (e.cshow && e.client) p.client = e.client; else delete p.client; } // client affiché avant le titre (admin)
+      var cl = e.client !== undefined ? e.client : mc; if (cl && e.cshow !== false) p.client = cl; else delete p.client; // client affiché avant le titre : celui de Slate, ou celui de l'admin ; caché si `cshow: false`
       if (e.ipos !== undefined) p.ipos = e.ipos; if (e.ihide) p.ihide = e.ihide.indexOf(d.slug) > -1; // stills et vidéos sous le film ; `hide` = lieux où la ligne est masquée (Gus 26/11)
       // Images d'un projet en images : l'ordre choisi dans le video club vaut partout (Gus 26/11) ; recadrage commun `scrop` { ar, z, x, y }.
       if (e.images && e.images.length) { p.images = e.images; if (p.stills && p.stills.length) p.stills = e.images; }
@@ -757,7 +760,7 @@
         var p = {}; for (var k in c) p[k] = c[k];
         if (ov[c.slate]) for (k in ov[c.slate]) p[k] = ov[c.slate][k];
         if (d.open !== undefined && c.slate === d.open) p.open = true;
-        var e = vcOf(c.slate), ge = vcGroup(c.slate); if (e || ge) vcApply(p, e || {}, d, ge);
+        var e = vcOf(c.slate), ge = vcGroup(c.slate), mc = vcClient(c.slate); if (e || ge || mc) vcApply(p, e || {}, d, ge, mc);
         if (p.extras && p.extras.some(function (x) { return x.hide; })) p.extras = p.extras.filter(function (x) { return !(x.hide && x.hide.indexOf(d.slug) > -1); }); // lignes masquées sur cette page (réglage de la page)
         // Projet en stills avec un extrait vidéo choisi dans l'admin (court métrage sans film ni bande-annonce) :
         // l'extrait joue au survol seulement ; au clic, le lecteur montre la galerie (pas de vidéo).
