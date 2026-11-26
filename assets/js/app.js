@@ -1087,8 +1087,8 @@
         }
         if (x.stills && x.stills.length) {
           var g = document.createElement("div"); g.className = "pgrid"; pgal.appendChild(g);
-          var cr = cropOf(x.crop); // recadrage commun aux images du groupe (admin, Gus 26/11) : forme du cadre, zoom, point de cadrage
           x.stills.forEach(function (u, i) {
+            var cr = cropOf(x.crop, u); // recadrage du groupe (ou propre à cette image), réglé dans l'admin
             var k = all.push(u) - 1, b = document.createElement("button"); crops[k] = cr;
             if (cr) { b.className = "cr"; cropVars(b, cr); b.appendChild(document.createElement("i")); }
             b.dataset.src = thumb(u, GW);
@@ -1130,9 +1130,22 @@
       if (b.classList.contains("pxv")) { b.classList.add("shown"); return; }
       loadImg(b.dataset.src, function (u) { (b.classList.contains("cr") ? b.firstChild : b).style.backgroundImage = 'url("' + u + '")'; b.classList.add("shown"); });
     }
-    // Recadrage de stills { ar, z, x, y } (admin : « ▣ ») : le cadre prend la forme `ar`, l'image (cover) est agrandie de `z` autour du point x % y %.
-    function cropOf(c) { return c && +c.ar > 0 ? { ar: +c.ar, z: Math.max(1, +c.z || 1), x: c.x === undefined ? 50 : +c.x, y: c.y === undefined ? 50 : +c.y } : null; }
-    function cropVars(el, c) { el.style.setProperty("--sar", c.ar); el.style.setProperty("--sz", c.z); el.style.setProperty("--sx", c.x + "%"); el.style.setProperty("--sy", c.y + "%"); }
+    // Recadrage de stills (admin : « ▣ ») : { l, t, w, h, ar } = rectangle (fraction de l'image) qui remplit un cadre de forme `ar` ;
+    // `per[adresse]` = recadrage propre à une image ; ancien format { ar, z, x, y } (zoom depuis un point) encore lu.
+    function cropOf(c, u) {
+      if (c && c.per && u && c.per[u]) c = c.per[u];
+      if (!c) return null;
+      if (+c.w > 0 && +c.h > 0 && +c.ar > 0) return { ar: +c.ar, w: +c.w, h: +c.h, l: +c.l || 0, t: +c.t || 0 };
+      if (+c.ar > 0) return { ar: +c.ar, z: Math.max(1, +c.z || 1), x: c.x === undefined ? 50 : +c.x, y: c.y === undefined ? 50 : +c.y };
+      return null;
+    }
+    function cropVars(el, c) {
+      el.style.setProperty("--sar", c.ar);
+      if (c.w) {
+        el.style.setProperty("--bsz", 100 / c.w + "% " + 100 / c.h + "%");
+        el.style.setProperty("--bpos", (c.w < 1 ? c.l / (1 - c.w) * 100 : 0) + "% " + (c.h < 1 ? c.t / (1 - c.h) * 100 : 0) + "%");
+      } else { el.style.setProperty("--sz", c.z); el.style.setProperty("--sx", c.x + "%"); el.style.setProperty("--sy", c.y + "%"); }
+    }
     var plimg = document.getElementById("plimg");
     function showStill(i) {
       var n = stillsP.stills.length; i = (i + n) % n;

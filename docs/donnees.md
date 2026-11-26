@@ -28,7 +28,7 @@ Note de tâche : à lire seulement quand la tâche touche ce sujet. Règles gén
   films, les autres en « co-DoP Nom ».
 
 ## Recadrage et ordre des stills (video club, 26/11)
-- `edits.json` : `images` (ordre des images d'un projet en images, remplace `images` / `stills` de la page), `scrop` = `{ ar, z, x, y }`
-  (rapport largeur / hauteur du cadre, zoom ≥ 1, point de cadrage en %) commun aux images du projet ; `extras[i].crop` = même chose pour un
-  groupe de stills sous un film. Sur le site : `vcApply` → `p.images`, `p.scrop` ; `buildStills` (`button.cr > i`, variables `--sar --sz --sx --sy`) et
-  la visionneuse (`.plcr`). Les bandes (`b/`) ne reprennent pas encore le recadrage.
+- `edits.json` : `images` (ordre des images d'un projet en images, remplace `images` / `stills` de la page), `scrop` = `{ l, t, w, h, ar, per? }`
+  (rectangle en fraction de l'image, `ar` = forme du cadre ; `per[adresse]` = recadrage propre à une image) commun aux images du projet ;
+  `extras[i].crop` = même chose pour un groupe de stills sous un film. Ancien format `{ ar, z, x, y }` encore lu. Sur le site : `vcApply` →
+  `p.images`, `p.scrop` ; `buildStills` (`button.cr > i`, variables `--sar --bsz --bpos`) et la visionneuse (`.plcr`). Les bandes (`b/`) ne le reprennent pas encore.

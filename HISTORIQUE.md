@@ -566,3 +566,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 25/11/2026 — Une seule source (Gus) : recadrage du video club appliqué au site ; titre du video club plus appliqué aux pages (chacune garde le sien).
 - 25/11/2026 — Stills et images du video club chez Amazon (`/api/depot` op `img`, `ourImg`, bandes) ; lecteur ouvert = préchargements arrêtés, images en priorité haute.
 - 26/11/2026 — Stills : ordre des images (`images`) et recadrage commun (`scrop`, `extras[].crop`) lus dans edits.json (admin, video club).
+- 26/11/2026 — Recadrage des stills en rectangle (`l t w h`) + cadre propre à une image (`per`).
