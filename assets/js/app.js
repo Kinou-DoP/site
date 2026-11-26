@@ -861,6 +861,7 @@
     function filmSlug(p) { return catSlug((p.title || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")) || String(p.slate || ""); }
     function tabFilms(slug, cat) {
       var l = (WORK[slug] || []).filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
+      if (cat === "FEATURED") { var seenF = {}; l = l.filter(function (p) { var k = p.slate || "t" + p.title; if (seenF[k]) return false; seenF[k] = 1; return true; }); } // un film dans plusieurs catégories (une entrée chacune) n'apparaît qu'une fois dans FEATURED
       if (slug === FIC && cat === "COMING SOON") l.reverse(); // fiction : ordre inverse de la bande (prochaine sortie en premier)
       return l;
     }
