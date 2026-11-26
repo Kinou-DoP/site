@@ -573,3 +573,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 26/11/2026 — FEATURED : un film présent dans plusieurs catégories (Balmain de Julien Teissier : COMMERCIAL et BEAUTY / FASHION, 2 entrées `featured`) n'apparaît qu'une fois (`tabFilms`).
 - 26/11/2026 — Vidéos d'un même import : si la page du chef op a réglé elle-même leurs lignes (ordre, masquées), c'est elle qui décide (`vcApply`).
 - 26/11/2026 — Page avec sa liste de vidéos d'un lot : titres et ordre suivent le video club sauf ordre choisi sur la page (`extrasOrd`).
+- 26/11/2026 — Client affiché avant le titre (`dtitle`, `cshow`), site et bandes.

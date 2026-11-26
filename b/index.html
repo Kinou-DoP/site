@@ -296,6 +296,8 @@
   }).catch(function () { msg("Oups", "La bande ne s'affiche pas. Réessayez dans un instant."); });
 
   function dpSlug(ctx, name) { var n = String(name).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim(); var d = ctx.dps.filter(function (x) { return String(x.name).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim() === n; })[0]; return d && d.slug; }
+  // Titre affiché : « Client | Titre » si le client est affiché (admin, Gus 26/11).
+  function dtitle(it) { return it.client ? it.client + " | " + (it.title || "") : (it.title || ""); }
   function dlURL(it) { return FN + "/api/media?u=" + encodeURIComponent(it.full) + "&dl=" + encodeURIComponent((it.title || "kinou").trim()); }
 
   var DPS = []; // chefs op du site (liens du lecteur)
@@ -469,7 +471,7 @@
         if (cr) { v.style.transform = "scale(" + cr.z + ")"; v.style.transformOrigin = cr.x + "% " + cr.y + "%"; }
         box.insertBefore(v, bgd.nextSibling);
       }
-      inn.textContent = ""; inn.appendChild(el("h2", { text: it.title || "" }));
+      inn.textContent = ""; inn.appendChild(el("h2", { text: dtitle(it) }));
       var cr = el("div", { class: "bl-cr" }), ds = (it.dops || []).filter(function (d) { return !(it.roles || {})[d]; });
       if (!h.dir && it.dir) cr.appendChild(el("div", {}, [el("b", { text: "Director" }), el("span", { text: it.dir })]));
       if (!h.dop && ds.length) cr.appendChild(el("div", {}, [el("b", { text: "Cinematographer" }), el("span", { text: ds.join(" & ") })]));
@@ -495,7 +497,7 @@
     var cr = it.crop, crAll = cr && cr.t !== false;
     if (crAll) { inn.style.transform = "scale(" + cr.z + ")"; inn.style.transformOrigin = cr.x + "% " + cr.y + "%"; }
     var types = !h.types ? (it.types || it.cats || []).filter(function (c) { return !/^(stills|trailer|bande-annonce|featured)$/i.test(c); }) : [];
-    var c = el("div", { class: "card", style: "--i:" + Math.min(i, 12) }, [still, el("div", { class: "meta" }, [el("h3", { text: it.title || "" }),
+    var c = el("div", { class: "card", style: "--i:" + Math.min(i, 12) }, [still, el("div", { class: "meta" }, [el("h3", { text: dtitle(it) }),
       it.images && !it.full && !it.video ? el("span", { class: "n", text: it.images.length + " images" }) : el("span", { class: "ty", text: types.slice(0, 2).join(" · ") })])]);
     c.addEventListener("click", function () { openPlayer(fi); });
     // Extrait : mp4 importé dans l'admin (relu par /api/media), sinon passage choisi du film complet, sinon extrait de Slate.
@@ -705,7 +707,7 @@
     P.textContent = ""; P.scrollTop = 0;
     if (!band.single) { document.body.style.overflow = "hidden"; P.appendChild(el("button", { class: "pclose", "aria-label": "Fermer" }, [svg22('<path d="M4 4l14 14M18 4L4 18"/>')])); }
     var src = it.full || it.video;
-    var pin = el("div", { class: "pin" }, [el("div", { class: "phead" }, [el("h2", { class: "ptitle", text: it.title || "" }),
+    var pin = el("div", { class: "pin" }, [el("div", { class: "phead" }, [el("h2", { class: "ptitle", text: dtitle(it) }),
       band.download && it.full ? el("a", { class: "pdl", href: dlURL(it), download: "" }, [svg(I_DL), "Download"]) : null])]);
     var stage = el("div", { class: "pstage" });
     if (src) { var v = el("video", { controls: "", autoplay: "", playsinline: "", preload: "auto", poster: it.img || null }); v.src = src; stage.appendChild(v); var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }

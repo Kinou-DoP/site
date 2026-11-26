@@ -726,6 +726,7 @@
         ex = ge.map(function (g) { if (hid[g.key]) g.hide = hid[g.key]; return g; });
       }
       if (ex !== undefined) { p.extras = (ex || []).filter(function (x) { return !x.self && !(x.hide && x.hide.indexOf(d.slug) > -1); }); delete p.stills; delete p.stillsLink; }
+      if (e.cshow !== undefined || e.client !== undefined) { if (e.cshow && e.client) p.client = e.client; else delete p.client; } // client affiché avant le titre (admin)
       if (e.ipos !== undefined) p.ipos = e.ipos; if (e.ihide) p.ihide = e.ihide.indexOf(d.slug) > -1; // stills et vidéos sous le film ; `hide` = lieux où la ligne est masquée (Gus 26/11)
       // Images d'un projet en images : l'ordre choisi dans le video club vaut partout (Gus 26/11) ; recadrage commun `scrop` { ar, z, x, y }.
       if (e.images && e.images.length) { p.images = e.images; if (p.stills && p.stills.length) p.stills = e.images; }
@@ -867,6 +868,8 @@
     // Adresse d'un film ouvert dans le lecteur : <slug>/<onglet>/<titre> (ex. …/vadim-…/narrative/panda), pour l'envoyer à
     // quelqu'un ; « featured » pour l'onglet d'arrivée (ALL du spotlight, NEW RELEASES de la fiction). Fermer le lecteur (croix,
     // bouton retour) remet l'adresse de la page (Gus 30/10). Films de l'accueil et images cliquées : l'adresse ne change pas.
+    // Titre affiché (Gus 26/11) : « Client | Titre » quand le client est affiché (admin : case « afficher avant le titre ») ; l'adresse garde le titre seul.
+    function dtitle(p) { return p.client ? p.client + " | " + p.title : p.title; }
     function filmSlug(p) { return catSlug((p.title || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")) || String(p.slate || ""); }
     function tabFilms(slug, cat) {
       var l = (WORK[slug] || []).filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });
@@ -962,7 +965,7 @@
         // Image d'une présentation « vidéo + stills » : clic = en plein écran (flèches : toute la galerie).
         if (p._big !== undefined) { im.className = "pbig"; im.addEventListener("click", function () { showStill(p._big); }); }
       }
-      ptitle.textContent = p.title;
+      ptitle.textContent = dtitle(p);
       // Depuis l'accueil : nom du ou des chefs op, en blanc, liens vers leur page (spotlight : dernière ligne, « DoP Nom »).
       if (p.dps && p.dps.length && view && MULTI[view.o.slug]) { var spotDps = true; }
       else if (p.dps && p.dps.length) {
@@ -1416,7 +1419,7 @@
           loadImg(thumb(p.img, mode === "gallery" ? GW : FW), (function (st) { return function (url) { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st));
         }
         var meta = document.createElement("div"); meta.className = "meta";
-        var h = document.createElement("h3"); h.textContent = p.title;
+        var h = document.createElement("h3"); h.textContent = dtitle(p);
         // Sans crédits : rien sous le titre (la catégorie est déjà l'onglet, ou affichée à part dans FEATURED : .ccat).
         var s = document.createElement("p"); s.textContent = p.sub || "";
         meta.appendChild(h); if (s.textContent) meta.appendChild(s);
@@ -1544,7 +1547,7 @@
         }
         g.appendChild(big);
         var info = document.createElement("div"); info.className = "sc-info";
-        var h = document.createElement("h3"); h.textContent = p.title; info.appendChild(h);
+        var h = document.createElement("h3"); h.textContent = dtitle(p); info.appendChild(h);
         if (p.sub) { var sb = document.createElement("p"); sb.textContent = p.sub; info.appendChild(sb); }
         var spec = specOf(p); if (spec.length) { var sp = document.createElement("p"); sp.className = "sc-spec"; sp.textContent = spec.join("  |  "); info.appendChild(sp); }
         g.appendChild(info);
@@ -1597,7 +1600,7 @@
           var p = g.p;
           if (groups.length > 1) { // plusieurs séries : leur titre au-dessus de chacune
             var h = document.createElement("div"); h.className = "phead";
-            var t = document.createElement("h3"); t.textContent = p.title; h.appendChild(t);
+            var t = document.createElement("h3"); t.textContent = dtitle(p); h.appendChild(t);
             if (p.sub) { var sb = document.createElement("p"); sb.textContent = p.sub; h.appendChild(sb); }
             feed.appendChild(h);
           }
