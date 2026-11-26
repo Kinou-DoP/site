@@ -571,3 +571,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 26/11/2026 — Vidéos d'un même import liées (`vcGroup`), images du projet placées parmi les lignes (`ipos`), lignes masquées par page (`hide`) aussi pour les extras des fiches ; bande : `hide` « band ».
 - 26/11/2026 — Bandes : flèches de la visionneuse d'images sous l'image, calées sur ses bords gauche et droit, plus grandes (`.plnav`).
 - 26/11/2026 — FEATURED : un film présent dans plusieurs catégories (Balmain de Julien Teissier : COMMERCIAL et BEAUTY / FASHION, 2 entrées `featured`) n'apparaît qu'une fois (`tabFilms`).
+- 26/11/2026 — Vidéos d'un même import : si la page du chef op a réglé elle-même leurs lignes (ordre, masquées), c'est elle qui décide (`vcApply`).
