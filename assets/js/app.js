@@ -13,6 +13,16 @@
     // Lecture demandée (play) : relancée après le repli, sinon la vidéo restait arrêtée.
     var jouer = HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play = function () { this.veutJouer = true; return jouer.apply(this, arguments); };
+    // Son coupé partout (Gus 26/11) : couper le son d'une vidéo avec ses commandes coupe toutes les autres (déjà là ou à venir) jusqu'à ce qu'on le remette ou qu'on
+    // recharge la page. Seules les vidéos « avec commandes » (celles qu'on écoute) déclenchent ; les aperçus restent muets.
+    var sonCoupe = false, coupeParNous = new WeakSet();
+    function coupeSon(o) { if (o && !o.muted) { o.muted = true; coupeParNous.add(o); } }
+    document.addEventListener("volumechange", function (ev) {
+      var v = ev.target; if (!(v instanceof HTMLMediaElement) || !v.controls) return;
+      var m = !!v.muted || v.volume === 0; if (m === sonCoupe) return; sonCoupe = m;
+      [].forEach.call(document.querySelectorAll("video"), function (o) { if (o === v) return; if (m) coupeSon(o); else if (coupeParNous.has(o)) { o.muted = false; coupeParNous.delete(o); } });
+    }, true);
+    ["loadstart", "play"].forEach(function (n) { document.addEventListener(n, function (ev) { if (sonCoupe && ev.target instanceof HTMLMediaElement && ev.target.controls) coupeSon(ev.target); }, true); });
     // Notre CloudFront ne répond pas du tout (2 replis, aucune vidéo lue chez nous) : Slate directement pour la suite de la visite.
     var ok = false, replis = 0, panne = false;
     document.addEventListener("loadeddata", function (ev) { var u = ev.target.getAttribute && ev.target.getAttribute("src"); if (u && u.indexOf(NOUS) === 0) ok = true; }, true);
@@ -872,7 +882,10 @@
     // quelqu'un ; « featured » pour l'onglet d'arrivée (ALL du spotlight, NEW RELEASES de la fiction). Fermer le lecteur (croix,
     // bouton retour) remet l'adresse de la page (Gus 30/10). Films de l'accueil et images cliquées : l'adresse ne change pas.
     // Titre affiché (Gus 26/11) : « Client | Titre » quand le client est affiché (admin : case « afficher avant le titre ») ; l'adresse garde le titre seul.
-    function dtitle(p) { return p.client ? p.client + " | " + p.title : p.title; }
+    function dtitle(p) { // pas de « | » si le titre est vide ou identique au client (Ubisoft | Ubisoft → Ubisoft)
+      var t = p.title || ""; if (!p.client) return t; var n = function (x) { return String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, ""); };
+      return !n(t) || n(t) === n(p.client) ? p.client : p.client + " | " + t;
+    }
     function filmSlug(p) { return catSlug((p.title || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")) || String(p.slate || ""); }
     function tabFilms(slug, cat) {
       var l = (WORK[slug] || []).filter(function (p) { return cat === "FEATURED" ? p.f : p.cat === cat; }).sort(function (a, b) { return cat === "FEATURED" ? (a.fo || 0) - (b.fo || 0) : 0; });

@@ -217,6 +217,16 @@
     // Lecture demandée (play) : relancée après le repli, sinon la vidéo restait arrêtée.
     var jouer = HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play = function () { this.veutJouer = true; return jouer.apply(this, arguments); };
+    // Son coupé partout (Gus 26/11) : couper le son d'une vidéo avec ses commandes coupe toutes les autres (déjà là ou à venir) jusqu'à ce qu'on le remette ou qu'on
+    // recharge la page. Seules les vidéos « avec commandes » (celles qu'on écoute) déclenchent ; les aperçus restent muets.
+    var sonCoupe = false, coupeParNous = new WeakSet();
+    function coupeSon(o) { if (o && !o.muted) { o.muted = true; coupeParNous.add(o); } }
+    document.addEventListener("volumechange", function (ev) {
+      var v = ev.target; if (!(v instanceof HTMLMediaElement) || !v.controls) return;
+      var m = !!v.muted || v.volume === 0; if (m === sonCoupe) return; sonCoupe = m;
+      [].forEach.call(document.querySelectorAll("video"), function (o) { if (o === v) return; if (m) coupeSon(o); else if (coupeParNous.has(o)) { o.muted = false; coupeParNous.delete(o); } });
+    }, true);
+    ["loadstart", "play"].forEach(function (n) { document.addEventListener(n, function (ev) { if (sonCoupe && ev.target instanceof HTMLMediaElement && ev.target.controls) coupeSon(ev.target); }, true); });
     // Notre CloudFront ne répond pas du tout (2 replis, aucune vidéo lue chez nous) : Slate directement pour la suite de la visite.
     var ok = false, replis = 0, panne = false;
     document.addEventListener("loadeddata", function (ev) { var u = ev.target.getAttribute && ev.target.getAttribute("src"); if (u && u.indexOf(NOUS) === 0) ok = true; }, true);
@@ -297,7 +307,9 @@
 
   function dpSlug(ctx, name) { var n = String(name).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim(); var d = ctx.dps.filter(function (x) { return String(x.name).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim() === n; })[0]; return d && d.slug; }
   // Titre affiché : « Client | Titre » si le client est affiché (admin, Gus 26/11).
-  function dtitle(it) { return it.client ? it.client + " | " + (it.title || "") : (it.title || ""); }
+  function dtitle(it) { // pas de « | » si le titre est vide ou identique au client (Ubisoft | Ubisoft → Ubisoft)
+    var t = it.title || ""; if (!it.client) return t; var n = function (x) { return String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, ""); };
+    return !n(t) || n(t) === n(it.client) ? it.client : it.client + " | " + t; }
   function dlURL(it) { return FN + "/api/media?u=" + encodeURIComponent(it.full) + "&dl=" + encodeURIComponent((it.title || "kinou").trim()); }
 
   var DPS = []; // chefs op du site (liens du lecteur)
