@@ -1433,7 +1433,7 @@
         if (slug === FIC) scopeCrop(st, p); // fiction : cadrage cinémascope (vignette et extrait réglés à part dans l'admin)
         else if (p.zoom > 1) { st.style.setProperty("--z", p.zoom); if (p.zoomPos) st.style.setProperty("--zp", p.zoomPos); if (p.zoomThumb) st.classList.add("zoomed"); }
         if (p.img) {
-          loadImg(thumb(p.img, mode === "gallery" ? GW : FW), (function (st) { return function (url) { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st)) // le fond flou (petite image, autre adresse que la vignette) est préchargé dès que la vignette est là : il apparaît tout de suite au survol
+          loadImg(thumb(p.img, mode === "gallery" ? GW : FW), (function (st) { return function (url) { st.style.setProperty("--img", 'url("' + url + '")'); st.classList.add("ready"); }; })(st));
           (function (u64) { setTimeout(function () { loadImg(u64, function () {}); }, 0); })(thumb(p.img, 64));
         }
         var meta = document.createElement("div"); meta.className = "meta";
