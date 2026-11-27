@@ -161,7 +161,7 @@
         v.dataset.src = hd ? p.full + "#t=" + p.start : p.video;
         if (hd) { v._hd = true; v._start = +p.start; }
         // Montage de l'extrait (admin, 27/11) : p.parts = [{ s, d, x }] (blocs lus l'un après l'autre, durée totale = celle d'un projet ; x = cadrage téléphone du bloc).
-        if (hd && p.parts && p.parts.length > 1) { v._parts = p.parts; v._pi = 0; v._start = +p.parts[0].s; if (p.parts[0].x !== undefined) s.style.setProperty("--pp", p.parts[0].x + "%"); }
+        if (hd && p.parts && p.parts.length > 1) { v._parts = p.parts; v._pi = 0; v._start = +p.parts[0].s; if (p.parts[0].x !== undefined) s.style.setProperty("--pp", p.parts[0].x + "%"); v._idx = i; }
         inner.appendChild(v);
       }
       wrap.appendChild(s); slides.push(s);
@@ -192,15 +192,40 @@
       if (!v._parts) return v.currentTime - v._start;
       var t = 0, k = 0; for (; k < v._pi; k++) t += v._parts[k].d; return t + Math.max(0, v.currentTime - v._parts[v._pi].s);
     }
-    function hdBloc(v, i) { // montage : bloc fini → suivant (même fichier, on saute au bloc d'après et on change le cadrage téléphone) ; dernier bloc fini → projet suivant
-      var pt = v._parts[v._pi]; if (v.currentTime < pt.s + pt.d - 0.03) return;
-      if (v._pi + 1 < v._parts.length) { v._pi++; var q = v._parts[v._pi]; try { v.currentTime = q.s; } catch (e) {} if (q.x !== undefined) slides[i].style.setProperty("--pp", q.x + "%"); }
-      else next();
+    // Montage de l'extrait : fin d'un bloc SANS image du plan d'après. Quand l'avant-dernière (ou la dernière) image du bloc est affichée (rappel image par image du navigateur),
+    // on arrête la vidéo, on affiche explicitement la dernière image du bloc (déplacement à l'arrêt), on la garde une image, puis bloc suivant / projet suivant.
+    var FPS_OK = [24000 / 1001, 24, 25, 30000 / 1001, 30, 50, 60000 / 1001, 60];
+    function hdGo(v, i) { // bloc suivant (même fichier) ou, après le dernier, projet suivant
+      v._hold = false; if (i !== cur || !active) return;
+      if (v._pi + 1 < v._parts.length) {
+        v._pi++; var q = v._parts[v._pi]; if (q.x !== undefined) slides[i].style.setProperty("--pp", q.x + "%");
+        v.addEventListener("seeked", function w() { v.removeEventListener("seeked", w); if (i === cur && active) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } });
+        try { v.currentTime = q.s + (v._fr || 0.04) * 0.25; } catch (e) {}
+      } else next();
+    }
+    function hdFin(v, i, e, mt) {
+      v._hold = true; v.pause(); var fr = v._fr || 0.04, go = function () { setTimeout(function () { hdGo(v, i); }, fr * 1000); };
+      if (mt < e - fr * 0.99) { v.addEventListener("seeked", function w() { v.removeEventListener("seeked", w); go(); }); try { v.currentTime = Math.max(v._parts[v._pi].s, e - 0.001); } catch (x) { go(); } } else go();
+    }
+    function hdFrames(v, i) { // un rappel par image affichée (seulement pour les extraits en montage)
+      if (!v.requestVideoFrameCallback) return; var last = null;
+      (function cb(now, m) {
+        v.requestVideoFrameCallback(cb);
+        if (last !== null) { var d = Math.abs(m.mediaTime - last); if (d > 0.008 && d < 0.06) { var f = 1 / d, best = FPS_OK.reduce(function (x, c) { return Math.abs(c - f) < Math.abs(x - f) ? c : x; }, FPS_OK[0]); if (Math.abs(best - f) / best < 0.12) v._fr = 1 / best; } }
+        last = m.mediaTime;
+        if (i !== cur || !active || v._hold || v.paused || !v._parts) return;
+        var pt = v._parts[v._pi], e = pt.s + pt.d;
+        if (m.mediaTime >= e - (v._fr || 0.04) * 2.05 && m.mediaTime < e + 1) hdFin(v, i, e, m.mediaTime);
+      })(0, { mediaTime: 0 });
+    }
+    function hdBloc(v, i) { // secours (navigateur sans rappel image par image, ou image sautée) : fin de bloc dépassée
+      var pt = v._parts[v._pi]; if (v._hold || v.currentTime < pt.s + pt.d + 0.03) return;
+      v._hold = true; hdGo(v, i);
     }
     (function tick() {
       if (active && cur >= 0) {
         var v = slides[cur].querySelector("video"), p = 0;
-        if (v && v._hd && v._parts && !timed && !v.paused && !v.seeking) hdBloc(v, cur);
+        if (v && v._hd && v._parts && !timed && !v.paused && !v.seeking && !v._hold) hdBloc(v, cur);
         if (timed) p = (performance.now() - timedAt) / DURATION;
         else if (v && v._hd) p = hdElapsed(v) * 1000 / DURATION;
         else if (v && v.duration) p = v.currentTime / v.duration;
@@ -248,7 +273,7 @@
       var v = slides[i].querySelector("video");
       if (v) {
         if (!v.src) v.src = v.dataset.src;
-        if (v._parts) { v._pi = 0; if (v._parts[0].x !== undefined) slides[i].style.setProperty("--pp", v._parts[0].x + "%"); }
+        if (v._parts) { v._pi = 0; v._hold = false; if (v._parts[0].x !== undefined) slides[i].style.setProperty("--pp", v._parts[0].x + "%"); }
         try { v.currentTime = v._hd ? v._start : 0; } catch (e) {}
         v.onended = next;
         v.onerror = function () {
@@ -265,6 +290,7 @@
     // s'arrête et revient au début du passage (jamais la suite du film : générique, cartons…).
     slides.forEach(function (s, i) {
       var v = s.querySelector("video");
+      if (v && v._parts) hdFrames(v, i);
       if (v) v.addEventListener("timeupdate", function () {
         if (!v._hd || v._parts || v.currentTime < v._start + DURATION / 1000) return;
         if (i === cur && active) next();
