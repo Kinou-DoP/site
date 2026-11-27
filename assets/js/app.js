@@ -160,6 +160,14 @@
         v.muted = true; v.playsInline = true; v.preload = "none";
         v.dataset.src = hd ? p.full + "#t=" + p.start : p.video;
         if (hd) { v._hd = true; v._start = +p.start; }
+        // Export de l'extrait (admin, 27/11) : p.exp = { v, k } = le montage déjà coupé en un petit fichier (1080p, sans son) ; il est lu tel quel, du début à la fin, si sa clé correspond
+        // au montage actuel (sinon le film complet, comme avant). Film complet gardé en secours si le fichier ne se lit pas.
+        var segs = p.parts && p.parts.length > 1 ? p.parts : (hd ? [{ s: +p.start, d: DURATION / 1000 }] : null);
+        if (hd && p.exp && p.exp.v && segs && p.exp.k === segs.map(function (q) { return Math.round(q.s * 1000) + "-" + Math.round(q.d * 1000); }).join("_")) {
+          v._fb = { src: v.dataset.src, start: +p.start, parts: p.parts && p.parts.length > 1 ? p.parts : null };
+          v.dataset.src = p.exp.v; v._hd = false; v._exp = true;
+          if (p.parts && p.parts.length > 1) { var tcum = 0; v._xs = p.parts.map(function (q) { var o = { t: tcum, x: q.x }; tcum += q.d; return o; }); if (p.parts[0].x !== undefined) s.style.setProperty("--pp", p.parts[0].x + "%"); }
+        } else
         // Montage de l'extrait (admin, 27/11) : p.parts = [{ s, d, x }] (blocs lus l'un après l'autre, durée totale = celle d'un projet ; x = cadrage téléphone du bloc).
         if (hd && p.parts && p.parts.length > 1) { v._parts = p.parts; v._pi = 0; v._start = +p.parts[0].s; if (p.parts[0].x !== undefined) s.style.setProperty("--pp", p.parts[0].x + "%"); v._idx = i; }
         inner.appendChild(v);
@@ -273,10 +281,17 @@
       var v = slides[i].querySelector("video");
       if (v) {
         if (!v.src) v.src = v.dataset.src;
+        if (v._xs && v._xs[0].x !== undefined) slides[i].style.setProperty("--pp", v._xs[0].x + "%");
         if (v._parts) { v._pi = 0; v._hold = false; if (v._parts[0].x !== undefined) slides[i].style.setProperty("--pp", v._parts[0].x + "%"); }
         try { v.currentTime = v._hd ? v._start : 0; } catch (e) {}
         v.onended = next;
         v.onerror = function () {
+          if (v._exp && v._fb) { // fichier exporté illisible : retour au film complet (montage compris)
+            var fb = v._fb; v._exp = false; v._xs = null; v._hd = true; v._start = fb.start;
+            if (fb.parts) { v._parts = fb.parts; v._pi = 0; v._hold = false; v._start = +fb.parts[0].s; hdFrames(v, i); }
+            v.dataset.src = fb.src; v.src = fb.src; try { v.currentTime = v._start; } catch (e) {}
+            if (i === cur) { var r0 = v.play(); if (r0 && r0.catch) r0.catch(function () {}); } return;
+          }
           if (!v._hd) { if (i === cur) later(); return; }
           if (!snippetOf(v, i)) { if (i === cur) later(); return; }
           if (i === cur) { var r = v.play(); if (r && r.catch) r.catch(function () {}); }
@@ -291,6 +306,9 @@
     slides.forEach(function (s, i) {
       var v = s.querySelector("video");
       if (v && v._parts) hdFrames(v, i);
+      if (v && v._xs) { // fichier exporté : le cadrage téléphone de chaque bloc suit le temps de lecture
+        var cx = null; if (v.requestVideoFrameCallback) (function cb(now, m) { v.requestVideoFrameCallback(cb); if (!v._xs) return; var k = 0; for (var q = 0; q < v._xs.length; q++) if (m.mediaTime >= v._xs[q].t - 0.001) k = q; var x = v._xs[k].x; if (x !== undefined && x !== cx) { cx = x; s.style.setProperty("--pp", x + "%"); } })(0, { mediaTime: 0 });
+      }
       if (v) v.addEventListener("timeupdate", function () {
         if (!v._hd || v._parts || v.currentTime < v._start + DURATION / 1000) return;
         if (i === cur && active) next();

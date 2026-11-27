@@ -581,3 +581,4 @@ sur l'API GitHub (lecture/écriture des JSON) et les tokens.
 - 27/11 : accueil : extrait en montage (`parts` [{s,d,x}], durée exacte, cadrage téléphone par bloc ; `hdBloc` dans initHome) ; `data/source.json` : source des vidéos nous / Slate (`kinouSource`, `KINOU_SLATE`).
 - 27/11 : accueil : `phoneZoom` (zoom téléphone séparé, `--zm`).
 - 27/11 : accueil : fin de bloc d'un montage sans image du plan d'après (`hdFrames`, `hdFin` : arrêt, dernière image affichée à l'arrêt, saut).
+- 27/11 : accueil : export de l'extrait (`exp` {v,k} : petit fichier lu tel quel, cadrage téléphone par bloc suivi au temps, film complet en secours) ; historique `hist` côté admin.
