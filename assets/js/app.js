@@ -216,7 +216,14 @@
       if (mt < e - fr * 0.99) { v.addEventListener("seeked", function w() { v.removeEventListener("seeked", w); go(); }); try { v.currentTime = Math.max(v._parts[v._pi].s, e - 0.001); } catch (x) { go(); } } else go();
     }
     function hdFrames(v, i) { // un rappel par image affichée (seulement pour les extraits en montage)
-      if (!v.requestVideoFrameCallback) return; var last = null;
+      if (!v.requestVideoFrameCallback) return; var last = null, endT = 0;
+      // minuteur de précision : arrêt une image et demi avant la fin du bloc, indépendant du rythme des rappels (comme dans la fenêtre de montage de l'admin)
+      function arm() {
+        clearTimeout(endT); if (i !== cur || !active || v._hold || v.paused || !v._parts) return;
+        var pt = v._parts[v._pi], e = pt.s + pt.d, dt = (e - (v._fr || 0.04) * 1.5 - v.currentTime) / (v.playbackRate || 1); if (!(dt > 0)) return;
+        endT = setTimeout(function () { if (i === cur && active && !v._hold && !v.paused && v._parts && v._parts[v._pi] === pt && v.currentTime < e) hdFin(v, i, e, v.currentTime); }, dt * 1000);
+      }
+      ["playing", "seeked", "ratechange"].forEach(function (n) { v.addEventListener(n, arm); });
       (function cb(now, m) {
         v.requestVideoFrameCallback(cb);
         if (last !== null) { var d = Math.abs(m.mediaTime - last); if (d > 0.008 && d < 0.06) { var f = 1 / d, best = FPS_OK.reduce(function (x, c) { return Math.abs(c - f) < Math.abs(x - f) ? c : x; }, FPS_OK[0]); if (Math.abs(best - f) / best < 0.12) v._fr = 1 / best; } }
