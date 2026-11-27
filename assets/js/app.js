@@ -840,6 +840,8 @@
         var p = {}; for (var k in c) p[k] = c[k];
         if (ov[c.slate]) for (k in ov[c.slate]) p[k] = ov[c.slate][k];
         if (d.open !== undefined && c.slate === d.open) p.open = true;
+        var vl = VCL[c.slate]; // film du video club ajouté à la page pendant son encodage : la copie de la page n'a ni film ni extrait, on les reprend du video club
+        if (vl && !/^\d+$/.test(String(c.slate))) { if (!p.full && vl.full) p.full = vl.full; var vsv = (vl.snip && vl.snip.v) || vl.video; if (!p.video && vsv) p.video = vsv; if (vl.img && (!p.img || /\/depot\//.test(p.img))) p.img = vl.img; }
         var e = vcOf(c.slate), ge = vcGroup(c.slate), mc = vcClient(c.slate); if (e || ge || mc) vcApply(p, e || {}, d, ge, mc);
         if (p.extras && p.extras.some(function (x) { return x.hide; })) p.extras = p.extras.filter(function (x) { return !(x.hide && x.hide.indexOf(d.slug) > -1); }); // lignes masquées sur cette page (réglage de la page)
         // Projet en stills avec un extrait vidéo choisi dans l'admin (court métrage sans film ni bande-annonce) :
