@@ -592,7 +592,7 @@
       who.appendChild(document.createTextNode("DoP "));
       p.dps.forEach(function (d, k) {
         if (k) who.appendChild(document.createTextNode(" & "));
-        var a = document.createElement(d.slug ? "a" : "span"); a.textContent = split(d.name).main;
+        var a = document.createElement(d.slug ? "a" : "span"); a.textContent = d.name; // nom complet, avec AFC / SBC… (Gus 27/11)
         if (d.slug) {
           a.href = pageURL(d.slug);
           a.addEventListener("click", function (e) { e.stopPropagation(); if (newTab(e)) return; e.preventDefault(); toDP(d, a, fromPlayer); });
@@ -809,15 +809,16 @@
       // Recadrage du video club (Gus 25/11 : une seule source pour fiches et video club) : { z, x, y, t } ; null = aucun.
       if (e.crop !== undefined) { if (e.crop && +e.crop.z > 1) { p.zoom = +e.crop.z; p.zoomPos = (+e.crop.x || 0) + "% " + (+e.crop.y || 0) + "%"; p.zoomThumb = !!e.crop.t; } else { delete p.zoom; delete p.zoomPos; delete p.zoomThumb; } }
       if (!["dir", "prod", "dops", "roles"].some(function (k) { return e[k] !== undefined; })) return;
+      var CRED_SEP = /\s*&\s*|\s*,\s*(?![A-Z]{2,5}\b)/; // « Nom, AFC & Nom2 » : la virgule avant un sigle (AFC, SBC…) fait partie du nom
       var DOP = /^(?:co-)?dop\.?\s+/i, isDop = function (x) { return DOP.test(x); }; // « co-DoP Nom », « DoP Nom », « dop. Nom »
       var l = String(p.sub || "").split("\n").map(function (x) { return x.trim(); });
       var plain = l.filter(function (x) { return x && !isDop(x); }), was = [];
-      l.filter(isDop).forEach(function (x) { was = was.concat(x.replace(DOP, "").split(/\s*[,&]\s*/)); });
+      l.filter(isDop).forEach(function (x) { was = was.concat(x.replace(DOP, "").split(CRED_SEP)); });
       var multi = MULTI[d.slug], me = multi ? "" : plainName(d.name);
       var dops = e.dops ? e.dops.slice() : multi ? (p.dps || []).map(function (x) { return x.name; }) : [d.name].concat(was);
       dops = dops.filter(Boolean); var ro = {}; Object.keys(e.roles || {}).forEach(function (n) { if (e.roles[n]) ro[plainName(n)] = e.roles[n]; });
       var main = dops.filter(function (n) { return !ro[plainName(n)]; }), oth = dops.filter(function (n) { return ro[plainName(n)]; });
-      var nm = function (n) { return split(n).main; }, lines = [e.dir !== undefined ? e.dir : plain[0] || "", e.prod !== undefined ? e.prod : plain[1] || ""];
+      var nm = function (n) { return dpByName(n).name; }, /* nom complet, avec AFC / SBC… quand le chef op a une page (Gus 27/11) */ lines = [e.dir !== undefined ? e.dir : plain[0] || "", e.prod !== undefined ? e.prod : plain[1] || ""];
       if (multi) { if (e.dops || e.roles) p.dps = main.map(dpByName); }
       else if (ro[me]) { if (main.length) lines.push("DoP " + main.map(nm).join(" & ")); }
       else { var co = main.filter(function (n) { return plainName(n) !== me; }); if (co.length) lines.push("co-DoP " + co.map(nm).join(" & ")); }
@@ -1050,7 +1051,7 @@
         var who = document.createElement("div"); who.className = "pdps";
         p.dps.forEach(function (d, k) {
           if (k) who.appendChild(document.createTextNode(" & "));
-          var a = document.createElement(d.slug ? "a" : "span"); a.textContent = split(d.name).main;
+          var a = document.createElement(d.slug ? "a" : "span"); a.textContent = d.name; // nom complet, avec AFC / SBC… (Gus 27/11)
           if (d.slug) { a.href = pageURL(d.slug); a.addEventListener("click", function (e) { if (newTab(e)) return; e.preventDefault(); dpFromPlayer(d, a, p); }); }
           who.appendChild(a);
         });
