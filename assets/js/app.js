@@ -558,7 +558,7 @@
     // Feed selectif par technicien : fiches data/dps/<slug>.json, chargees a la demande.
     // f: true = fait partie des projets FEATURED (fo = rang) ; img: chemin d'une image de couverture (optionnel).
     var CATS = ["FEATURED", "BEAUTY", "TEXTURES", "FOOD", "COMEDY", "LIFESTYLE", "AUTOMOTIVE"];
-    var WORK = {}, CATS_BY = {}, TEMPLATE = {}, SHOW = {}, loading = {};
+    var WORK = {}, CATS_BY = {}, TEMPLATE = {}, SHOW = {}, FEATLAB = {}, loading = {};
     function loadDP(slug) {
       if (!loading[slug]) loading[slug] = (slug === SPOT ? getJSON("spotlight.json").then(spotToDP) : slug === FIC ? getJSON("fiction.json").then(ficToDP) : getJSON("dps/" + slug + ".json"))
         .then(function (d) { return VC_P.then(function () { register(d); if (!MULTI[slug]) live(d); return d; }); }, function () { return null; });
@@ -675,7 +675,7 @@
       st.style.setProperty("--cy", -n(s.y) * (z * SCOPE / VID_A - 1) + "%");
     }
     function dataURL(u) { return /^(https?:|data:)/.test(u) ? u : DATA_BASE + u; }
-    function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : slug === FIC && c === "FEATURED" ? "NEW RELEASES" : c; }
+    function catLabel(slug, c) { return slug === SPOT && c === "FEATURED" ? "ALL" : slug === FIC && c === "FEATURED" ? "NEW RELEASES" : c === "FEATURED" && FEATLAB[slug] ? FEATLAB[slug] : c; }
     // Pages de l'en-tête (spotlight, contact), ouvertes depuis l'en-tête ou le menu du téléphone : le mot devient le titre.
     var CONTACT = "contact", PAGES = { spotlight: "Spotlight", fiction: "Fiction", contact: "Contact" };
     function openSpot(a, opts) { openPage(SPOT, a, opts); }
@@ -855,6 +855,7 @@
       ["img", "cv"].forEach(function (k) { if (a[k] && !/^(https?:|data:|\/)/.test(a[k])) a[k] = DATA_BASE + "dps/" + a[k]; });
       ABOUT[d.slug] = a;
       TEMPLATE[d.slug] = d.template || "default";
+      FEATLAB[d.slug] = d.featuredName || ""; // nom affiché de l'onglet FEATURED (renommé dans l'admin)
       SHOW[d.slug] = d.showcase || []; // onglets en présentation « vidéo + stills » (interrupteur de l'admin)
       return d;
     }

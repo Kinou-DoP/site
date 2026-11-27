@@ -4,7 +4,8 @@ Note de tâche : à lire seulement quand la tâche touche ce sujet. Règles gén
 
 - `dps/index.json` : `{ dps: [{ slug, name, img?, hidden?, gender? }] }` (ordre de la liste ; `hidden` = page cachée : absente de la
   liste et de la roulette, nom sans lien, mais **son adresse ouvre la page** (« Voir sur le site » de l'admin ; lien invisible `li.off`) ; `gender` sert seulement à l'admin).
-- `dps/<slug>.json` : `{ slug, name, hue, categories, clips, bundle?, open?, overrides?, showcase?, about, template? }`.
+- `dps/<slug>.json` : `{ slug, name, hue, categories, clips, bundle?, open?, overrides?, showcase?, featuredName?, about, template? }`.
+  `featuredName` : nom affiché de l'onglet FEATURED d'une fiche (renommé avec le crayon de « Modifier la sélection ») ; le code interne reste `FEATURED`, l'adresse aussi.
   Clip : `{ title, sub ("Réal\nProd[\nco-DoP Nom]"), video (extrait 10 s sans son), full (film complet 1080p), img (vignette signée),
   cat, featured, featuredOrder, slate (id Slate), stills? }`. Un même film peut être dans plusieurs catégories (une entrée chacune).
 - `overrides[<id Slate>]` (corrections de l'admin, appliquées par-dessus le clip, toutes les clés sont copiées) : `title`, `sub`,
